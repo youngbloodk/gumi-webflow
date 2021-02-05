@@ -16,6 +16,7 @@ $(document).ready(function () {
 			alert(`Thanks for testing, ${$testName}! Let Kohlmann know if you had any issues 😉`);
 		})
 		;
+
 	function updateCheckoutItem (sku, method) {
 		const $quantity = $(`.cart-item[data-sku="${sku}"]`).find('.ticker-quantity input');
 		if ($quantity) {
@@ -33,6 +34,7 @@ $(document).ready(function () {
 			}
 		}
 	}
+
 	function addCheckoutItem (item, quantity = 1) {
 		let is_sub = $('#subscribe').is(':checked');
 		let price_info = `
@@ -73,6 +75,7 @@ $(document).ready(function () {
 </li>
 `);
 	}
+
 	function evaluateSub (storage = null) {
 		if (storage === null) {
 			storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
@@ -89,10 +92,12 @@ $(document).ready(function () {
 			$('#subscription-agreement-text').hide();
 		}
 	}
+
 	function resetCheckoutCart () {
 		$('#build-your-box-form .cart-list .cart-item').remove();
 		renderCheckoutFromStorage();
 	}
+
 	function renderMetaFromStorage () {
 		let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 		let sub_btn = $('#subscribe').is(':checked');
@@ -102,12 +107,14 @@ $(document).ready(function () {
 		}
 		$('.select').val(storage.freq).trigger('change');
 	}
+
 	function renderBuildBoxFromStorage () {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		for (const item of storage) {
 			updateBuildBoxQuantity(item.sku, item.quantity);
 		}
 	}
+
 	function renderCheckoutFromStorage () {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 
@@ -117,6 +124,7 @@ $(document).ready(function () {
 		}
 		updateCartRender();
 	}
+
 	function updateCartRender () {
 		const $emptyMessage = $('.empty-box');
 
@@ -139,6 +147,7 @@ $(document).ready(function () {
 			$emptyMessage.show();
 		}
 	}
+
 	function removeCartItem (sku) {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		storage = storage.filter((item) => item.sku != sku);
@@ -175,6 +184,7 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		}
 		return data;
 	}
+
 	// Initalize variables
 	function init () {
 		let cart_meta = localStorage.getItem('buildBoxMeta');
@@ -190,6 +200,7 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 			localStorage.setItem('buildBox', "[]");
 		}
 	}
+
 	function renderBoxTotals () {
 		//shipping render
 		evaluateSub();
@@ -265,20 +276,39 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		const i = Math.floor(n), f = n - i;
 		const e = 1e-8;
 		const r = (f > 0.5 - e && f < 0.5 + e) ? ((i % 2 == 0) ? i : i + 1) : Math.round(n); return d ? r / m : r;
-	} function
+	}
+
+	function
 		updateCheckoutForm (method) {
-		const $email = $('#checkout-email'); const $firstName = $('#checkout-first-name'); const
-			$lastName = $('#checkout-last-name'); const $street = $('#checkout-street-address'); const $city = $('#checkout-city');
-		const $state = $('#checkout-state'); const $zip = $('#checkout-zip'); const
-			customerDataStorage = localStorage.getItem('gumiCheckout'); let customerData = `{ "email" : "${$email.val()}"
-	, "firstName" : "${$firstName.val()}" , "lastName" : "${$lastName.val()}" , "address" : { "street"
-	: "${$street.val()}" , "city" : "${$city.val()}" , "state" : "${$state.val()}" , "zip" : "${$city.val()}" } }`; if
-			(method == 'save') {localStorage.setItem('gumiCheckout', customerData);} else if (method == 'render' &&
-				customerDataStorage != null) {
-			customerData = JSON.parse(customerDataStorage); $email.val(customerData.email);
-			$firstName.val(customerData.firstName); $lastName.val(customerData.lastName);
-			$street.val(customerData.address.street); $city.val(customerData.address.city);
-			$state.val(customerData.address.state); $zip.val(customerData.address.zip);
-		} renderBoxTotals();
+		const $email = $('#checkout-email');
+		const $firstName = $('#checkout-first-name');
+		const $lastName = $('#checkout-last-name');
+		const $street = $('#checkout-street-address');
+		const $city = $('#checkout-city');
+		const $state = $('#checkout-state');
+		const $zip = $('#checkout-zip');
+		const customerDataStorage = localStorage.getItem('gumiCheckout');
+		let customerData = `{ 
+			"email" : "${$email.val()}",
+			"firstName" : "${$firstName.val()}",
+			"lastName" : "${$lastName.val()}",
+			"address" : {
+				"street" : "${$street.val()}",
+				"city" : "${$city.val()}",
+				"state" : "${$state.val()}",
+				"zip" : "${$city.val()}" } }`;
+		if (method == 'save') {
+			localStorage.setItem('gumiCheckout', customerData);
+		} else if (method == 'render' && customerDataStorage != null) {
+			customerData = JSON.parse(customerDataStorage);
+			$email.val(customerData.email);
+			$firstName.val(customerData.firstName);
+			$lastName.val(customerData.lastName);
+			$street.val(customerData.address.street);
+			$city.val(customerData.address.city);
+			$state.val(customerData.address.state);
+			$zip.val(customerData.address.zip);
+		}
+		renderBoxTotals();
 	}
 });
