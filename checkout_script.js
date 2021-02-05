@@ -267,15 +267,15 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		const r = (f > 0.5 - e && f < 0.5 + e) ? ((i % 2 == 0) ? i : i + 1) : Math.round(n); return d ? r / m : r;
 	} function
 		updateCheckoutForm (method) {
-			const $email = $('#checkout-email'); const $firstName = $('#checkout-first-name'); const
-				$lastName = $('#checkout-last-name'); const $street = $('#checkout-street-address'); const $city = $('#checkout-city');
+		const $email = $('#checkout-email'); const $firstName = $('#checkout-first-name'); const
+			$lastName = $('#checkout-last-name'); const $street = $('#checkout-street-address'); const $city = $('#checkout-city');
 		const $state = $('#checkout-state'); const $zip = $('#checkout-zip'); const
 			customerDataStorage = localStorage.getItem('gumiCheckout'); let customerData = `{ "email" : "${$email.val()}"
 	, "firstName" : "${$firstName.val()}" , "lastName" : "${$lastName.val()}" , "address" : { "street"
 	: "${$street.val()}" , "city" : "${$city.val()}" , "state" : "${$state.val()}" , "zip" : "${$city.val()}" } }`; if
 			(method == 'save') {localStorage.setItem('gumiCheckout', customerData);} else if (method == 'render' &&
 				customerDataStorage != null) {
-					customerData = JSON.parse(customerDataStorage); $email.val(customerData.email);
+			customerData = JSON.parse(customerDataStorage); $email.val(customerData.email);
 			$firstName.val(customerData.firstName); $lastName.val(customerData.lastName);
 			$street.val(customerData.address.street); $city.val(customerData.address.city);
 			$state.val(customerData.address.state); $zip.val(customerData.address.zip);
