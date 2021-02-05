@@ -17,7 +17,7 @@ $(document).ready(function () {
 		})
 		;
 
-	function updateCheckoutItem (sku, method) {
+	function updateCheckoutItem(sku, method) {
 		const $quantity = $(`.cart-item[data-sku="${sku}"]`).find('.ticker-quantity input');
 		if ($quantity) {
 			const quantity = parseInt($quantity.val());
@@ -35,7 +35,7 @@ $(document).ready(function () {
 		}
 	}
 
-	function addCheckoutItem (item, quantity = 1) {
+	function addCheckoutItem(item, quantity = 1) {
 		let is_sub = $('#subscribe').is(':checked');
 		let price_info = `
 <div class="cart-item-price">$${item.price}</div>
@@ -76,7 +76,7 @@ $(document).ready(function () {
 `);
 	}
 
-	function evaluateSub (storage = null) {
+	function evaluateSub(storage = null) {
 		if (storage === null) {
 			storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 		}
@@ -93,12 +93,12 @@ $(document).ready(function () {
 		}
 	}
 
-	function resetCheckoutCart () {
+	function resetCheckoutCart() {
 		$('#build-your-box-form .cart-list .cart-item').remove();
 		renderCheckoutFromStorage();
 	}
 
-	function renderMetaFromStorage () {
+	function renderMetaFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 		let sub_btn = $('#subscribe').is(':checked');
 		if (sub_btn != storage.is_sub) {
@@ -108,14 +108,14 @@ $(document).ready(function () {
 		$('.select').val(storage.freq).trigger('change');
 	}
 
-	function renderBuildBoxFromStorage () {
+	function renderBuildBoxFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		for (const item of storage) {
 			updateBuildBoxQuantity(item.sku, item.quantity);
 		}
 	}
 
-	function renderCheckoutFromStorage () {
+	function renderCheckoutFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 
 		for (const item of storage) {
@@ -125,7 +125,7 @@ $(document).ready(function () {
 		updateCartRender();
 	}
 
-	function updateCartRender () {
+	function updateCartRender() {
 		const $emptyMessage = $('.empty-box');
 
 		// Update subtotal
@@ -148,28 +148,28 @@ $(document).ready(function () {
 		}
 	}
 
-	function removeCartItem (sku) {
+	function removeCartItem(sku) {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		storage = storage.filter((item) => item.sku != sku);
 		localStorage.setItem('buildBox', JSON.stringify(storage));
 		$(`#build-your-box-form .cart-list .cart-item[data-sku="${sku}"]`).remove();
 		updateBuildBoxQuantity(sku, 0);
 	}
-	function updateBuildBoxQuantity (sku, quantity) {
+	function updateBuildBoxQuantity(sku, quantity) {
 		const $list_item = $(`.build-your-box-item .product-data
 input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		$list_item.find('.ticker input').val(quantity);
 	}
-	function getItemDataFromSku (sku) {
+	function getItemDataFromSku(sku) {
 		const $list_item = $(`.build-your-box-item .product-data
 input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		return getItemDataFromBuildBoxItem($list_item);
 	}
-	function getItemData ($el) {
+	function getItemData($el) {
 		const $list_item = $el.closest('.build-your-box-item');
 		return getItemDataFromBuildBoxItem($list_item);
 	}
-	function getItemDataFromBuildBoxItem ($el) {
+	function getItemDataFromBuildBoxItem($el) {
 		const $product_data = $el.find('.product-data input');
 		let data = {
 			freq: $('#subscribe').is(':checked') ? $('.product-select').val() : null
@@ -186,7 +186,7 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 	}
 
 	// Initalize variables
-	function init () {
+	function init() {
 		let cart_meta = localStorage.getItem('buildBoxMeta');
 		if (cart_meta == null) {
 			localStorage.setItem('buildBoxMeta', JSON.stringify({
@@ -201,7 +201,7 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		}
 	}
 
-	function renderBoxTotals () {
+	function renderBoxTotals() {
 		//shipping render
 		evaluateSub();
 		const $shippingText = $('#checkout-shipping');
@@ -269,7 +269,7 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		}
 	}
 
-	function evenRound (num, decimalPlaces) {
+	function evenRound(num, decimalPlaces) {
 		const d = decimalPlaces || 0;
 		const m = Math.pow(10, d);
 		const n = +(d ? num * m : num).toFixed(8);
@@ -279,7 +279,7 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 	}
 
 	function
-		updateCheckoutForm (method) {
+		updateCheckoutForm(method) {
 		const $email = $('#checkout-email');
 		const $firstName = $('#checkout-first-name');
 		const $lastName = $('#checkout-last-name');
