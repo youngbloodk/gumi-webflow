@@ -266,5 +266,14 @@ $('.continue-checkout-button').click(function () {
 	if (boxStatus == "[]") {
 		e.preventDefault();
 		alert('Your Box is empty. Add some products to get started!');
+	} else {
+		$('.button-loader').show();
+		setTimeout(
+			function () {
+				$('.button-loader').hide();
+				alert('Whoops! Something went wrong. Try again.');
+				location.reload();
+			}, 10000);
+
 	}
 });
