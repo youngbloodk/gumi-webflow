@@ -51,7 +51,7 @@ $(document).ready(function () {
 		} else {
 			freq_info = `<div class="cart-item-frequency">Delivered: Just this once</div>`;
 		}
-		$('#build-your-box-form .cart-list').append(`
+		$('#payment-form .cart-list').append(`
 <li class="cart-item" data-sku="${item.sku}">
 	<div class="cart-item-image-wrap">
 		<img src="${item.image}" loading="lazy" sizes="(max-width: 479px) 13vw, 60px" alt="cart-item"
@@ -94,7 +94,7 @@ $(document).ready(function () {
 	}
 
 	function resetCheckoutCart() {
-		$('#build-your-box-form .cart-list .cart-item').remove();
+		$('#payment-form .cart-list .cart-item').remove();
 		renderCheckoutFromStorage();
 	}
 
@@ -152,7 +152,7 @@ $(document).ready(function () {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		storage = storage.filter((item) => item.sku != sku);
 		localStorage.setItem('buildBox', JSON.stringify(storage));
-		$(`#build-your-box-form .cart-list .cart-item[data-sku="${sku}"]`).remove();
+		$(`#payment-form .cart-list .cart-item[data-sku="${sku}"]`).remove();
 		updateBuildBoxQuantity(sku, 0);
 	}
 	function updateBuildBoxQuantity(sku, quantity) {

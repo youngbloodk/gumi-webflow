@@ -264,7 +264,7 @@ $(document).ready(function () {
 $('.continue-checkout-button').click(function () {
 	let boxStatus = localStorage.getItem('buildBox');
 	if (boxStatus == "[]") {
-		event.preventDefault();
+		e.preventDefault();
 		alert('Your Box is empty. Add some products to get started!');
 	}
 });
