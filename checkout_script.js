@@ -208,44 +208,43 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		const $shippingMethodPriceText = $('#shippingMethodPrice');
 		const $shippingMethodText = $('#shippingMethodText');
 		const $boxCount = parseInt($('#boxCount').text());
-		let $shipping = 0;
+		let shipping = 0;
 		if ($boxCount == 1) {
 			$shippingText.text('$5.00');
 			$shippingMethodPriceText.text('$5.00');
-			$shipping = 5;
+			shipping = 5;
 		} else if ($boxCount == 2) {
 			$shippingText.text('$8.50');
 			$shippingMethodPriceText.text('$8.50');
-			$shipping = 8.5;
+			shipping = 8.5;
 		} else if ($boxCount > 2) {
 			$shippingText.text('$0.00');
 			$shippingMethodText.text('Free Shipping');
 			$shippingMethodPriceText.text('$0.00');
-			$shipping = 0;
+			shipping = 0;
 		}
-		//tax, subtotal and total render
+		//tax, subtotal, total, subscription renewal price calculation
 		const $customerState = $('#checkout-state').val();
 		const $subtotal = Number($('#checkout-subtotal').text().replace(/[^0-9.-]+/g, ""));
 		const $discount = Number($('#checkout-discount').text().replace(/[^0-9.-]+/g, ""));
+		let taxRate = 0;
+		if ($customerState === 'UT') {
+			taxRate = .03;
+		}
 		const $taxText = $('#checkout-tax');
 		const $totalText = $('#checkout-total');
-		let $subtotalAfterDiscount = $subtotal - $discount;
-		let $tax = 0;
-		let $total = 0;
-		if ($customerState === 'UT') {
-			$tax = $subtotalAfterDiscount * .03;
-			$tax = evenRound($tax, 2);
-			$taxText.text(`$${$tax}`);
-		} else if ($customerState === null) {
-			$taxText.text(`TBD`);
-		} else {
-			$taxText.text(`$0.00`);
-		}
-		if ($customerState != null) {
-			$total = $subtotalAfterDiscount + $tax + $shipping;
-			$totalText.text(`$${$total.toFixed(2)}`);
-			$('#payButton').text(`Pay $${$total.toFixed(2)}`);
-		}
+		const $subscriptionRenewalPriceText = $('.subscription-renewal-price-text');
+		const subtotalAfterDiscount = $subtotal - $discount;
+		const tax = evenRound((subtotalAfterDiscount * taxRate), 2);
+		const total = subtotalAfterDiscount + tax + shipping;
+		const subscriptionRenewalPrice = $subtotal + tax + shipping;
+
+		//tax, subtotal, total, subscription renewal price render
+		$totalText.text(`$${total.toFixed(2)}`);
+		$taxText.text(`$${tax.toFixed(2)}`);
+		$subscriptionRenewalPriceText.text(`$${subscriptionRenewalPrice.toFixed(2)}`);
+		$('#payButton').text(`Pay $${total.toFixed(2)}`);
+
 		// renewal date render
 		const is_sub = JSON.parse(localStorage.getItem('buildBoxMeta')).is_sub;
 		const months = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Augus', 'Sept', 'Oct', 'Nov', 'Dec'];
