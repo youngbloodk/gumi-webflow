@@ -193,11 +193,11 @@ $(document).ready(function () {
 		}
 		return data;
 	}
+
 	// Initalize variables
 	function init() {
 		let cart_meta = localStorage.getItem('buildBoxMeta');
 		if (cart_meta == null) {
-			$('#sub_frequency').val(1);
 			localStorage.setItem('buildBoxMeta', JSON.stringify({
 				is_sub: true,
 				freq: '1'
@@ -206,11 +206,9 @@ $(document).ready(function () {
 		let cart = localStorage.getItem('buildBox');
 		if (cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
-		} else $('html, body').animate({
-			scrollTop:
-				$('#customize-order').offset().top
-		}, 1000);
+		}
 	}
+
 	function renderBoxTotals() {
 		//shipping render
 		evaluateSub();
