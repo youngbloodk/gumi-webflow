@@ -4,55 +4,47 @@ $(document).ready(function () {
 	renderBuildBoxFromStorage();
 	renderCheckoutFromStorage();
 
-	if (Number($('#boxCount').text()) > 0 && $(window).width() < 991) {
-		$('html, body').animate({
-			scrollTop:
-				$('#customize-order').offset().top
-		}, 1000);
-
-	}
-	if (parseInt($('#boxCount').text()) === 0) {
-		$('#sub_frequency').val(1);
-	}
-
-	$(document).on('click', '.plus-minus-button.plus', function () {
-		const item_data = getItemData($(this)); const $quant = $(this).closest('.ticker').find('input'); const
-			quant = parseInt($quant.val()); if (quant == 6) {window.alert("You cannot add more than 6 of a single item"); return;}
-		let storage = JSON.parse(localStorage.getItem('buildBox') || "[]"); let exists_in_storage = false; if (storage.length >
-			0) {
-			for (const item of storage) {
-				if (item.sku === item_data.sku) {
-					item.quantity++;
-					updateCheckoutItem(item_data.sku, 'add');
-					exists_in_storage = true;
-					break;
+	$(document)
+		.on('click', '.plus-minus-button.plus', function () {
+			const item_data = getItemData($(this)); const $quant = $(this).closest('.ticker').find('input'); const
+				quant = parseInt($quant.val()); if (quant == 6) {window.alert("You cannot add more than 6 of a single item"); return;}
+			let storage = JSON.parse(localStorage.getItem('buildBox') || "[]"); let exists_in_storage = false; if (storage.length >
+				0) {
+				for (const item of storage) {
+					if (item.sku === item_data.sku) {
+						item.quantity++;
+						updateCheckoutItem(item_data.sku, 'add');
+						exists_in_storage = true;
+						break;
+					}
 				}
 			}
-		}
-		if (!exists_in_storage) {
-			storage.push({
-				sku: item_data.sku,
-				quantity: 1,
-				imageURL: item_data.image,
-				price: item_data.price
-			});
-			addCheckoutItem(item_data);
-		}
+			if (!exists_in_storage) {
+				storage.push({
+					sku: item_data.sku,
+					quantity: 1,
+					imageURL: item_data.image,
+					price: item_data.price
+				});
+				addCheckoutItem(item_data);
+			}
 
-		localStorage.setItem('buildBox', JSON.stringify(storage));
-		updateCartRender();
-		if (quant < 6) {$quant[0].value = quant + 1;} $('.empty');
-	}).on('click', '.plus-minus-button.minus', function () {
-		const item_data = getItemData($(this)); const $quant = $(this).closest('.ticker').find('input'); const
-			quant = parseInt($quant.val()); let storage = JSON.parse(localStorage.getItem('buildBox') || "[]"); for (const item
-			of storage) {if (item.sku === item_data.sku) {item.quantity--; if (item.quantity == 0) {delete item;} break;} }
-		localStorage.setItem('buildBox', JSON.stringify(storage)); if (quant > 0) {
-			const item_data = getItemData($(this));
-			updateCheckoutItem(item_data.sku, 'sub');
+			localStorage.setItem('buildBox', JSON.stringify(storage));
 			updateCartRender();
-			$quant[0].value = quant - 1;
-		}
-	})
+			if (quant < 6) {$quant[0].value = quant + 1;} $('.empty');
+
+		})
+		.on('click', '.plus-minus-button.minus', function () {
+			const item_data = getItemData($(this)); const $quant = $(this).closest('.ticker').find('input'); const
+				quant = parseInt($quant.val()); let storage = JSON.parse(localStorage.getItem('buildBox') || "[]"); for (const item
+				of storage) {if (item.sku === item_data.sku) {item.quantity--; if (item.quantity == 0) {delete item;} break;} }
+			localStorage.setItem('buildBox', JSON.stringify(storage)); if (quant > 0) {
+				const item_data = getItemData($(this));
+				updateCheckoutItem(item_data.sku, 'sub');
+				updateCartRender();
+				$quant[0].value = quant - 1;
+			}
+		})
 
 		.on('click', '.cart-item .remove-button', function () {
 			let $item = $(this).closest('.cart-item');
@@ -69,7 +61,24 @@ $(document).ready(function () {
 			evaluateSub(storage);
 			resetCheckoutCart();
 		})
-		;
+
+		.on('click', '.continue-checkout-button', function () {
+			let boxStatus = localStorage.getItem('buildBox');
+			if (boxStatus == "[]") {
+				event.preventDefault();
+				alert('Your Box is empty. Add some products to get started!');
+				$('.button-loader').hide();
+			} else {
+				setTimeout(
+					function () {
+						$('.button-loader').hide();
+						alert('Whoops! Something went wrong. Try again.');
+						location.reload();
+					}, 10000);
+
+			}
+		});
+	;
 
 	function updateCheckoutItem(sku, method) {
 		const $quantity = $(`.cart-item[data-sku="${sku}"]`).find('.ticker-quantity input');
@@ -237,12 +246,22 @@ $(document).ready(function () {
 		if (cart_meta == null) {
 			localStorage.setItem('buildBoxMeta', JSON.stringify({
 				is_sub: true,
-				freq: '1m'
+				freq: '1'
 			}));
 		}
 		let cart = localStorage.getItem('buildBox');
 		if (cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
+		}
+		if (Number($('#boxCount').text()) > 0 && $(window).width() < 991) {
+			$('html, body').animate({
+				scrollTop:
+					$('#customize-order').offset().top
+			}, 1000);
+
+		}
+		if (parseInt($('#boxCount').text()) === 0) {
+			$('#sub_frequency').val(1);
 		}
 	}
 	function renderBoxCount() {
@@ -251,22 +270,5 @@ $(document).ready(function () {
 		boxData.forEach(element => boxTotals.push(element.quantity));
 		let boxCount = boxTotals.reduce((a, b) => a + b, 0);
 		$('#boxCount').text(boxCount);
-	}
-});
-
-$('.continue-checkout-button').click(function () {
-	let boxStatus = localStorage.getItem('buildBox');
-	if (boxStatus == "[]") {
-		event.preventDefault();
-		alert('Your Box is empty. Add some products to get started!');
-		$('.button-loader').hide();
-	} else {
-		setTimeout(
-			function () {
-				$('.button-loader').hide();
-				alert('Whoops! Something went wrong. Try again.');
-				location.reload();
-			}, 10000);
-
 	}
 });
