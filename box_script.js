@@ -9,6 +9,7 @@ $(document).ready(function () {
 			scrollTop:
 				$('#customize-order').offset().top
 		}, 1000);
+
 	}; $(document).on('click', '.plus-minus-button.plus', function () {
 		const item_data = getItemData($(this)); const $quant = $(this).closest('.ticker').find('input'); const
 			quant = parseInt($quant.val()); if (quant == 6) {window.alert("You cannot add more than 6 of a single item"); return;}
@@ -48,7 +49,6 @@ $(document).ready(function () {
 		}
 	})
 
-
 		.on('click', '.cart-item .remove-button', function () {
 			let $item = $(this).closest('.cart-item');
 			let sku = $item.attr('data-sku');
@@ -59,13 +59,7 @@ $(document).ready(function () {
 		.on('change', '.select', function () {
 			let storage = JSON.parse(localStorage.getItem('buildBoxMeta') || "{}");
 			storage.freq = $(this).val();
-			localStorage.setItem('buildBoxMeta', JSON.stringify(storage));
-			resetCheckoutCart();
-		})
-
-		.on('click', '#subscribe', function () {
-			let storage = JSON.parse(localStorage.getItem('buildBoxMeta') || "{}");
-			storage.is_sub = $(this).is(':checked');
+			storage.is_sub = storage.freq > 0;
 			localStorage.setItem('buildBoxMeta', JSON.stringify(storage));
 			evaluateSub(storage);
 			resetCheckoutCart();
@@ -90,7 +84,7 @@ $(document).ready(function () {
 		}
 	}
 	function addCheckoutItem(item, quantity = 1) {
-		let is_sub = $('#subscribe').is(':checked');
+		let is_sub = $('#sub_frequency').val() > 0;
 		let price_info = `
 		<div class="cart-item-price">$${item.price}</div>
 		`;
@@ -137,13 +131,10 @@ $(document).ready(function () {
 		if (storage === null) {
 			storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 		}
-
 		if (storage.is_sub) {
-			$('#delivered').show();
 			$('.price.compare').removeClass('active');
 			$('.price.black').show();
 		} else {
-			$('#delivered').hide();
 			$('.price.compare').addClass('active');
 			$('.price.black').hide();
 		}
@@ -154,9 +145,8 @@ $(document).ready(function () {
 	}
 	function renderMetaFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
-		let sub_btn = $('#subscribe').is(':checked');
-		if (sub_btn != storage.is_sub) {
-			$('#subscribe').click();
+		let sub_val = $('#sub_frequency').val() > 0;
+		if (sub_val != storage.is_sub) {
 			evaluateSub(storage);
 		}
 		$('.select').val(storage.freq).trigger('change');
@@ -181,7 +171,7 @@ $(document).ready(function () {
 
 		// Update subtotal
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
-		let is_sub = $('#subscribe').is(':checked');
+		let is_sub = $('#sub_frequency').val() > 0;
 		let subtotal = 0.00;
 		for (const item of storage) {
 			const item_data = getItemDataFromSku(item.sku);
@@ -223,7 +213,7 @@ $(document).ready(function () {
 	function getItemDataFromBuildBoxItem($el) {
 		const $product_data = $el.find('.product-data input');
 		let data = {
-			freq: $('#subscribe').is(':checked') ? $('.product-select').val() : null
+			freq: $('#sub_frequency').val() > 0 ? $('.product-select').val() : null
 		};
 		$product_data.each(function () {
 			const name = $(this).attr('name');
@@ -245,12 +235,10 @@ $(document).ready(function () {
 				freq: '1m'
 			}));
 		}
-
 		let cart = localStorage.getItem('buildBox');
 		if (cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
 		}
-		renderBoxCount();
 	}
 	function renderBoxCount() {
 		const boxData = JSON.parse(localStorage.getItem('buildBox'));

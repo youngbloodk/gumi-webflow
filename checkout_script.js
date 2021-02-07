@@ -21,7 +21,13 @@ $(document).ready(function () {
 				}, 2000);
 
 		})
-		;
+		.on('click', '#discountApply', function () {
+			$('#checkout-discount').text('$17.10');
+			$('#discountAppliedWrap').show();
+			$('.discount-text').text($('#discount-code').val());
+			renderBoxTotals();
+		});
+	;
 
 	function updateCheckoutItem(sku, method) {
 		const $quantity = $(`.cart-item[data-sku="${sku}"]`).find('.ticker-quantity input');
@@ -42,15 +48,15 @@ $(document).ready(function () {
 	}
 
 	function addCheckoutItem(item, quantity = 1) {
-		let is_sub = $('#subscribe').is(':checked');
+		let is_sub = $('#sub_frequency').val() > 0;
 		let price_info = `
-<div class="cart-item-price">$${item.price}</div>
-`;
+		<div class="cart-item-price">$${item.price}</div>
+		`;
 		let freq_info = '';
 		if (is_sub) {
 			price_info = `
-<div class="cart-item-price compare">$${item.price}</div>
-<div class="cart-item-price">$${item.sub_price}0</div>
+		<div class="cart-item-price compare">$${item.price}</div>
+		<div class="cart-item-price">$${item.sub_price}0</div>
 `;
 			let freq_name = $('.select option:selected').text();
 			freq_info = `<div class="cart-item-frequency">Delivered: ${freq_name}</div>`;
@@ -87,12 +93,10 @@ $(document).ready(function () {
 			storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 		}
 		if (storage.is_sub) {
-			$('#delivered').show();
 			$('.price.compare').removeClass('active');
 			$('.price.black').show();
 			$('#subscription-agreement-text').show();
 		} else {
-			$('#delivered').hide();
 			$('.price.compare').addClass('active');
 			$('.price.black').hide();
 			$('#subscription-agreement-text').hide();
@@ -106,9 +110,8 @@ $(document).ready(function () {
 
 	function renderMetaFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
-		let sub_btn = $('#subscribe').is(':checked');
-		if (sub_btn != storage.is_sub) {
-			$('#subscribe').click();
+		let sub_val = $('#sub_frequency').val() > 0;
+		if (sub_val != storage.is_sub) {
 			evaluateSub(storage);
 		}
 		$('.select').val(storage.freq).trigger('change');
@@ -136,7 +139,7 @@ $(document).ready(function () {
 
 		// Update subtotal
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
-		let is_sub = $('#subscribe').is(':checked');
+		let is_sub = $('#sub_frequency').val() > 0;
 		let subtotal = 0.00;
 		for (const item of storage) {
 			const item_data = getItemDataFromSku(item.sku);
@@ -163,12 +166,12 @@ $(document).ready(function () {
 	}
 	function updateBuildBoxQuantity(sku, quantity) {
 		const $list_item = $(`.build-your-box-item .product-data
-input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
+		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		$list_item.find('.ticker input').val(quantity);
 	}
 	function getItemDataFromSku(sku) {
 		const $list_item = $(`.build-your-box-item .product-data
-input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
+		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		return getItemDataFromBuildBoxItem($list_item);
 	}
 	function getItemData($el) {
@@ -178,7 +181,7 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 	function getItemDataFromBuildBoxItem($el) {
 		const $product_data = $el.find('.product-data input');
 		let data = {
-			freq: $('#subscribe').is(':checked') ? $('.product-select').val() : null
+			freq: $('#sub_frequency').val() > 0 ? $('.product-select').val() : null
 		};
 		$product_data.each(function () {
 			const name = $(this).attr('name');
@@ -200,7 +203,6 @@ input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 				freq: '1m'
 			}));
 		}
-
 		let cart = localStorage.getItem('buildBox');
 		if (cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
