@@ -254,8 +254,8 @@ $('.continue-checkout-button').click(function () {
 	if (boxStatus == "[]") {
 		event.preventDefault();
 		alert('Your Box is empty. Add some products to get started!');
+		$('.button-loader').hide();
 	} else {
-		$('.button-loader').show();
 		setTimeout(
 			function () {
 				$('.button-loader').hide();
