@@ -252,7 +252,7 @@ $(document).ready(function () {
 $('.continue-checkout-button').click(function () {
 	let boxStatus = localStorage.getItem('buildBox');
 	if (boxStatus == "[]") {
-		e.preventDefault();
+		event.preventDefault();
 		alert('Your Box is empty. Add some products to get started!');
 	} else {
 		$('.button-loader').show();
