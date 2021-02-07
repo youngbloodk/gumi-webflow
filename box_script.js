@@ -79,7 +79,6 @@ $(document).ready(function () {
 			}
 		});
 	;
-
 	function updateCheckoutItem(sku, method) {
 		const $quantity = $(`.cart-item[data-sku="${sku}"]`).find('.ticker-quantity input');
 		if ($quantity) {
@@ -140,7 +139,6 @@ $(document).ready(function () {
 		</li>
 		`);
 	}
-
 	function evaluateSub(storage = null) {
 		if (storage === null) {
 			storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
@@ -239,11 +237,11 @@ $(document).ready(function () {
 		}
 		return data;
 	}
-
 	// Initalize variables
 	function init() {
 		let cart_meta = localStorage.getItem('buildBoxMeta');
 		if (cart_meta == null) {
+			$('#sub_frequency').val(1);
 			localStorage.setItem('buildBoxMeta', JSON.stringify({
 				is_sub: true,
 				freq: '1'
@@ -252,17 +250,10 @@ $(document).ready(function () {
 		let cart = localStorage.getItem('buildBox');
 		if (cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
-		}
-		if (Number($('#boxCount').text()) > 0 && $(window).width() < 991) {
-			$('html, body').animate({
-				scrollTop:
-					$('#customize-order').offset().top
-			}, 1000);
-
-		}
-		if (parseInt($('#boxCount').text()) === 0) {
-			$('#sub_frequency').val(1);
-		}
+		} else $('html, body').animate({
+			scrollTop:
+				$('#customize-order').offset().top
+		}, 1000);
 	}
 	function renderBoxCount() {
 		const boxData = JSON.parse(localStorage.getItem('buildBox'));
