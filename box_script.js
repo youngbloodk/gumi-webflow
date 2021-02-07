@@ -10,7 +10,12 @@ $(document).ready(function () {
 				$('#customize-order').offset().top
 		}, 1000);
 
-	}; $(document).on('click', '.plus-minus-button.plus', function () {
+	}
+	if (parseInt($('#boxCount').text()) === 0) {
+		$('#sub_frequency').val(1);
+	}
+
+	$(document).on('click', '.plus-minus-button.plus', function () {
 		const item_data = getItemData($(this)); const $quant = $(this).closest('.ticker').find('input'); const
 			quant = parseInt($quant.val()); if (quant == 6) {window.alert("You cannot add more than 6 of a single item"); return;}
 		let storage = JSON.parse(localStorage.getItem('buildBox') || "[]"); let exists_in_storage = false; if (storage.length >
@@ -56,7 +61,7 @@ $(document).ready(function () {
 			updateCartRender();
 		})
 
-		.on('change', '.select', function () {
+		.on('change', '#sub_frequency', function () {
 			let storage = JSON.parse(localStorage.getItem('buildBoxMeta') || "{}");
 			storage.freq = $(this).val();
 			storage.is_sub = storage.freq > 0;
