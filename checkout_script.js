@@ -26,6 +26,15 @@ $(document).ready(function () {
 			$('#discountAppliedWrap').show();
 			$('.discount-text').text($('#discount-code').val());
 			renderBoxTotals();
+			let checkmarkAnim = bodymovin.loadAnimation({
+				container: document.getElementById('checkmarkAnim'),
+				path: 'https://uploads-ssl.webflow.com/6012e1ca5effcb5c10935dc4/6023044303afc45149a5dd8a_check.json',
+				renderer: 'svg',
+				loop: false,
+				autoplay: false,
+				name: "checkmarkAnim",
+			});
+			checkmarkAnim.play();
 		});
 	;
 
