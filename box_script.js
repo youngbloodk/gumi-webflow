@@ -3,6 +3,7 @@ $(document).ready(function () {
 	renderMetaFromStorage();
 	renderBuildBoxFromStorage();
 	renderCheckoutFromStorage();
+	window.addEventListener('resize', init);
 
 	$(document)
 		.on('click', '.plus-minus-button.plus', function () {
@@ -180,6 +181,7 @@ $(document).ready(function () {
 	}
 	function updateCartRender() {
 		const $emptyMessage = $('.empty-box');
+		const $continueBlock = $('#continueToCheckout');
 
 		// Update subtotal
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
@@ -196,8 +198,12 @@ $(document).ready(function () {
 		$('#checkout-subtotal').html('$' + subtotal.toFixed(2));
 		if (storage.length > 0) {
 			$emptyMessage.hide();
+			$continueBlock.show();
+			$('#emptyWrap').addClass('middle');
 		} else {
 			$emptyMessage.show();
+			$continueBlock.hide();
+			$('#emptyWrap').removeClass('middle');
 		}
 		renderBoxCount();
 	}
@@ -250,11 +256,21 @@ $(document).ready(function () {
 		let cart = localStorage.getItem('buildBox');
 		if (cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
-		} else $('html, body').animate({
-			scrollTop:
-				$('#customize-order').offset().top
-		}, 1000);
+		}
+		if (location.toString().indexOf('?build') < 0) {
+			if (screen.width < 991) {
+				$('#choose-your-goods').css('order', 99999);
+			} else {
+				$('#choose-your-goods').css('order', -99999);
+			}
+			$('#chooseYourGoodsText').text('Other goods you might like');
+			$('#customizeDeliveryText').text('Your Box');
+			$('.add-products-button').show();
+		} else {
+			$('.add-products-button').hide();
+		}
 	}
+
 	function renderBoxCount() {
 		const boxData = JSON.parse(localStorage.getItem('buildBox'));
 		let boxTotals = [];

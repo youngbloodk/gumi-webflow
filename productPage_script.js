@@ -1,30 +1,43 @@
 $(document).ready(function () {
 	$(document)
-		.on('change', 'input[type="radio"]', function () {
+		.on('change', 'form', function () {
 			const $pic = $('#productImage');
-			const $selectedQuant = Number($('input[type=radio]:checked').val());
+			const $selectedQuant = parseInt($('input[type=radio]:checked').val());
 			const $totalPrice = $('#mainSubPrice');
 			const $currentRegPrice = $('#currentRegPrice');
 			const $currentSubPrice = $('#currentSubPrice');
 			const regPrices = ['{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:2-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:3-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:4-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:5-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:6-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}'];
 			const subPrices = ['{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:2-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:3-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:4-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:5-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:6-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}'];
 			const pics = ['{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;2-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;3-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;4-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;5-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;6-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}'];
+			const $shippingText = $('#shippingText');
 
+			if ($selectedQuant < 3) {
+				$shippingText.text('+ Shipping');
+			} else {
+				$shippingText.text('+ Free shipping 🎉');
+			}
 			$pic.css("background-image", `url(${pics[$selectedQuant - 1]})`);
-			$currentRegPrice.text(`${subPrices[$selectedQuant - 1]}`);
-			$currentSubPrice.text(`${regPrices[$selectedQuant - 1]}`);
-		})
+			$currentRegPrice.text(`${regPrices[$selectedQuant - 1]}`);
+			$currentSubPrice.text(`${subPrices[$selectedQuant - 1]}`);
 
-		.on('change', '#subFrequency', function () {
 			const $deliveryFrequency = Number($('#subFrequency').val());
 			const $deliveryFrequencyText = $('#deliveryFrequencyText');
+			const $comparePrice = $('.text.price.compare');
+			const $subPriceWrap = $('.sub-price-wrap');
 
 			if ($deliveryFrequency === 0) {
 				$deliveryFrequencyText.hide();
-			} else if ($deliveryFrequency == 1) {
-				$deliveryFrequencyText.text(`Every month`);
+				$comparePrice.addClass('active');
+				$subPriceWrap.hide();
 			} else {
-				$deliveryFrequencyText.text(`Every ${$deliveryFrequency} months`);
+				if ($deliveryFrequency == 1) {
+					$deliveryFrequencyText.text(`Every month`);
+				} else {
+					$deliveryFrequencyText.text(`Every ${$deliveryFrequency} months`);
+				}
+				$deliveryFrequencyText.show();
+				$comparePrice.removeClass('active');
+				$subPriceWrap.show();
 			}
 		})
 
@@ -34,7 +47,7 @@ $(document).ready(function () {
 			const sku = $('#productcode').val();
 			const freq = $('#subFrequency').val();
 			const is_sub = freq > 0;
-			const quantity = parseInt($('#quantity').val());
+			const quantity = parseInt($('input[type=radio]:checked').val());
 
 			// Set sub info
 			localStorage.setItem('buildBoxMeta', JSON.stringify({
