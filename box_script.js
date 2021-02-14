@@ -23,9 +23,7 @@ $(document).ready(function () {
 			if (!exists_in_storage) {
 				storage.push({
 					sku: item_data.sku,
-					quantity: 1,
-					imageURL: item_data.image,
-					price: item_data.price
+					quantity: 1
 				});
 				addCheckoutItem(item_data);
 			}
