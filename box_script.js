@@ -133,7 +133,7 @@ $(document).ready(function () {
 			</div>
 			<div class="ticker-wrap">
 				<div class="ticker-quantity">
-					<input type="number" class="form-field ticker" min="0" max="6" placeholder="0" name="itemQuantity"
+					<input type="number" class="field ticker" min="0" max="6" placeholder="0" name="itemQuantity"
 						value="${quantity}" readonly />
 				</div>
 			</div>
