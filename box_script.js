@@ -55,16 +55,9 @@ $(document).ready(function () {
 		.on('change', 'input[type="radio"]', function () {
 			let storage = JSON.parse(localStorage.getItem('buildBoxMeta') || "{}");
 			storage.is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
-			$('input[name="subscription"]:checked').closest('div').find('.text').addClass('light');
-			$('input[name="subscription"]').not(':checked').closest('div').find('.text').removeClass('light');
 			localStorage.setItem('buildBoxMeta', JSON.stringify(storage));
 			evaluateSub(storage);
 			resetCheckoutCart();
-			if ($('#false').is(':checked')) {
-				$('#deliveryFrequencyWrap').hide();
-			} else {
-				$('#deliveryFrequencyWrap').show();
-			}
 		})
 
 		.on('change', '#sub_frequency', function () {
@@ -155,11 +148,19 @@ $(document).ready(function () {
 			storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 		}
 		if (storage.is_sub) {
+			$('#true').click().attr('checked', true);
+			$('#true').closest('div').find('.text').addClass('light');
+			$('#false').closest('div').find('.text').removeClass('light');
 			$('.price.compare').removeClass('active');
 			$('.price.black').show();
+			$('#deliveryFrequencyWrap').show();
 		} else {
+			$('#false').click().attr('checked', true);
+			$('#false').closest('div').find('.text').addClass('light');
+			$('#true').closest('div').find('.text').removeClass('light');
 			$('.price.compare').addClass('active');
 			$('.price.black').hide();
+			$('#deliveryFrequencyWrap').hide();
 		}
 	}
 	function resetCheckoutCart() {
@@ -168,7 +169,7 @@ $(document).ready(function () {
 	}
 	function renderMetaFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
-		let sub_val = storage.is_sub;
+		let sub_val = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		if (sub_val != storage.is_sub) {
 			evaluateSub(storage);
 		}
@@ -262,6 +263,9 @@ $(document).ready(function () {
 	}
 	// Initalize variables
 	function init() {
+		if (performance.navigation.type == 2) {
+			location.reload(true);
+		}
 		let cart_meta = localStorage.getItem('buildBoxMeta');
 		if (cart_meta == null) {
 			$('#sub_frequency').val(1);

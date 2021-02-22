@@ -2,7 +2,7 @@ $(document).ready(function () {
 	$(document)
 		.on('change', 'form', function () {
 			const $pic = $('#productImage');
-			const $selectedQuant = parseInt($('input[type=radio]:checked').val());
+			const $quant = parseInt($('#quantity option:selected').val());
 			const $totalPrice = $('#mainSubPrice');
 			const $currentRegPrice = $('#currentRegPrice');
 			const $currentSubPrice = $('#currentSubPrice');
@@ -11,14 +11,14 @@ $(document).ready(function () {
 			const pics = ['{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;2-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;3-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;4-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;5-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;6-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}'];
 			const $shippingText = $('#shippingText');
 
-			if ($selectedQuant < 3) {
+			if ($quant < 3) {
 				$shippingText.text('+ Shipping');
 			} else {
 				$shippingText.text('+ Free shipping 🎉');
 			}
-			$pic.css("background-image", `url(${pics[$selectedQuant - 1]})`);
-			$currentRegPrice.text(`${regPrices[$selectedQuant - 1]}`);
-			$currentSubPrice.text(`${subPrices[$selectedQuant - 1]}`);
+			$pic.css("background-image", `url(${pics[$quant - 1]})`);
+			$currentRegPrice.text(`${regPrices[$quant - 1]}`);
+			$currentSubPrice.text(`${subPrices[$quant - 1]}`);
 
 			const $deliveryFrequency = Number($('#subFrequency').val());
 			const $deliveryFrequencyText = $('#deliveryFrequencyText');

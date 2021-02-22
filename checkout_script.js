@@ -38,24 +38,6 @@ $(document).ready(function () {
 		});
 	;
 
-	function updateCheckoutItem(sku, method) {
-		const $quantity = $(`.cart-item[data-sku="${sku}"]`).find('.ticker-quantity input');
-		if ($quantity) {
-			const quantity = parseInt($quantity.val());
-			if ($quantity) {
-				if (method == 'add') {
-					$quantity[0].value = quantity + 1;
-				}
-				if (method == 'sub') {
-					$quantity[0].value = quantity - 1;
-					if ((quantity - 1) == 0) {
-						removeCartItem(sku);
-					}
-				}
-			}
-		}
-	}
-
 	function addCheckoutItem(item, quantity = 1) {
 		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let price_info = `
@@ -105,16 +87,13 @@ $(document).ready(function () {
 			$('.price.compare').removeClass('active');
 			$('.price.black').show();
 			$('#subscription-agreement-text').show();
+			$('#true').click();
 		} else {
 			$('.price.compare').addClass('active');
 			$('.price.black').hide();
 			$('#subscription-agreement-text').hide();
+			$('#false').click();
 		}
-	}
-
-	function resetCheckoutCart() {
-		$('#payment-form .cart-list .cart-item').remove();
-		renderCheckoutFromStorage();
 	}
 
 	function renderMetaFromStorage() {
@@ -166,13 +145,6 @@ $(document).ready(function () {
 		}
 	}
 
-	function removeCartItem(sku) {
-		let storage = JSON.parse(localStorage.getItem('buildBox'));
-		storage = storage.filter((item) => item.sku != sku);
-		localStorage.setItem('buildBox', JSON.stringify(storage));
-		$(`#payment-form .cart-list .cart-item[data-sku="${sku}"]`).remove();
-		updateBuildBoxQuantity(sku, 0);
-	}
 	function updateBuildBoxQuantity(sku, quantity) {
 		const $list_item = $(`.build-your-box-item .product-data
 		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
@@ -183,10 +155,7 @@ $(document).ready(function () {
 		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		return getItemDataFromBuildBoxItem($list_item);
 	}
-	function getItemData($el) {
-		const $list_item = $el.closest('.build-your-box-item');
-		return getItemDataFromBuildBoxItem($list_item);
-	}
+
 	function getItemDataFromBuildBoxItem($el) {
 		const $product_data = $el.find('.product-data input');
 		let data = {
