@@ -52,10 +52,24 @@ $(document).ready(function () {
 			updateCartRender();
 		})
 
+		.on('change', 'input[type="radio"]', function () {
+			let storage = JSON.parse(localStorage.getItem('buildBoxMeta') || "{}");
+			storage.is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+			$('input[name="subscription"]:checked').closest('div').find('.text').addClass('light');
+			$('input[name="subscription"]').not(':checked').closest('div').find('.text').removeClass('light');
+			localStorage.setItem('buildBoxMeta', JSON.stringify(storage));
+			evaluateSub(storage);
+			resetCheckoutCart();
+			if ($('#false').is(':checked')) {
+				$('#deliveryFrequencyWrap').hide();
+			} else {
+				$('#deliveryFrequencyWrap').show();
+			}
+		})
+
 		.on('change', '#sub_frequency', function () {
 			let storage = JSON.parse(localStorage.getItem('buildBoxMeta') || "{}");
 			storage.freq = $(this).val();
-			storage.is_sub = storage.freq > 0;
 			localStorage.setItem('buildBoxMeta', JSON.stringify(storage));
 			evaluateSub(storage);
 			resetCheckoutCart();
@@ -96,7 +110,7 @@ $(document).ready(function () {
 		}
 	}
 	function addCheckoutItem(item, quantity = 1) {
-		let is_sub = $('#sub_frequency').val() > 0;
+		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let price_info = `
 		<div class="cart-item-price">$${item.price}</div>
 		`;
@@ -124,9 +138,7 @@ $(document).ready(function () {
 						${price_info}
 					</div>
 					${freq_info}
-					<a href="#" class="remove-button w-inline-block">
-						<div class="text remove">Remove</div>
-					</a>
+          <div style="color: red; cursor: pointer;" class="text remove-button">Remove</div>
 				</div>
 			</div>
 			<div class="ticker-wrap">
@@ -156,7 +168,7 @@ $(document).ready(function () {
 	}
 	function renderMetaFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
-		let sub_val = $('#sub_frequency').val() > 0;
+		let sub_val = storage.is_sub;
 		if (sub_val != storage.is_sub) {
 			evaluateSub(storage);
 		}
@@ -183,16 +195,23 @@ $(document).ready(function () {
 
 		// Update subtotal
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
-		let is_sub = $('#sub_frequency').val() > 0;
+		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let subtotal = 0.00;
+		let oneTimeSubtotal = 0.00;
+		let subSubtotal = 0.00;
+
 		for (const item of storage) {
 			const item_data = getItemDataFromSku(item.sku);
+			oneTimeSubtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
+			subSubtotal += parseFloat(item_data.sub_price) * parseFloat(item.quantity);
 			if (is_sub) {
 				subtotal += parseFloat(item_data.sub_price) * parseFloat(item.quantity);
 			} else {
 				subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
 			}
 		}
+		$('#oneTimeSubtotal').html('$' + oneTimeSubtotal.toFixed(2));
+		$('#subSubtotal').html('$' + subSubtotal.toFixed(2));
 		$('#checkout-subtotal').html('$' + subtotal.toFixed(2));
 		if (storage.length > 0) {
 			$emptyMessage.hide();
@@ -258,6 +277,7 @@ $(document).ready(function () {
 		if (location.toString().indexOf('?build') < 0) {
 			if (screen.width < 991) {
 				$('#choose-your-goods').css('order', 99999);
+				$('#buildYourBoxTitle').hide();
 			} else {
 				$('#choose-your-goods').css('order', -99999);
 			}

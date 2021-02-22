@@ -47,7 +47,7 @@ $(document).ready(function () {
 			const sku = $('#productcode').val();
 			const freq = $('#subFrequency').val();
 			const is_sub = freq > 0;
-			const quantity = parseInt($('input[type=radio]:checked').val());
+			const quantity = parseInt($('#quantity').val());
 
 			// Set sub info
 			localStorage.setItem('buildBoxMeta', JSON.stringify({

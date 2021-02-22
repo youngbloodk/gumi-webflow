@@ -57,7 +57,7 @@ $(document).ready(function () {
 	}
 
 	function addCheckoutItem(item, quantity = 1) {
-		let is_sub = $('#sub_frequency').val() > 0;
+		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let price_info = `
 		<div class="cart-item-price">$${item.price}</div>
 		`;
@@ -148,7 +148,7 @@ $(document).ready(function () {
 
 		// Update subtotal
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
-		let is_sub = $('#sub_frequency').val() > 0;
+		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let subtotal = 0.00;
 		for (const item of storage) {
 			const item_data = getItemDataFromSku(item.sku);
