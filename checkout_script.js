@@ -119,7 +119,7 @@ $(document).ready(function () {
 
 	function renderMetaFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
-		let sub_val = $('#sub_frequency').val() > 0;
+		let sub_val = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		if (sub_val != storage.is_sub) {
 			evaluateSub(storage);
 		}
