@@ -68,20 +68,11 @@ $(document).ready(function () {
 			resetCheckoutCart();
 		})
 
-		.on('click', '.continue-checkout-button', function () {
+		.on('click', '#continueCheckoutButton', function () {
 			let boxStatus = localStorage.getItem('buildBox');
 			if (boxStatus == "[]") {
 				event.preventDefault();
 				alert('Your Box is empty. Add some products to get started!');
-				$('.button-loader').hide();
-			} else {
-				setTimeout(
-					function () {
-						$('.button-loader').hide();
-						alert('Whoops! Something went wrong. Try again.');
-						location.reload();
-					}, 10000);
-
 			}
 		});
 	;
