@@ -88,4 +88,6 @@ $(document).ready(function () {
 		});
 });
 
-fbq('track', 'ViewContent', {content_name: "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"});
+fbq('track', 'ViewContent', {
+	content_name: "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
+});
