@@ -84,15 +84,19 @@ $(document).ready(function () {
 			storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 		}
 		if (storage.is_sub) {
+			$('#true').click().attr('checked', true);
+			$('#true').closest('div').find('.text').addClass('light');
+			$('#false').closest('div').find('.text').removeClass('light');
 			$('.price.compare').removeClass('active');
 			$('.price.black').show();
-			$('#subscription-agreement-text').show();
-			$('#true').click();
+			$('#deliveryFrequencyWrap').show();
 		} else {
+			$('#false').click().attr('checked', true);
+			$('#false').closest('div').find('.text').addClass('light');
+			$('#true').closest('div').find('.text').removeClass('light');
 			$('.price.compare').addClass('active');
 			$('.price.black').hide();
-			$('#subscription-agreement-text').hide();
-			$('#false').click();
+			$('#deliveryFrequencyWrap').hide();
 		}
 	}
 

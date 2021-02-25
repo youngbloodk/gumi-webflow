@@ -7,10 +7,19 @@ $(document).ready(function () {
 
 	$(document)
 		.on('click', '.plus-minus-button.plus', function () {
-			const item_data = getItemData($(this)); const $quant = $(this).closest('.ticker').find('input'); const
-				quant = parseInt($quant.val()); if (quant == 6) {window.alert("You cannot add more than 6 of a single item"); return;}
-			let storage = JSON.parse(localStorage.getItem('buildBox') || "[]"); let exists_in_storage = false; if (storage.length >
-				0) {
+			const item_data = getItemData($(this));
+			const $quant = $(this).closest('.ticker').find('input');
+			const quant = parseInt($quant.val());
+
+			if (quant == 6) {
+				window.alert("You cannot add more than 6 of a single item");
+				return;
+			}
+
+			let storage = JSON.parse(localStorage.getItem('buildBox') || "[]");
+			let exists_in_storage = false;
+
+			if (storage.length > 0) {
 				for (const item of storage) {
 					if (item.sku === item_data.sku) {
 						item.quantity++;
@@ -20,6 +29,7 @@ $(document).ready(function () {
 					}
 				}
 			}
+
 			if (!exists_in_storage) {
 				storage.push({
 					sku: item_data.sku,
@@ -30,13 +40,25 @@ $(document).ready(function () {
 
 			localStorage.setItem('buildBox', JSON.stringify(storage));
 			updateCartRender();
-			if (quant < 6) {$quant[0].value = quant + 1;} $('.empty');
 
+			// if (quant < 6) { $quant[0].value = quant + 1; }
+
+			updateBuildBoxQuantity(item_data.sku, quant + 1);
 		})
+
 		.on('click', '.plus-minus-button.minus', function () {
-			const item_data = getItemData($(this)); const $quant = $(this).closest('.ticker').find('input'); const
-				quant = parseInt($quant.val()); let storage = JSON.parse(localStorage.getItem('buildBox') || "[]"); for (const item
-				of storage) {if (item.sku === item_data.sku) {item.quantity--; if (item.quantity == 0) {delete item;} break;} }
+			const item_data = getItemData($(this));
+			const $quant = $(this).closest('.ticker').find('input');
+			const quant = parseInt($quant.val());
+			let storage = JSON.parse(localStorage.getItem('buildBox') || "[]");
+			for (const item of storage) {
+				if (item.sku === item_data.sku) {
+					item.quantity--;
+					if (item.quantity == 0) {
+						delete item;
+					} break;
+				}
+			}
 			localStorage.setItem('buildBox', JSON.stringify(storage)); if (quant > 0) {
 				const item_data = getItemData($(this));
 				updateCheckoutItem(item_data.sku, 'sub');
@@ -76,6 +98,7 @@ $(document).ready(function () {
 			}
 		});
 	;
+
 	function updateCheckoutItem(sku, method) {
 		const $quantity = $(`.cart-item[data-sku="${sku}"]`).find('.ticker-quantity input');
 		if ($quantity) {
@@ -93,6 +116,7 @@ $(document).ready(function () {
 			}
 		}
 	}
+
 	function addCheckoutItem(item, quantity = 1) {
 		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let price_info = `
@@ -134,6 +158,7 @@ $(document).ready(function () {
 		</li>
 		`);
 	}
+
 	function evaluateSub(storage = null) {
 		if (storage === null) {
 			storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
@@ -145,6 +170,7 @@ $(document).ready(function () {
 			$('.price.compare').removeClass('active');
 			$('.price.black').show();
 			$('#deliveryFrequencyWrap').show();
+			$('.price-badge-value').text('$17.10');
 		} else {
 			$('#false').click().attr('checked', true);
 			$('#false').closest('div').find('.text').addClass('light');
@@ -152,12 +178,15 @@ $(document).ready(function () {
 			$('.price.compare').addClass('active');
 			$('.price.black').hide();
 			$('#deliveryFrequencyWrap').hide();
+			$('.price-badge-value').text('$19');
 		}
 	}
+
 	function resetCheckoutCart() {
 		$('#build-your-box-form .cart-list .cart-item').remove();
 		renderCheckoutFromStorage();
 	}
+
 	function renderMetaFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 		let sub_val = $('input[type="radio"][name="subscription"]:checked').val() == "true";
@@ -166,12 +195,14 @@ $(document).ready(function () {
 		}
 		$('.select').val(storage.freq).trigger('change');
 	}
+
 	function renderBuildBoxFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		for (const item of storage) {
 			updateBuildBoxQuantity(item.sku, item.quantity);
 		}
 	}
+
 	function renderCheckoutFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 
@@ -181,6 +212,7 @@ $(document).ready(function () {
 		}
 		updateCartRender();
 	}
+
 	function updateCartRender() {
 		const $emptyMessage = $('.empty-box');
 		const $continueBlock = $('#continueToCheckout');
@@ -216,6 +248,7 @@ $(document).ready(function () {
 		}
 		renderBoxCount();
 	}
+
 	function removeCartItem(sku) {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		storage = storage.filter((item) => item.sku != sku);
@@ -223,20 +256,29 @@ $(document).ready(function () {
 		$(`#build-your-box-form .cart-list .cart-item[data-sku="${sku}"]`).remove();
 		updateBuildBoxQuantity(sku, 0);
 	}
+
 	function updateBuildBoxQuantity(sku, quantity) {
-		const $list_item = $(`.build-your-box-item .product-data
-		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
+		const $list_item = $(`.build-your-box-item .product-data input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		$list_item.find('.ticker input').val(quantity);
+
+		if (quantity < 1) {
+			$list_item.find('.ticker input, .minus').fadeOut();
+		} else if (quantity >= 1) {
+			$list_item.find('.ticker input, .minus').fadeIn();
+		}
 	}
+
 	function getItemDataFromSku(sku) {
 		const $list_item = $(`.build-your-box-item .product-data
 		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		return getItemDataFromBuildBoxItem($list_item);
 	}
+
 	function getItemData($el) {
 		const $list_item = $el.closest('.build-your-box-item');
 		return getItemDataFromBuildBoxItem($list_item);
 	}
+
 	function getItemDataFromBuildBoxItem($el) {
 		const $product_data = $el.find('.product-data input');
 		let data = {
@@ -252,8 +294,10 @@ $(document).ready(function () {
 		}
 		return data;
 	}
+
 	// Initalize variables
 	function init() {
+		$('.minus, .ticker input').hide();
 		if (performance.navigation.type == 2) {
 			location.reload(true);
 		}

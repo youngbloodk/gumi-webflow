@@ -39,6 +39,14 @@ $(document).ready(function () {
 				$comparePrice.removeClass('active');
 				$subPriceWrap.show();
 			}
+			if ($('#true').is(':checked')) {
+				$('#deliveryFrequencyWrap').show();
+				$('#deliveryFrequencyWrap').prop('disabled', false);
+
+			} else {
+				$('#deliveryFrequencyWrap').hide();
+				$('#deliveryFrequencyWrap').prop('disabled', 'disabled');
+			}
 		})
 
 		.on('submit', '#product-form', function (e) {
@@ -46,7 +54,7 @@ $(document).ready(function () {
 			e.stopPropagation();
 			const sku = $('#productcode').val();
 			const freq = $('#subFrequency').val();
-			const is_sub = freq > 0;
+			const is_sub = $('#true').is(':checked');
 			const quantity = parseInt($('#quantity').val());
 
 			// Set sub info
@@ -62,7 +70,6 @@ $(document).ready(function () {
 					item.quantity = parseInt(item.quantity);
 					if (item.quantity + quantity > 6) {
 						window.alert(`You cannot add more than 6 of a single item and you currently have: ${item.quantity}`);
-						$('.button-loader').hide();
 						return;
 					}
 					item.quantity += quantity;
