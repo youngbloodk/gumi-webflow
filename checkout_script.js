@@ -223,7 +223,7 @@ $(document).ready(function () {
 		}
 		const $taxText = $('#checkout-tax');
 		const $totalText = $('#checkout-total');
-		const $subscriptionRenewalPriceText = $('.subscription-renewal-price-text');
+		const $subscriptionRenewalPriceText = $('[data-id="subscriptionPriceText"]');
 		const subtotalAfterDiscount = $subtotal - $discount;
 		const tax = evenRound((subtotalAfterDiscount * taxRate), 2);
 		const total = subtotalAfterDiscount + tax + shipping;
@@ -238,7 +238,7 @@ $(document).ready(function () {
 		// renewal date render
 		const is_sub = JSON.parse(localStorage.getItem('buildBoxMeta')).is_sub;
 		const months = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Augus', 'Sept', 'Oct', 'Nov', 'Dec'];
-		const $renewalDateText = $('#checkout-renewal-date');
+		const $renewalDateText = $('#checkoutRenewalDate');
 		const frequency = parseInt(JSON.parse(localStorage.getItem('buildBoxMeta')).freq);
 		const today = new Date();
 		let renewalDate = new Date(today);
