@@ -216,6 +216,7 @@ $(document).ready(function () {
 	function updateCartRender() {
 		const $emptyMessage = $('.empty-box');
 		const $continueBlock = $('#continueToCheckout');
+		const $freeShippingMeter = $('#freeShippingMeter');
 
 		// Update subtotal
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
@@ -241,10 +242,12 @@ $(document).ready(function () {
 			$emptyMessage.hide();
 			$continueBlock.show();
 			$('#emptyWrap').addClass('middle');
+			$freeShippingMeter.show();
 		} else {
 			$emptyMessage.show();
 			$continueBlock.hide();
 			$('#emptyWrap').removeClass('middle');
+			$freeShippingMeter.hide();
 		}
 		renderBoxCount();
 	}
@@ -313,7 +316,7 @@ $(document).ready(function () {
 		if (cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
 		}
-		if (location.toString().indexOf('?build') < 0) {
+		if (location.toString().indexOf('state=build') < 0) {
 			if (screen.width < 991) {
 				$('#choose-your-goods').css('order', 99999);
 				$('#buildYourBoxTitle').hide();
@@ -330,9 +333,27 @@ $(document).ready(function () {
 
 	function renderBoxCount() {
 		const boxData = JSON.parse(localStorage.getItem('buildBox'));
+		const $progressBar = $('#progressBar');
+		const $freeShippingMeterTitle = $('#freeShippingMeterTitle');
+		const $freeShippingMessage = $('#freeShippingYay');
 		let boxTotals = [];
+
 		boxData.forEach(element => boxTotals.push(element.quantity));
 		let boxCount = boxTotals.reduce((a, b) => a + b, 0);
 		$('#boxCount').text(boxCount);
+		const quantToFreeShipping = Math.abs(boxCount - 3);
+		if (boxCount >= 3) {
+			$freeShippingMessage.show();
+			$freeShippingMeterTitle.hide();
+		} else {
+			if (boxCount == 2) {
+				$freeShippingMeterTitle.text(`Add 1 more bottle for free shipping!`);
+			} else {
+				$freeShippingMeterTitle.text(`Add 2 more bottles for free shipping!`);
+			}
+			$freeShippingMessage.hide();
+			$freeShippingMeterTitle.show();
+		}
+		$progressBar.width(`${(1 - (quantToFreeShipping / 3)) * 100}%`);
 	}
 });
