@@ -3,7 +3,13 @@ $(document).ready(function () {
 	renderMetaFromStorage();
 	renderBuildBoxFromStorage();
 	renderCheckoutFromStorage();
-	window.addEventListener('resize', init);
+
+	// window.addEventListener('resize', function () {
+	// 	init();
+	// 	renderMetaFromStorage();
+	// 	renderBuildBoxFromStorage();
+	// 	renderCheckoutFromStorage();
+	// });
 
 	$(document)
 		.on('click', '.plus-minus-button.plus', function () {
@@ -265,9 +271,9 @@ $(document).ready(function () {
 		$list_item.find('.ticker input').val(quantity);
 
 		if (quantity < 1) {
-			$list_item.find('.ticker input, .minus').fadeOut();
+			$list_item.find('.ticker input, .minus').hide();
 		} else if (quantity >= 1) {
-			$list_item.find('.ticker input, .minus').fadeIn();
+			$list_item.find('.ticker input, .minus').show();
 		}
 	}
 
@@ -338,22 +344,25 @@ $(document).ready(function () {
 		const $freeShippingMessage = $('#freeShippingYay');
 		let boxTotals = [];
 
+
 		boxData.forEach(element => boxTotals.push(element.quantity));
 		let boxCount = boxTotals.reduce((a, b) => a + b, 0);
 		$('#boxCount').text(boxCount);
 		const quantToFreeShipping = Math.abs(boxCount - 3);
-		if (boxCount >= 3) {
-			$freeShippingMessage.show();
-			$freeShippingMeterTitle.hide();
-		} else {
+		if (boxCount < 3) {
 			if (boxCount == 2) {
 				$freeShippingMeterTitle.text(`Add 1 more bottle for free shipping!`);
+				$freeShippingMessage.text('2/3');
 			} else {
 				$freeShippingMeterTitle.text(`Add 2 more bottles for free shipping!`);
+				$freeShippingMessage.text('1/3');
 			}
-			$freeShippingMessage.hide();
 			$freeShippingMeterTitle.show();
+			$progressBar.width(`${(1 - (quantToFreeShipping / 3)) * 100}%`);
+		} else {
+			$freeShippingMessage.text('Free Shipping Activated! 🎉');
+			$freeShippingMeterTitle.hide();
+			$progressBar.width(`100%`);
 		}
-		$progressBar.width(`${(1 - (quantToFreeShipping / 3)) * 100}%`);
 	}
 });
