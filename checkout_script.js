@@ -285,7 +285,7 @@ $(document).ready(function () {
 				"street" : "${$street.val()}",
 				"city" : "${$city.val()}",
 				"state" : "${$state.val()}",
-				"zip" : "${$city.val()}" } }`;
+				"zip" : "${$zip.val()}" } }`;
 		if (method == 'save') {
 			localStorage.setItem('gumiCheckout', customerData);
 		} else if (method == 'render' && customerDataStorage != null) {
