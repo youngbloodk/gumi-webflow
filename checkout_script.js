@@ -16,8 +16,6 @@ $(document).ready(function () {
 			setTimeout(
 				function () {
 					$('.button-loader').hide();
-					alert(`Thanks for testing, ${$testName}! Let Kohlmann know if you had any issues 😉`);
-					location.reload();
 				}, 2000);
 
 		})
