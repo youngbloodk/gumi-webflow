@@ -30,18 +30,18 @@ $(document).ready(function () {
 				},
 				mode: 'cors',
 				body: {
-					value: $(this).val();
+					value: $(this).val()
 				}
 			}).then(response => response.json())
-			.then(function(data) {
-				if(data.error) {
-					// Do stuff with data.error
-				} else {
-					// Data will have "amount_off" (needs to be divided by 100)
-					// and "percent_off" that you can use
-					// Example: data.percent_off
-				}
-			})
+				.then(function (data) {
+					if (data.error) {
+						// Do stuff with data.error
+					} else {
+						// Data will have "amount_off" (needs to be divided by 100)
+						// and "percent_off" that you can use
+						// Example: data.percent_off
+					}
+				});
 
 			$('#checkout-discount').text('$17.10');
 			$('#discountAppliedWrap').show();
