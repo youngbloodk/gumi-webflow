@@ -21,6 +21,28 @@ $(document).ready(function () {
 
 		})
 		.on('click', '#discountApply', function () {
+			fetch('https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/coupon-exists', {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*",
+					"Accept": "application/json",
+				},
+				mode: 'cors',
+				body: {
+					value: $(this).val();
+				}
+			}).then(response => response.json())
+			.then(function(data) {
+				if(data.error) {
+					// Do stuff with data.error
+				} else {
+					// Data will have "amount_off" (needs to be divided by 100)
+					// and "percent_off" that you can use
+					// Example: data.percent_off
+				}
+			})
+
 			$('#checkout-discount').text('$17.10');
 			$('#discountAppliedWrap').show();
 			$('.discount-text').text($('#discount-code').val());
@@ -277,7 +299,7 @@ $(document).ready(function () {
 		const $state = $('#checkout-state');
 		const $zip = $('#checkout-zip');
 		const customerDataStorage = localStorage.getItem('gumiCheckout');
-		let customerData = `{ 
+		let customerData = `{
 			"email" : "${$email.val()}",
 			"firstName" : "${$firstName.val()}",
 			"lastName" : "${$lastName.val()}",
