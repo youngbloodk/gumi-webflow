@@ -5,6 +5,7 @@ $(document).ready(function () {
 	renderCheckoutFromStorage();
 	renderBoxTotals();
 	updateCheckoutForm('render');
+
 	$(document)
 		.on('input', 'form :input', function () {
 			updateCheckoutForm('save');
@@ -152,6 +153,7 @@ $(document).ready(function () {
 		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		$list_item.find('.ticker input').val(quantity);
 	}
+
 	function getItemDataFromSku(sku) {
 		const $list_item = $(`.build-your-box-item .product-data
 		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
