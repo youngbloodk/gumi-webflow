@@ -30,7 +30,7 @@ $(document).ready(function () {
 				},
 				mode: 'cors',
 				body: JSON.stringify({
-					value: $(this).val()
+					value: $('#discount-code').val()
 				})
 			}).then(response => response.json())
 			.then(function (data) {
