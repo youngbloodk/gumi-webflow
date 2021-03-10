@@ -48,16 +48,19 @@ $(document).ready(function () {
 			let $email = $('#checkoutEmail').val();
 			let $pass = $('#checkoutPassword').val();
 			signIn($email, $pass)
-				.then(res => {
-					$('#passwordWrap').hide();
-					$('#welcomeMessageWrap').show();
-					$('#checkoutFirstName').val(res.success.first_name);
-					$('#checkoutLastName').val(res.success.last_name);
-					$('#checkoutStreetAddress').val(res.success.street_address);
-					$('#checkoutCity').val(res.success.city);
-					$('#checkoutState').val(res.success.state);
-					$('#checkout-zip').val(res.success.zip);
-					updateCheckoutForm('save');
+				.then(async res => {
+					getCustomer($email, res.token)
+						.then(res => {
+							$('#passwordWrap').hide();
+							$('#welcomeMessageWrap').show();
+							$('#checkoutFirstName').val(res.success.first_name);
+							$('#checkoutLastName').val(res.success.last_name);
+							$('#checkoutStreetAddress').val(res.success.street_address);
+							$('#checkoutCity').val(res.success.city);
+							$('#checkoutState').val(res.success.state);
+							$('#checkout-zip').val(res.success.zip);
+							updateCheckoutForm('save');
+						});
 				});
 
 		})

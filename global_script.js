@@ -26,13 +26,21 @@ async function signIn(email, pass) {
         })
     }).then(response => response.json())
         .then(async function (res) {
+            //set cookie with email and token
             const date = new Date();
             const minutes = 30;
             date.setTime(date.getTime() + (minutes * 60 * 1000));
-            $.cookie('gumiAuth', res.token, { expires: date });
-            return await getCustomer(email, res.token);
+            $.cookie.json = true;
+            const cookieData = { email: email, token: res.token };
+            $.cookie('gumiAuth', cookieData, { expires: date });
+            return await res;
         })
         .catch(error => console.log('error', error));
+}
+
+function signOut() {
+    $.removeCookie('gumiAuth');
+    window.location.href = "/";
 }
 
 async function getCustomer(email, token) {
@@ -55,12 +63,6 @@ async function getCustomer(email, token) {
         .catch(error => console.log('error', error));
 }
 
-function checkSignIn() {
-    if (signedIn) {
-
-    }
-}
-
 function evenRound(num, decimalPlaces) {
     const d = decimalPlaces || 0;
     const m = Math.pow(10, d);
@@ -75,7 +77,21 @@ $(document).ready(function () {
 
     renderBoxCount();
 
+    if (signedIn) {
+        $('[data-id="signIn"]').hide();
+        $('[data-id="myAccount"]').show();
+        $('[data-id="signOut"]').show();
+    } else {
+        $('[data-id="signIn"]').show();
+        $('[data-id="myAccount"]').hide();
+        $('[data-id="signOut"]').hide();
+    }
+
     $(document)
+
+        .on('click', '[data-id="signOut"]', function () {
+            signOut();
+        })
 
         //button loaders global
         .on('click', '.button', function () {
