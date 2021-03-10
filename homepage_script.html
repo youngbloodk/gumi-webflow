@@ -10,62 +10,69 @@ $(document).ready(function () {
 			});
 		}, 5000);
 	}
-	$("#close-popup").click(function () {
-		$('.pop-up').fadeOut();
-	});
-	$("#open-popup").click(function () {
-		$('.pop-up').fadeIn();
-	});
 
-	$('#submitEmail').click(function (e) {
-		e.preventDefault();
-		const $custEmail = $('#custEmail').val();
-		const settings = {
-			"async": true,
-			"crossDomain": true,
-			"url": "https://manage.kmail-lists.com/ajax/subscriptions/subscribe",
-			"method": "POST",
-			"headers": {
-				"content-type": "application/x-www-form-urlencoded",
-				"cache-control": "no-cache"
-			},
-			"data": {
-				"g": "XmUQKR",
-				"$fields": "$source",
-				"email": `${$custEmail}`,
-				"$source": "Gumi Popup"
-			}
-		};
-		$.ajax(settings).done(function (response) {
-			if (response.data.is_subscribed === true) {
-				alert(`Looks like you're already subscribed 😉`);
+	$(document)
+
+		.on('click', '#close-popup', function () {
+			$('.pop-up').fadeOut();
+		})
+
+		.on('click', '#open-popup', function () {
+			$('.pop-up').fadeIn();
+		})
+
+		.on('click', '#submitEmail', function (e) {
+			e.preventDefault();
+			const $custEmail = $('#custEmail').val();
+			const settings = {
+				"async": true,
+				"crossDomain": true,
+				"url": "https://manage.kmail-lists.com/ajax/subscriptions/subscribe",
+				"method": "POST",
+				"headers": {
+					"content-type": "application/x-www-form-urlencoded",
+					"cache-control": "no-cache"
+				},
+				"data": {
+					"g": "XmUQKR",
+					"$fields": "$source",
+					"email": `${$custEmail}`,
+					"$source": "Gumi Popup"
+				}
+			};
+			$.ajax(settings).done(function (response) {
+				if (response.data.is_subscribed === true) {
+					alert(`Looks like you're already subscribed 😉`);
+				} else {
+					$('#email_signup').hide();
+					$('.success-message').show();
+					let animation = bodymovin.loadAnimation({
+						container: document.getElementById('emailSuccessCheck'),
+						path: 'https://uploads-ssl.webflow.com/6012e1ca5effcb5c10935dc4/6023044303afc45149a5dd8a_check.json',
+						renderer: 'svg',
+						loop: false,
+						autoplay: true,
+						name: "check anim",
+					});
+
+				}
+			});
+		})
+
+		.on('click', '#searchButton', function () {
+			//change to x icon
+			if ($(this).text() === '') {
+				$(this).text('');
+				//change to search icon
 			} else {
-				$('#email_signup').hide();
-				$('.success-message').show();
-				let animation = bodymovin.loadAnimation({
-					container: document.getElementById('emailSuccessCheck'),
-					path: 'https://uploads-ssl.webflow.com/6012e1ca5effcb5c10935dc4/6023044303afc45149a5dd8a_check.json',
-					renderer: 'svg',
-					loop: false,
-					autoplay: true,
-					name: "check anim",
-				});
-
+				$(this).text('');
 			}
-		});
-	});
+		})
 
-	$('#searchButton').click(function () {
-		//change to x icon
-		if ($(this).text() === '') {
-			$(this).text('');
-			//change to search icon
-		} else {
-			$(this).text('');
-		}
-	});
+		.on('click', '#contact', function () {
+			$('div.zsiq_floatmain.zsiq_theme1.siq_bR').click();
+		})
 
-	$('#contact').click(function () {
-		$('div.zsiq_floatmain.zsiq_theme1.siq_bR').click();
-	});
+		;
+
 });
