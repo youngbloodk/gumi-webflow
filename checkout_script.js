@@ -1,3 +1,5 @@
+//signedIn is a global variable defined on the webflow site
+
 $(document).ready(function () {
 	init();
 	renderMetaFromStorage();
@@ -6,13 +8,15 @@ $(document).ready(function () {
 	renderBoxTotals('full');
 	updateCheckoutForm('render');
 
+
 	$(document)
-		.on('input', 'form :input', function () {
+		.on('change', 'form :input', function () {
 			updateCheckoutForm('save');
 			renderBoxTotals();
 		})
 
-		.on('change', '#checkout-email', function () {
+		.on('change', '#checkoutEmail', function () {
+
 			fetch("https://gumi-api-dcln6.ondigitalocean.app/v1/user/email-exists", {
 				method: "POST",
 				headers: {
@@ -27,16 +31,37 @@ $(document).ready(function () {
 			}).then(response => response.json())
 				.then(function (res) {
 					console.log(res);
-					if (res.exists == true) {
+					if (res.exists == true && !signedIn) {
 						$('#passwordWrap').show();
 						$('#checkoutPassword').prop('required', true);
-
+					} else if (res.exists == true && signedIn) {
+						$('#passwordWrap').hide();
+						$('#welcomeMessageWrap').show();
 					} else {
 						$('#passwordWrap').hide();
 						$('#checkoutPassword').prop('required', false);
 					}
 				}).catch(error => console.log('error', error));
 		})
+
+		.on('click', '#signIn', function () {
+			let $email = $('#checkoutEmail').val();
+			let $pass = $('#checkoutPassword').val();
+			signIn($email, $pass)
+				.then(res => {
+					$('#passwordWrap').hide();
+					$('#welcomeMessageWrap').show();
+					$('#checkoutFirstName').val(res.success.first_name);
+					$('#checkoutLastName').val(res.success.last_name);
+					$('#checkoutStreetAddress').val(res.success.street_address);
+					$('#checkoutCity').val(res.success.city);
+					$('#checkoutState').val(res.success.state);
+					$('#checkout-zip').val(res.success.zip);
+					updateCheckoutForm('save');
+				});
+
+		})
+
 
 		.on('input', '#checkout-zip', function () {
 			$(this).val($(this).val().replace(/[^0-9\.]/g, ''));
@@ -315,7 +340,7 @@ $(document).ready(function () {
 		}
 
 		//tax, subtotal, total, subscription renewal price calculation
-		const $customerState = $('#checkout-state').val();
+		const $customerState = $('#checkoutState').val();
 		const $subtotal = Number($('#checkout-subtotal').text().replace(/[^0-9.-]+/g, ""));
 		const $discount = Number($('#checkoutDiscount').text().replace(/[^0-9.-]+/g, ""));
 		let taxRate = 0;
@@ -370,14 +395,13 @@ $(document).ready(function () {
 		const r = (f > 0.5 - e && f < 0.5 + e) ? ((i % 2 == 0) ? i : i + 1) : Math.round(n); return d ? r / m : r;
 	}
 
-	function
-		updateCheckoutForm(method) {
-		const $email = $('#checkout-email');
-		const $firstName = $('#checkout-first-name');
-		const $lastName = $('#checkout-last-name');
-		const $street = $('#checkout-street-address');
-		const $city = $('#checkout-city');
-		const $state = $('#checkout-state');
+	function updateCheckoutForm(method) {
+		const $email = $('#checkoutEmail');
+		const $firstName = $('#checkoutFirstName');
+		const $lastName = $('#checkoutLastName');
+		const $street = $('#checkoutStreetAddress');
+		const $city = $('#checkoutCity');
+		const $state = $('#checkoutState');
 		const $zip = $('#checkout-zip');
 		const checkoutDataStorage = localStorage.getItem('gumiCheckout');
 		let checkoutData = `{
@@ -410,4 +434,6 @@ $(document).ready(function () {
 
 		renderBoxTotals();
 	}
+
+
 });
