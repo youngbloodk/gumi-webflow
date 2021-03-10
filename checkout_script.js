@@ -386,15 +386,6 @@ $(document).ready(function () {
 		}
 	}
 
-	function evenRound(num, decimalPlaces) {
-		const d = decimalPlaces || 0;
-		const m = Math.pow(10, d);
-		const n = +(d ? num * m : num).toFixed(8);
-		const i = Math.floor(n), f = n - i;
-		const e = 1e-8;
-		const r = (f > 0.5 - e && f < 0.5 + e) ? ((i % 2 == 0) ? i : i + 1) : Math.round(n); return d ? r / m : r;
-	}
-
 	function updateCheckoutForm(method) {
 		const $email = $('#checkoutEmail');
 		const $firstName = $('#checkoutFirstName');

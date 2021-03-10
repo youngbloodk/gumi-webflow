@@ -255,7 +255,7 @@ $(document).ready(function () {
 			$('#emptyWrap').removeClass('middle');
 			$freeShippingMeter.hide();
 		}
-		renderBoxCount();
+		renderShippingProgress();
 	}
 
 	function removeCartItem(sku) {
@@ -337,7 +337,7 @@ $(document).ready(function () {
 		}
 	}
 
-	function renderBoxCount() {
+	function renderShippingProgress() {
 		const boxData = JSON.parse(localStorage.getItem('buildBox'));
 		const $progressBar = $('#progressBar');
 		const $freeShippingMeterTitle = $('#freeShippingMeterTitle');
