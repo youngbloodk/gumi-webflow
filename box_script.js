@@ -4,13 +4,6 @@ $(document).ready(function () {
 	renderBuildBoxFromStorage();
 	renderCheckoutFromStorage();
 
-	// window.addEventListener('resize', function () {
-	// 	init();
-	// 	renderMetaFromStorage();
-	// 	renderBuildBoxFromStorage();
-	// 	renderCheckoutFromStorage();
-	// });
-
 	$(document)
 		.on('click', '.plus-minus-button.plus', function () {
 			const item_data = getItemData($(this));
