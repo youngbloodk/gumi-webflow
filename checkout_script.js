@@ -1,5 +1,3 @@
-//signedIn is a global variable defined on the webflow site
-
 $(document).ready(function () {
 	init();
 	renderMetaFromStorage();
