@@ -66,7 +66,7 @@ $(document).ready(function () {
 
 	async function init() {
 		if (!signedIn) {
-			window.location.href = '/signin';
+			window.location.href = '/account/signin';
 		} else {
 			currentUser = await getCustomer(JSON.parse($.cookie('gumiAuth')).email, JSON.parse($.cookie('gumiAuth')).token);
 			$('[data-id="customerFirstName"]').html(await currentUser.first_name);
