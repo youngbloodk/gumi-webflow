@@ -1,33 +1,46 @@
 $(document).ready(function () {
+	$('form').trigger('change');
 	$(document)
 		.on('change', 'form', function () {
+			const is_sub = $('#true').is(':checked');
 			const $pic = $('#productImage');
 			const $quant = parseInt($('#quantity option:selected').val());
-			const $totalPrice = $('#mainSubPrice');
-			const $currentRegPrice = $('#currentRegPrice');
-			const $currentSubPrice = $('#currentSubPrice');
-			const regPrices = ['{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:2-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:3-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:4-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:5-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:6-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}'];
-			const subPrices = ['{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:2-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:3-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:4-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:5-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:6-bottle-subscription-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}'];
+			const $oneTimeSubtotal = $('#oneTimeSubtotal');
+			const $subSubtotal = $('#subSubtotal');
+			const $subtotalText = $('#subtotalActual');
+			const prices = ['{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:2-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:3-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:4-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:5-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:6-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}'];
 			const pics = ['{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;2-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;3-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;4-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;5-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;6-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}'];
-			const $shippingText = $('#shippingText');
+			const subtotal = parseInt(prices[$quant - 1]);
 
-			if ($quant < 3) {
-				$shippingText.text('+ Shipping');
-			} else {
-				$shippingText.text('+ Free shipping 🎉');
+			let shipping = 0.00;
+
+			if ($quant == 1) {
+				shipping = 5.00;
+			} else if ($quant >= 2 && $quant <= 6) {
+				shipping = 8.50;
+			} else if ($quant > 6) {
+				shipping = 12.00;
 			}
+
+			if (is_sub) {
+				$('#shippingTitleText').html('Free shipping 🎉');
+				$('#shippingAmount').html(`$0.00`);
+			} else {
+				$('#shippingTitleText').html('Shipping');
+				$('#shippingAmount').html(`$${shipping.toFixed(2)}`);
+			}
+
+			$subtotalText.html(`$${subtotal.toFixed(2)}`);
+			$oneTimeSubtotal.html(`$${(subtotal + shipping).toFixed(2)}`);
+			$subSubtotal.html(`$${subtotal.toFixed(2)} + Free shipping 🎉`);
 			$pic.css("background-image", `url(${pics[$quant - 1]})`);
-			$currentRegPrice.text(`${regPrices[$quant - 1]}`);
-			$currentSubPrice.text(`${subPrices[$quant - 1]}`);
 
 			const $deliveryFrequency = Number($('#subFrequency').val());
 			const $deliveryFrequencyText = $('#deliveryFrequencyText');
-			const $comparePrice = $('.text.price.compare');
 			const $subPriceWrap = $('.sub-price-wrap');
 
 			if ($deliveryFrequency === 0) {
 				$deliveryFrequencyText.hide();
-				$comparePrice.addClass('active');
 				$subPriceWrap.hide();
 			} else {
 				if ($deliveryFrequency == 1) {
@@ -36,7 +49,6 @@ $(document).ready(function () {
 					$deliveryFrequencyText.text(`Every ${$deliveryFrequency} months`);
 				}
 				$deliveryFrequencyText.show();
-				$comparePrice.removeClass('active');
 				$subPriceWrap.show();
 			}
 			if ($('#true').is(':checked')) {
@@ -88,6 +100,6 @@ $(document).ready(function () {
 		});
 });
 
-fbq('track', 'ViewContent', {
-	content_name: "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
-});
+// fbq('track', 'ViewContent', {
+	// content_name: "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
+// });

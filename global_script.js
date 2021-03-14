@@ -8,6 +8,7 @@ function renderBoxCount() {
 	boxData.forEach(element => boxTotals.push(element.quantity));
 	let boxCount = boxTotals.reduce((a, b) => a + b, 0);
 	$('#boxCount').text(boxCount);
+	return boxCount;
 };
 
 async function signIn(email, pass) {

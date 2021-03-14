@@ -119,13 +119,12 @@ $(document).ready(function () {
 	function addCheckoutItem(item, quantity = 1) {
 		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let price_info = `
-		<div class="cart-item-price">$${item.price}</div>
+		<div class="cart-item-price">$${item.price} + Shipping</div>
 		`;
 		let freq_info = '';
 		if (is_sub) {
 			price_info = `
-		<div class="cart-item-price compare">$${item.price}</div>
-		<div class="cart-item-price">$${item.sub_price}0</div>
+		<div class="cart-item-price">$${item.price} + Free Shipping</div>
 		`;
 			let freq_name = $('.select option:selected').text();
 			freq_info = `<div class="cart-item-frequency">Delivered: ${freq_name}</div>`;
@@ -166,18 +165,12 @@ $(document).ready(function () {
 			$('#true').click().attr('checked', true);
 			$('#true').closest('div').find('.text').addClass('light');
 			$('#false').closest('div').find('.text').removeClass('light');
-			$('.price.compare').removeClass('active');
-			$('.price.black').show();
 			$('#deliveryFrequencyWrap').show();
-			$('.price-badge-value').text('$17.10');
 		} else {
 			$('#false').click().attr('checked', true);
 			$('#false').closest('div').find('.text').addClass('light');
 			$('#true').closest('div').find('.text').removeClass('light');
-			$('.price.compare').addClass('active');
-			$('.price.black').hide();
 			$('#deliveryFrequencyWrap').hide();
-			$('.price-badge-value').text('$19');
 		}
 	}
 
@@ -215,40 +208,50 @@ $(document).ready(function () {
 	function updateCartRender() {
 		const $emptyMessage = $('.empty-box');
 		const $continueBlock = $('#continueToCheckout');
-		const $freeShippingMeter = $('#freeShippingMeter');
 
 		// Update subtotal
-		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		let subtotal = 0.00;
-		let oneTimeSubtotal = 0.00;
-		let subSubtotal = 0.00;
+		let shipping = 0.00;
+		let totalQuant = renderBoxCount();
 
 		for (const item of storage) {
 			const item_data = getItemDataFromSku(item.sku);
-			oneTimeSubtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
-			subSubtotal += parseFloat(item_data.sub_price) * parseFloat(item.quantity);
-			if (is_sub) {
-				subtotal += parseFloat(item_data.sub_price) * parseFloat(item.quantity);
-			} else {
-				subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
-			}
+			subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
 		}
-		$('#oneTimeSubtotal').html('$' + oneTimeSubtotal.toFixed(2));
-		$('#subSubtotal').html('$' + subSubtotal.toFixed(2));
-		$('#checkout-subtotal').html('$' + subtotal.toFixed(2));
+		if (totalQuant == 1) {
+			shipping = 5.00;
+		} else if (totalQuant >= 2 && totalQuant <= 6) {
+			shipping = 8.50;
+		} else if (totalQuant > 6) {
+			shipping = 12.00;
+		}
+
+		if (is_sub) {
+			$('#shippingTitleText').html('Free Shipping 🎉');
+			$('#shippingAmount').html(`$0.00`);
+		} else {
+			$('#shippingTitleText').html('Shipping');
+			$('#shippingAmount').html(`$${shipping.toFixed(2)}`);
+		}
+
+		$('#oneTimeSubtotal').html(`$${(subtotal + shipping).toFixed(2)}`);
+		$('#subSubtotal').html(`$${subtotal.toFixed(2)}`);
+		$('#subtotalAcutal').html(`$${subtotal.toFixed(2)}`);
+
+
 		if (storage.length > 0) {
 			$emptyMessage.hide();
 			$continueBlock.show();
 			$('#emptyWrap').addClass('middle');
-			$freeShippingMeter.show();
+
 		} else {
 			$emptyMessage.show();
 			$continueBlock.hide();
 			$('#emptyWrap').removeClass('middle');
-			$freeShippingMeter.hide();
+
 		}
-		renderShippingProgress();
 	}
 
 	function removeCartItem(sku) {
@@ -284,16 +287,13 @@ $(document).ready(function () {
 	function getItemDataFromBuildBoxItem($el) {
 		const $product_data = $el.find('.product-data input');
 		let data = {
-			freq: $('#sub_frequency').val() > 0 ? $('.product-select').val() : null
+			freq: parseInt($('#sub_frequency').val()) > 0 ? $('.product-select').val() : null
 		};
 		$product_data.each(function () {
 			const name = $(this).attr('name');
 			const value = $(this).attr('value');
 			data[name] = value;
 		});
-		if (data.price) {
-			data['sub_price'] = data.price - (data.price * 0.10);
-		}
 		return data;
 	}
 
@@ -301,14 +301,14 @@ $(document).ready(function () {
 	function init() {
 		$('.minus, .ticker input').hide();
 		if (performance.navigation.type == 2) {
-			location.reload(true);
+			location.reload();
 		}
 		let cart_meta = localStorage.getItem('buildBoxMeta');
 		if (cart_meta == null) {
-			$('#sub_frequency').val(1);
+			$('#sub_frequency').val('1m');
 			localStorage.setItem('buildBoxMeta', JSON.stringify({
 				is_sub: true,
-				freq: '1'
+				freq: '1m'
 			}));
 		}
 		let cart = localStorage.getItem('buildBox');
@@ -330,32 +330,30 @@ $(document).ready(function () {
 		}
 	}
 
-	function renderShippingProgress() {
-		const boxData = JSON.parse(localStorage.getItem('buildBox'));
-		const $progressBar = $('#progressBar');
-		const $freeShippingMeterTitle = $('#freeShippingMeterTitle');
-		const $freeShippingMessage = $('#freeShippingYay');
-		let boxTotals = [];
-
-
-		boxData.forEach(element => boxTotals.push(element.quantity));
-		let boxCount = boxTotals.reduce((a, b) => a + b, 0);
-		$('#boxCount').text(boxCount);
-		const quantToFreeShipping = Math.abs(boxCount - 3);
-		if (boxCount < 3) {
-			if (boxCount == 2) {
-				$freeShippingMeterTitle.text(`Add 1 more bottle for free shipping!`);
-				$freeShippingMessage.text('2/3');
-			} else {
-				$freeShippingMeterTitle.text(`Add 2 more bottles for free shipping!`);
-				$freeShippingMessage.text('1/3');
-			}
-			$freeShippingMeterTitle.show();
-			$progressBar.width(`${(1 - (quantToFreeShipping / 3)) * 100}%`);
-		} else {
-			$freeShippingMessage.text('Free Shipping Activated! 🎉');
-			$freeShippingMeterTitle.hide();
-			$progressBar.width(`100%`);
-		}
-	}
+	// function renderShippingProgress() {
+	// 	const boxData = JSON.parse(localStorage.getItem('buildBox'));
+	// 	const $progressBar = $('#progressBar');
+	// 	const $freeShippingMeterTitle = $('#freeShippingMeterTitle');
+	// 	const $freeShippingMessage = $('#freeShippingYay');
+	// 	let boxTotals = [];
+	// 	boxData.forEach(element => boxTotals.push(element.quantity));
+	// 	let boxCount = boxTotals.reduce((a, b) => a + b, 0);
+	// 	$('#boxCount').text(boxCount);
+	// 	const quantToFreeShipping = Math.abs(boxCount - 3);
+	// 	if (boxCount < 3) {
+	// 		if (boxCount == 2) {
+	// 			$freeShippingMeterTitle.text(`Add 1 more bottle for free shipping!`);
+	// 			$freeShippingMessage.text('2/3');
+	// 		} else {
+	// 			$freeShippingMeterTitle.text(`Add 2 more bottles for free shipping!`);
+	// 			$freeShippingMessage.text('1/3');
+	// 		}
+	// 		$freeShippingMeterTitle.show();
+	// 		$progressBar.width(`${(1 - (quantToFreeShipping / 3)) * 100}%`);
+	// 	} else {
+	// 		$freeShippingMessage.text('Free Shipping Activated! 🎉');
+	// 		$freeShippingMeterTitle.hide();
+	// 		$progressBar.width(`100%`);
+	// 	}
+	// }
 });

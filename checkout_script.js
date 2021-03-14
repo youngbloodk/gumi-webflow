@@ -14,7 +14,7 @@ $(document).ready(function () {
 		})
 
 		.on('change', '#checkoutEmail', function () {
-
+			$('#welcomeMessageWrap').hide();
 			fetch("https://gumi-api-dcln6.ondigitalocean.app/v1/user/email-exists", {
 				method: "POST",
 				headers: {
@@ -27,17 +27,23 @@ $(document).ready(function () {
 					email: $(this).val()
 				})
 			}).then(response => response.json())
-				.then(function (res) {
-					console.log(res);
+				.then(res => {
 					if (res.exists == true && !signedIn) {
 						$('#passwordWrap').show();
 						$('#checkoutPassword').prop('required', true);
-					} else if (res.exists == true && signedIn) {
+					} else if (res.exists == true && signedIn && JSON.parse($.cookie('gumiAuth')).email == $('#checkoutEmail').val()) {
 						$('#passwordWrap').hide();
 						$('#welcomeMessageWrap').show();
+						getCustomer(JSON.parse($.cookie('gumiAuth')).email, JSON.parse($.cookie('gumiAuth')).token).then(async res => {
+							$('[data-id="customerFirstName"]').html(await res.first_name);
+						});
+					} else if (res.exists == true && signedIn && JSON.parse($.cookie('gumiAuth')).email !== $('#checkoutEmail').val()) {
+						$('#passwordWrap').show();
+						$('#welcomeMessageWrap').hide();
 					} else {
 						$('#passwordWrap').hide();
 						$('#checkoutPassword').prop('required', false);
+						$('#welcomeMessageWrap').hide();
 					}
 				}).catch(error => console.log('error', error));
 		})
@@ -46,17 +52,17 @@ $(document).ready(function () {
 			let $email = $('#checkoutEmail').val();
 			let $pass = $('#checkoutPassword').val();
 			signIn($email, $pass)
-				.then(async res => {
+				.then(res => {
 					getCustomer($email, res.token)
 						.then(res => {
 							$('#passwordWrap').hide();
 							$('#welcomeMessageWrap').show();
-							$('#checkoutFirstName').val(res.success.first_name);
-							$('#checkoutLastName').val(res.success.last_name);
-							$('#checkoutStreetAddress').val(res.success.street_address);
-							$('#checkoutCity').val(res.success.city);
-							$('#checkoutState').val(res.success.state);
-							$('#checkout-zip').val(res.success.zip);
+							$('#checkoutFirstName').val(res.first_name);
+							$('#checkoutLastName').val(res.last_name);
+							$('#checkoutStreetAddress').val(res.street_address);
+							$('#checkoutCity').val(res.city);
+							$('#checkoutState').val(res.state);
+							$('#checkout-zip').val(res.zip);
 							updateCheckoutForm('save');
 						});
 				});
@@ -103,7 +109,6 @@ $(document).ready(function () {
 					})
 				}).then(response => response.json())
 					.then(function (data) {
-						console.log(data);
 						if (data.error) {
 							if (data.error.startsWith('No such coupon:')) {
 								$error.show().text(`Sorry! ${$discountInput} is not a valid coupon...`);
@@ -120,7 +125,7 @@ $(document).ready(function () {
 							if (data.amount_off !== null) {
 								$discountAmountText.text(`-$${(data.amount_off / 100).toFixed(2)}`);
 							} else {
-								$discountAmountText.text(`-$${evenRound((data.percent_off / 100) * Number($('#checkout-subtotal').text().replace(/[^0-9.-]+/g, "")), 2)}`);
+								$discountAmountText.text(`-$${(evenRound((data.percent_off / 100) * Number($('#checkout-subtotal').text().replace(/[^0-9.-]+/g, "")), 2)).toFixed(2)}`);
 							}
 							localStorage.setItem('discountcode', `${$discountInput}`);
 							$discountAppliedWrap.show();
@@ -150,13 +155,12 @@ $(document).ready(function () {
 	function addCheckoutItem(item, quantity = 1) {
 		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let price_info = `
-		<div class="cart-item-price">$${item.price}</div>
+		<div class="cart-item-price">$${item.price} + Shipping</div>
 		`;
 		let freq_info = '';
 		if (is_sub) {
 			price_info = `
-		<div class="cart-item-price compare">$${item.price}</div>
-		<div class="cart-item-price">$${item.sub_price}0</div>
+		<div class="cart-item-price">$${item.price} + Free Shipping</div>
 `;
 			let freq_name = $('.select option:selected').text();
 			freq_info = `<div class="cart-item-frequency">Delivered: ${freq_name}</div>`;
@@ -196,14 +200,12 @@ $(document).ready(function () {
 			$('#true').click().attr('checked', true);
 			$('#true').closest('div').find('.text').addClass('light');
 			$('#false').closest('div').find('.text').removeClass('light');
-			$('.price.compare').removeClass('active');
 			$('.price.black').show();
 			$('#deliveryFrequencyWrap').show();
 		} else {
 			$('#false').click().attr('checked', true);
 			$('#false').closest('div').find('.text').addClass('light');
 			$('#true').closest('div').find('.text').removeClass('light');
-			$('.price.compare').addClass('active');
 			$('.price.black').hide();
 			$('#deliveryFrequencyWrap').hide();
 		}
@@ -242,15 +244,24 @@ $(document).ready(function () {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 		let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 		let subtotal = 0.00;
+		let shipping = 0.00;
+		let totalQuant = renderBoxCount();
+
+		if (totalQuant = 1) {
+			shipping = 5.00;
+		} else if (totalQuant >= 2 && totalQuant < 6) {
+			shipping = 8.50;
+		} else if (totalQuant > 6) {
+			shipping = 12.00;
+		}
+
 		for (const item of storage) {
 			const item_data = getItemDataFromSku(item.sku);
-			if (is_sub) {
-				subtotal += parseFloat(item_data.sub_price) * parseFloat(item.quantity);
-			} else {
-				subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
-			}
+			subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
 		}
+
 		$('#checkout-subtotal').html('$' + subtotal.toFixed(2));
+
 		if (storage.length > 0) {
 			$emptyMessage.hide();
 		} else {
@@ -303,27 +314,32 @@ $(document).ready(function () {
 
 	function renderBoxTotals(type) {
 		evaluateSub();
-
+		const is_sub = JSON.parse(localStorage.getItem('buildBoxMeta')).is_sub;
 		//shipping calc & render
 		const $shippingText = $('#checkout-shipping');
 		const $shippingMethodPriceText = $('#shippingMethodPrice');
 		const $shippingMethodText = $('#shippingMethodText');
-		const $boxCount = parseInt($('#boxCount').text());
-		let shipping = 0;
+		const $boxCount = renderBoxCount();
+		let shipping = 0.00;
 
-		if ($boxCount == 1) {
-			$shippingText.text('$5.00');
-			$shippingMethodPriceText.text('$5.00');
-			shipping = 5;
-		} else if ($boxCount == 2) {
-			$shippingText.text('$8.50');
-			$shippingMethodPriceText.text('$8.50');
-			shipping = 8.5;
-		} else if ($boxCount > 2) {
-			$shippingText.text('$0.00');
+		if (!is_sub) {
+			if ($boxCount == 1) {
+				$shippingText.text('$5.00');
+				$shippingMethodPriceText.text('$5.00');
+				shipping = 5.00;
+			} else if ($boxCount >= 2 && $boxCount < 6) {
+				$shippingText.text('$8.50');
+				$shippingMethodPriceText.text('$8.50');
+				shipping = 8.50;
+			} else if ($boxCount > 6) {
+				$shippingText.text('$12.00');
+				$shippingMethodPriceText.text('$12.00');
+				shipping = 12.00;
+			}
+		} else {
 			$shippingMethodText.text('Free Shipping');
+			$shippingText.text('$0.00');
 			$shippingMethodPriceText.text('$0.00');
-			shipping = 0;
 		}
 
 		//discount code render
@@ -365,7 +381,6 @@ $(document).ready(function () {
 		$('#payButton').text(`Pay $${total.toFixed(2)}`);
 
 		// renewal date render
-		const is_sub = JSON.parse(localStorage.getItem('buildBoxMeta')).is_sub;
 		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 		const $renewalDateText = $('#checkoutRenewalDate');
 		const frequency = parseInt(JSON.parse(localStorage.getItem('buildBoxMeta')).freq);
@@ -374,7 +389,7 @@ $(document).ready(function () {
 		renewalDate = new Date(renewalDate.setMonth(renewalDate.getMonth() + frequency));
 		let renewalMonth = new Date(today.getFullYear(), today.getMonth() + frequency).getMonth();
 		let lastDayOfRenewalMonth = new Date(renewalDate.getFullYear(), renewalMonth + 1, 0);
-		if (is_sub == true) {
+		if (is_sub) {
 			//if 31st is last day -> renew on last day of every month
 			if (new Date(today.getTime() + 86400000).getDate() === 1 && today.getDate() === 31) {
 				renewalDate = new Date(renewalDate.getFullYear(), renewalDate.getMonth(), 0);
@@ -426,6 +441,4 @@ $(document).ready(function () {
 
 		renderBoxTotals();
 	}
-
-
 });
