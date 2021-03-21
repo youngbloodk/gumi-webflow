@@ -63,6 +63,25 @@ async function getCustomer(email, token) {
 		.catch(error => console.log('error', error));
 }
 
+async function changePass(token, currentPass, newPass) {
+	$('#errorMessage').hide();
+
+	return await fetch("https://gumi-api-dcln6.ondigitalocean.app/v1/user/change-password", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"Access-Control-Allow-Origin": "*",
+			"Accept": "application/json",
+		},
+		mode: 'cors',
+		body: JSON.stringify({
+			token: token,
+			current_pass: currentPass,
+			new_pass: newPass
+		})
+	});
+}
+
 function evenRound(num, decimalPlaces) {
 	const d = decimalPlaces || 0;
 	const m = Math.pow(10, d);
