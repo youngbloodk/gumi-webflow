@@ -3,18 +3,23 @@ $(document).ready(function () {
         window.location.href = '/account';
     }
     $(document)
-        .on('click', '#signInButton', async function (ev) {
-            ev.preventDefault();
+        .on('click', '#signInButton', async function (e) {
+            const $email = $('#signInEmail').val();
+            const $pass = $('#signInPassword').val();
+            const $errorMessage = $('.errorMessage');
 
-            $('.errorMessage').hide();
+            e.preventDefault();
+            $errorMessage.hide();
 
-            signIn($('#signInEmail').val(), $('#signInPassword').val())
-                .then(response => {
-                    if (response.success) {
-                        window.location.href = '/account';
+            signIn($email, $pass)
+                .then(res => {
+                    if (res.success) {
+                        location.href = '/account';
                     } else {
-                        $('#errorMessage').show().html(response.error.replace('Server:', ''));
+                        $errorMessage.show().html(res.error.replace('Server:', ''));
                     }
                 });
+            ;
         });
+    ;
 });

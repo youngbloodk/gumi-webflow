@@ -10,9 +10,8 @@ function renderBoxCount() {
 	$('#boxCount').text(boxCount);
 	return boxCount;
 };
-
-async function signIn(email, pass) {
-	return await fetch("https://gumi-api-dcln6.ondigitalocean.app/v1/user/sign-in", {
+async function request(url, body) {
+	return await fetch(url, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -20,12 +19,22 @@ async function signIn(email, pass) {
 			"Accept": "application/json",
 		},
 		mode: 'cors',
-		body: JSON.stringify({
-			email: email,
-			password: pass
-		})
-	}).then(response => response.json())
-		.then(async function (res) {
+		body: JSON.stringify(body)
+	})
+		.then(response => response.json())
+		.then(async res => {
+			return await res;
+		});
+}
+
+async function signIn(email, pass) {
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/sign-in";
+	const body = {
+		email: email,
+		password: pass
+	};
+	return await request(url, body)
+		.then(async res => {
 			//set cookie with email and token
 			const date = new Date();
 			const minutes = 30;
@@ -33,9 +42,8 @@ async function signIn(email, pass) {
 			$.cookie.json = true;
 			const cookieData = { email: email, token: res.token };
 			$.cookie('gumiAuth', cookieData, { expires: date });
-			return await res;
-		})
-		.catch(error => console.log('error', error));
+			return res;
+		});
 }
 
 function signOut() {
@@ -44,24 +52,17 @@ function signOut() {
 }
 
 async function getCustomer(email, token) {
-	return await fetch("https://gumi-api-dcln6.ondigitalocean.app/v1/user/get-user", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"Access-Control-Allow-Origin": "*",
-			"Accept": "application/json",
-		},
-		mode: 'cors',
-		body: JSON.stringify({
-			email: email,
-			token: token
-		})
-	}).then(response => response.json())
-		.then(async res => {
-			return await res.success;
-		})
-		.catch(error => console.log('error', error));
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/get-user";
+	const body = {
+		email: email,
+		token: token
+	};
+	return await request(url, body)
+		.then(res => {
+			return res.success;
+		});
 }
+
 
 async function changePass(token, currentPass, newPass) {
 	$('#errorMessage').hide();
