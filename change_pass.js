@@ -2,6 +2,7 @@ $(document).ready(function () {
 	$(document)
 		.on('click', '#changePassSubmit', async function (e) {
 			e.preventDefault();
+			$('#errorMessage').hide();
 
 			const $email = $('#email').val();
 			const $currentPass = $('#currentPass').val();
@@ -13,7 +14,6 @@ $(document).ready(function () {
 					$('#errorMessageText').text(res.error.replace('Server:', ''));
 				} else {
 					await changePass(res.token, $currentPass, $newPass)
-						.then(response => response.json())
 						.then(function (res) {
 							if (res.error) {
 								$('#errorMessage').show();

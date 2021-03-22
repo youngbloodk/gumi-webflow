@@ -93,22 +93,17 @@ async function getPaymentMethods(token) {
 }
 
 async function changePass(token, currentPass, newPass) {
-	$('#errorMessage').hide();
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/change-password";
+	const body = {
+		token: token,
+		current_pass: currentPass,
+		new_pass: newPass
+	};
+	return await request(url, body)
+		.then(res => {
+			return res;
+		});
 
-	return await fetch("https://gumi-api-dcln6.ondigitalocean.app/v1/user/change-password", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"Access-Control-Allow-Origin": "*",
-			"Accept": "application/json",
-		},
-		mode: 'cors',
-		body: JSON.stringify({
-			token: token,
-			current_pass: currentPass,
-			new_pass: newPass
-		})
-	});
 }
 
 async function couponExists(coupon) {
