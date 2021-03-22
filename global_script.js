@@ -1,9 +1,11 @@
 //global variables
 const signedIn = !$.cookie('gumiAuth') == false;
 let gumiAuth;
+let currentUser;
 
 if (signedIn) {
 	gumiAuth = JSON.parse($.cookie('gumiAuth'));
+	currentUser = getUser(gumiAuth.email, gumiAuth.token);
 }
 
 // global functions
@@ -67,7 +69,7 @@ async function emailExists(email) {
 		});
 }
 
-async function getCustomer(email, token) {
+async function getUser(email, token) {
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/get-user";
 	const body = {
 		email: email,
@@ -107,6 +109,17 @@ async function changePass(token, currentPass, newPass) {
 			new_pass: newPass
 		})
 	});
+}
+
+async function couponExists(coupon) {
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/coupon-exists";
+	const body = {
+		value: coupon.toLowerCase()
+	};
+	return await request(url, body)
+		.then(res => {
+			return res;
+		});
 }
 
 function evenRound(num, decimalPlaces) {

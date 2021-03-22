@@ -1,5 +1,4 @@
 $(document).ready(function () {
-	let currentUser;
 
 	if (!signedIn) {
 		window.location.href = '/signin';
@@ -52,7 +51,6 @@ $(document).ready(function () {
 		;
 
 	async function renderAccount() {
-		currentUser = await getCustomer(gumiAuth.email, gumiAuth.token);
 		$('[data-customer="firstName"]').html(currentUser.first_name);
 		$('[data-customer="email"]').html(currentUser.email);
 		$('#shippingAddress').html(`${currentUser.first_name} ${currentUser.last_name}<br>

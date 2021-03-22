@@ -23,9 +23,6 @@ $(document).ready(function () {
 					} else if (res.exists == true && signedIn && gumiAuth.email == $('#checkoutEmail').val()) {
 						$('#passwordWrap').hide();
 						$('#welcomeMessageWrap').show();
-						await getCustomer(gumiAuth.email, gumiAuth.token).then(async res => {
-							$('[data-id="customerFirstName"]').html(await res.first_name);
-						});
 					} else if (res.exists == true && signedIn && gumiAuth.email !== $('#checkoutEmail').val()) {
 						$('#passwordWrap').show();
 						$('#welcomeMessageWrap').hide();
@@ -39,28 +36,24 @@ $(document).ready(function () {
 		})
 
 		.on('click', '#signIn', async function () {
+			const $errorMessage = $('#errorMessage');
+			$errorMessage.hide();
+
 			let $email = $('#checkoutEmail').val();
 			let $pass = $('#checkoutPassword').val();
 			await signIn($email, $pass)
 				.then(res => {
-					getCustomer($email, res.token)
-						.then(res => {
-							$('#passwordWrap').hide();
-							$('#welcomeMessageWrap').show();
-							$('#checkoutFirstName').val(res.first_name);
-							$('#checkoutLastName').val(res.last_name);
-							$('#checkoutStreetAddress').val(res.street_address);
-							$('#checkoutCity').val(res.city);
-							$('#checkoutState').val(res.state);
-							$('#checkout-zip').val(res.zip);
-							updateCheckoutForm('save');
-						});
+					if (res.error) {
+						$errorMessage.html(res.error).show();
+					} else {
+						location.reload();
+					}
+
 				});
 
 		})
 
-
-		.on('input', '#checkout-zip', function () {
+		.on('input', '#checkoutZip', function () {
 			$(this).val($(this).val().replace(/[^0-9\.]/g, ''));
 		})
 
@@ -86,19 +79,8 @@ $(document).ready(function () {
 			$discountAppliedWrap.hide();
 
 			if ($discountInput !== '') {
-				fetch('https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/coupon-exists', {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"Access-Control-Allow-Origin": "*",
-						"Accept": "application/json",
-					},
-					mode: 'cors',
-					body: JSON.stringify({
-						value: $discountInput
-					})
-				}).then(response => response.json())
-					.then(function (data) {
+				couponExists($discountInput)
+					.then(data => {
 						if (data.error) {
 							if (data.error.startsWith('No such coupon:')) {
 								$error.show().text(`Sorry! ${$discountInput} is not a valid coupon...`);
@@ -115,7 +97,7 @@ $(document).ready(function () {
 							if (data.amount_off !== null) {
 								$discountAmountText.text(`-$${(data.amount_off / 100).toFixed(2)}`);
 							} else {
-								$discountAmountText.text(`-$${(evenRound((data.percent_off / 100) * Number($('#checkout-subtotal').text().replace(/[^0-9.-]+/g, "")), 2)).toFixed(2)}`);
+								$discountAmountText.text(`-$${(evenRound((data.percent_off / 100) * Number($('#checkoutSubtotal').text().replace(/[^0-9.-]+/g, "")), 2)).toFixed(2)}`);
 							}
 							localStorage.setItem('discountcode', `${$discountInput}`);
 							$discountAppliedWrap.show();
@@ -250,7 +232,7 @@ $(document).ready(function () {
 			subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
 		}
 
-		$('#checkout-subtotal').html('$' + subtotal.toFixed(2));
+		$('#checkoutSubtotal').html('$' + subtotal.toFixed(2));
 
 		if (storage.length > 0) {
 			$emptyMessage.hide();
@@ -300,13 +282,26 @@ $(document).ready(function () {
 		if (cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
 		}
+		if (signedIn) {
+			currentUser.then(res => {
+				$('#passwordWrap').hide();
+				$('#welcomeMessageWrap').show();
+				$('#checkoutFirstName, [data-id="customerFirstName"]').html(res.first_name);
+				$('#checkoutLastName').val(res.last_name);
+				$('#checkoutStreetAddress').val(res.street_address);
+				$('#checkoutCity').val(res.city);
+				$('#checkoutState').val(res.state);
+				$('#checkoutZip').val(res.zip);
+				updateCheckoutForm('save');
+			});
+		}
 	}
 
 	function renderBoxTotals(type) {
 		evaluateSub();
 		const is_sub = JSON.parse(localStorage.getItem('buildBoxMeta')).is_sub;
 		//shipping calc & render
-		const $shippingText = $('#checkout-shipping');
+		const $shippingText = $('#checkoutShipping');
 		const $shippingMethodPriceText = $('#shippingMethodPrice');
 		const $shippingMethodText = $('#shippingMethodText');
 		const $boxCount = renderBoxCount();
@@ -348,7 +343,7 @@ $(document).ready(function () {
 
 		//tax, subtotal, total, subscription renewal price calculation
 		const $customerState = $('#checkoutState').val();
-		const $subtotal = Number($('#checkout-subtotal').text().replace(/[^0-9.-]+/g, ""));
+		const $subtotal = Number($('#checkoutSubtotal').text().replace(/[^0-9.-]+/g, ""));
 		const $discount = Number($('#checkoutDiscount').text().replace(/[^0-9.-]+/g, ""));
 		let taxRate = 0;
 
@@ -356,8 +351,8 @@ $(document).ready(function () {
 			taxRate = .03;
 		}
 
-		const $taxText = $('#checkout-tax');
-		const $totalText = $('#checkout-total');
+		const $taxText = $('#checkoutTax');
+		const $totalText = $('#checkoutTotal');
 		const $subscriptionRenewalPriceText = $('[data-id="subscriptionPriceText"]');
 		const subtotalAfterDiscount = $subtotal + $discount;
 		const tax = evenRound((subtotalAfterDiscount * taxRate), 2);
@@ -399,7 +394,7 @@ $(document).ready(function () {
 		const $street = $('#checkoutStreetAddress');
 		const $city = $('#checkoutCity');
 		const $state = $('#checkoutState');
-		const $zip = $('#checkout-zip');
+		const $zip = $('#checkoutZip');
 		const checkoutDataStorage = localStorage.getItem('gumiCheckout');
 		let checkoutData = `{
 			"email" : "${$email.val()}",
