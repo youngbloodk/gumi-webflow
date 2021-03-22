@@ -1,4 +1,11 @@
 $(document).ready(function () {
+	if (signedIn) {
+		currentUser.then(res => {
+			$('#emailRow').hide();
+			$('#email').val(res.email);
+		});
+	}
+
 	$(document)
 		.on('click', '#changePassSubmit', async function (e) {
 			e.preventDefault();
