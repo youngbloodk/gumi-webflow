@@ -15,29 +15,18 @@ $(document).ready(function () {
 
 		.on('change', '#checkoutEmail', function () {
 			$('#welcomeMessageWrap').hide();
-			fetch("https://gumi-api-dcln6.ondigitalocean.app/v1/user/email-exists", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"Access-Control-Allow-Origin": "*",
-					"Accept": "application/json",
-				},
-				mode: 'cors',
-				body: JSON.stringify({
-					email: $(this).val()
-				})
-			}).then(response => response.json())
-				.then(res => {
+			emailExists($(this).val())
+				.then(async res => {
 					if (res.exists == true && !signedIn) {
 						$('#passwordWrap').show();
 						$('#checkoutPassword').prop('required', true);
-					} else if (res.exists == true && signedIn && JSON.parse($.cookie('gumiAuth')).email == $('#checkoutEmail').val()) {
+					} else if (res.exists == true && signedIn && gumiAuth.email == $('#checkoutEmail').val()) {
 						$('#passwordWrap').hide();
 						$('#welcomeMessageWrap').show();
-						getCustomer(JSON.parse($.cookie('gumiAuth')).email, JSON.parse($.cookie('gumiAuth')).token).then(async res => {
+						await getCustomer(gumiAuth.email, gumiAuth.token).then(async res => {
 							$('[data-id="customerFirstName"]').html(await res.first_name);
 						});
-					} else if (res.exists == true && signedIn && JSON.parse($.cookie('gumiAuth')).email !== $('#checkoutEmail').val()) {
+					} else if (res.exists == true && signedIn && gumiAuth.email !== $('#checkoutEmail').val()) {
 						$('#passwordWrap').show();
 						$('#welcomeMessageWrap').hide();
 					} else {
@@ -45,13 +34,14 @@ $(document).ready(function () {
 						$('#checkoutPassword').prop('required', false);
 						$('#welcomeMessageWrap').hide();
 					}
-				}).catch(error => console.log('error', error));
+				})
+				;
 		})
 
-		.on('click', '#signIn', function () {
+		.on('click', '#signIn', async function () {
 			let $email = $('#checkoutEmail').val();
 			let $pass = $('#checkoutPassword').val();
-			signIn($email, $pass)
+			await signIn($email, $pass)
 				.then(res => {
 					getCustomer($email, res.token)
 						.then(res => {

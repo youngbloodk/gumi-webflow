@@ -52,14 +52,14 @@ $(document).ready(function () {
 		;
 
 	async function renderAccount() {
-		currentUser = await getCustomer(JSON.parse($.cookie('gumiAuth')).email, JSON.parse($.cookie('gumiAuth')).token);
+		currentUser = await getCustomer(gumiAuth.email, gumiAuth.token);
 		$('[data-customer="firstName"]').html(currentUser.first_name);
 		$('[data-customer="email"]').html(currentUser.email);
 		$('#shippingAddress').html(`${currentUser.first_name} ${currentUser.last_name}<br>
 			${currentUser.street_address}<br>
 			${currentUser.city}, ${currentUser.state}, ${currentUser.zip}`);
 
-		await getPaymentMethods(JSON.parse($.cookie('gumiAuth')).token)
+		await getPaymentMethods(gumiAuth.token)
 			.then(methods => {
 				for (const method of methods.payment_methods) {
 					$('#paymentMethodsList').prepend(

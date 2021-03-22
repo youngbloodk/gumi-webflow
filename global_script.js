@@ -1,5 +1,10 @@
 //global variables
 const signedIn = !$.cookie('gumiAuth') == false;
+let gumiAuth;
+
+if (signedIn) {
+	gumiAuth = JSON.parse($.cookie('gumiAuth'));
+}
 
 // global functions
 function renderBoxCount() {
@@ -49,6 +54,17 @@ async function signIn(email, pass) {
 function signOut() {
 	$.removeCookie('gumiAuth');
 	location.reload();
+}
+
+async function emailExists(email) {
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/email-exists";
+	const body = {
+		email: email
+	};
+	return await request(url, body)
+		.then(async res => {
+			return res;
+		});
 }
 
 async function getCustomer(email, token) {
