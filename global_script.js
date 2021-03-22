@@ -63,6 +63,16 @@ async function getCustomer(email, token) {
 		});
 }
 
+async function getPaymentMethods(token) {
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods";
+	const body = {
+		token: token
+	};
+	return await request(url, body)
+		.then(res => {
+			return res.success;
+		});
+}
 
 async function changePass(token, currentPass, newPass) {
 	$('#errorMessage').hide();
