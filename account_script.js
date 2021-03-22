@@ -16,33 +16,39 @@ $(document).ready(function () {
 			$(`[data-tabpane="${$(this).attr('data-tab')}"]`).show();
 		})
 		//update or cancel update of email & pass
-		.on('click', '#updateProfile', function () {
-			$('[data-id="updateProfileItem"]').show();
-			$('[data-id="existingProfileItem"]').hide();
+		.on('click', '#updateProfileButton', function () {
+			$(this).hide();
+			$('#updateProfile, #cancelUpdateProfile').show();
 		})
 		.on('click', '#cancelUpdateProfile', function () {
-			$('[data-id="updateProfileItem"]').hide();
-			$('[data-id="existingProfileItem"]').show();
-		})
-		//update or cancel update of shipping address
-		.on('click', '#updateShippingAddress', function () {
-			$('[data-id="updateAddressItem"]').show();
-			$('[data-id="existingAddressItem"]').hide();
-		})
-		.on('click', '#cancelUpdateAddress', function () {
-			$('[data-id="updateAddressItem"]').hide();
-			$('[data-id="existingAddressItem"]').show();
+			$($(this) + '#updateprofile').hide();
+			$('#updateProfileButton').show();
 		})
 		//subscription menu dropdown
 		.on('click', '#subscriptionMenuDropdownButton', function () {
 			$(this).closest('.subscription-menu-dropdown').find('.subscription-menu-dropdown-list').show();
 		})
+		//click off for all elements
 		.on('click', function (e) {
 			if (!$(e.target).hasClass('subscription-menu-dropdown-button')) {
 				$('.subscription-menu-dropdown-list').hide();
 			}
 		})
-
+		//edit or cancel edit payment methods
+		.on('click', '#editPaymentMethods', function () {
+			$(this).hide();
+			$('.remove-card-bubble').show();
+			$('.payment-method-card').addClass('card-jiggle');
+			$('#cancelEditPaymentMethods').show();
+			$('.add-payment-method').hide();
+		})
+		.on('click', '#cancelEditPaymentMethods', function () {
+			$(this).hide();
+			$('.remove-card-bubble').hide();
+			$('.payment-method-card').removeClass('card-jiggle');
+			$('#editPaymentMethods').show();
+			$('.add-payment-method').show();
+		})
 		;
 
 	async function renderAccount() {
@@ -56,8 +62,8 @@ $(document).ready(function () {
 		await getPaymentMethods(JSON.parse($.cookie('gumiAuth')).token)
 			.then(methods => {
 				for (const method of methods.payment_methods) {
-					$('#paymentMethodsList').append(
-						`<div class="w-layout-grid grid payment-method-card">
+					$('#paymentMethodsList').prepend(
+						`<div class="w-layout-grid grid payment-method-card" data-id="${method.id}">
     <div class="w-layout-grid grid _2col">
         <div class="cell a-end">
             <img src="https://uploads-ssl.webflow.com/6012e1ca5effcb5c10935dc4/6054e16af351c7a1b1d8ff29_chip.svg"
@@ -75,7 +81,7 @@ $(document).ready(function () {
         <div class="text light">${method.billing_details.name}</div>
         <div class="text right light">${method.card.exp_month}/${method.card.exp_year}</div>
     </div>
-    <a href="#" class="edit-card-bubble"><span class="font-awesome _12"></span> </a>
+    <a href="#" class="remove-card-bubble"><span class="font-awesome center"></span> </a>
 </div>`
 					);
 				};

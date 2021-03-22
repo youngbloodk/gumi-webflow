@@ -11,7 +11,7 @@ $(document).ready(function () {
 			const quant = parseInt($quant.val());
 
 			if (quant == 6) {
-				window.alert("You cannot add more than 6 of a single item");
+				alert("You cannot add more than 6 of a single item");
 				return;
 			}
 
@@ -329,31 +329,4 @@ $(document).ready(function () {
 			$('.add-products-button').hide();
 		}
 	}
-
-	// function renderShippingProgress() {
-	// 	const boxData = JSON.parse(localStorage.getItem('buildBox'));
-	// 	const $progressBar = $('#progressBar');
-	// 	const $freeShippingMeterTitle = $('#freeShippingMeterTitle');
-	// 	const $freeShippingMessage = $('#freeShippingYay');
-	// 	let boxTotals = [];
-	// 	boxData.forEach(element => boxTotals.push(element.quantity));
-	// 	let boxCount = boxTotals.reduce((a, b) => a + b, 0);
-	// 	$('#boxCount').text(boxCount);
-	// 	const quantToFreeShipping = Math.abs(boxCount - 3);
-	// 	if (boxCount < 3) {
-	// 		if (boxCount == 2) {
-	// 			$freeShippingMeterTitle.text(`Add 1 more bottle for free shipping!`);
-	// 			$freeShippingMessage.text('2/3');
-	// 		} else {
-	// 			$freeShippingMeterTitle.text(`Add 2 more bottles for free shipping!`);
-	// 			$freeShippingMessage.text('1/3');
-	// 		}
-	// 		$freeShippingMeterTitle.show();
-	// 		$progressBar.width(`${(1 - (quantToFreeShipping / 3)) * 100}%`);
-	// 	} else {
-	// 		$freeShippingMessage.text('Free Shipping Activated! 🎉');
-	// 		$freeShippingMeterTitle.hide();
-	// 		$progressBar.width(`100%`);
-	// 	}
-	// }
 });
