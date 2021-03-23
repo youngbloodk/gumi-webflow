@@ -133,6 +133,7 @@ $(document).ready(function () {
 					let taxRate;
 					let tax = 0;
 					let taxInfo = '';
+					let subscriptionTitle = subscription.items.total_count > 1 ? `${subscription.items.total_count} items` : `${subscription.items.total_count} item`;
 
 					for (const subItem of subscription.items.data) {
 						total += ((subItem.price.unit_amount * .01) * subItem.quantity);
@@ -160,15 +161,38 @@ $(document).ready(function () {
 										<div class="text right">$${tax}</div>
 									</div>`;
 					}
+
+					let status = 'active';
+					let renewalDate = subscription.current_period_end;
+					let pauseUpdateRenewButtons = `<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Update subscription</a>
+											<div class="divider no-margin"></div>
+											<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Pause subscription</a>
+											<div class="divider no-margin"></div>`;
+
+					if (subscription.pause_collection) {
+						status = 'paused';
+						renewalDate = subscription.pause_collection.resumes_at;
+						pauseUpdateRenewButtons = `<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Restart subscription</a>
+											<div class="divider no-margin"></div>
+											<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Change renewal date</a>
+											<div class="divider no-margin"></div>`;
+					}
+
 					$('#subscriptionsList').append(`
-						<div class="cell vertical card">
+						<div class="cell vertical card" data-subscription="${subscription.id}">
 							<div class="cell-header">
-								<div class="h5">Subscription ${subscriptions.subscriptions.indexOf(subscription) + 1}</div>
+								<div class="w-layout-grid grid _2col auto a-center">
+									<div class="h5">${subscriptionTitle}</div>
+									<div class="cell tag ${status}">
+										<div id="discountName" class="text tag light">${status.charAt(0).toUpperCase()}${status.slice(1)}</div>
+									</div>
+								</div>
 								<div class="subscription-menu-dropdown">
-									<div id="subscriptionMenuDropdownButton" class="text subscription-menu-dropdown-button"><span class="font-awesome _12 subscription-menu-dropdown-button"></span> Edit</div>
-									<div class="subscription-menu-dropdown-list" style="display: none;"><a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Update Subscription</a>
-									<div class="divider no-margin"></div><a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Pause subscription</a>
-									<div class="divider no-margin"></div><a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span>Cancel subscription</a>
+									<div id="subscriptionMenuDropdownButton" class="text subscription-menu-dropdown-button"><span
+											class="font-awesome _12 subscription-menu-dropdown-button"></span> Edit</div>
+									<div class="subscription-menu-dropdown-list">
+										${pauseUpdateRenewButtons}
+										<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span>Cancel subscription</a>
 									</div>
 								</div>
 							</div>
@@ -181,12 +205,12 @@ $(document).ready(function () {
 										${taxInfo}
 										<div class="w-layout-grid grid _2col _1fr-auto">
 											<div class="text bold">Total:</div>
-											<div class="text right bold">$${(total + tax).toFixed(2)}</div> 
+											<div class="text right bold">$${(total + tax).toFixed(2)}</div>
 										</div>
-										<div class="w-layout-grid grid _2col _1fr-auto">
-											<div class="text">Next shipment:</div>
-											<div class="text right">${moment.unix(subscription.current_period_end).format("DD MMM YYYY")}</div>
-										</div>
+									</div>
+									<div class="w-layout-grid grid _2col _1fr-auto">
+										<div class="text">Next shipment:</div>
+										<div class="text">${moment.unix(renewalDate).format("DD MMM YYYY")}</div>
 									</div>
 								</div>
 							</div>
