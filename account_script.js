@@ -156,10 +156,18 @@ $(document).ready(function () {
 					if (subscription.default_tax_rates[0]) {
 						taxRate = subscription.default_tax_rates[0].percentage / 100;
 						tax = total * taxRate;
-						taxInfo = `<div class="w-layout-grid grid _2col _1fr-auto">
-										<div class="text">Tax:</div>
-										<div class="text right">$${tax}</div>
-									</div>`;
+						taxInfo = `<div class="w-layout-grid grid _1col row-gap-0">
+										<div class="w-layout-grid grid _2col _1fr-auto">
+											<div class="text">Tax:</div>
+											<div class="text right">$${tax}</div>
+										</div>
+										<div class="w-layout-grid grid _2col _1fr-auto">
+											<div class="text bold">Total:</div>
+											<div class="text right bold">$${(total + tax).toFixed(2)}</div>
+										</div>
+									</div>
+									<div class="divider no-margin"></div>
+									`;
 					}
 
 					let status = 'active';
@@ -201,16 +209,10 @@ $(document).ready(function () {
 									<div data-subscription="items-list" class="w-layout-grid grid _1col row-gap-0">
 										${await subItems.toString().replaceAll(',', '')}
 									</div>
+									${taxInfo}
 									<div class="w-layout-grid grid _1col row-gap-0">
-										${taxInfo}
-										<div class="w-layout-grid grid _2col _1fr-auto">
-											<div class="text bold">Total:</div>
-											<div class="text right bold">$${(total + tax).toFixed(2)}</div>
-										</div>
-									</div>
-									<div class="w-layout-grid grid _2col _1fr-auto">
-										<div class="text">Next shipment:</div>
-										<div class="text">${moment.unix(renewalDate).format("DD MMM YYYY")}</div>
+										<div class="text bold">Subscription Details</div>
+										<div class="text">Your subscription will renew on <span class="text bold">${moment.unix(renewalDate).format("DD MMM YYYY")}</span> for a total of <span class="text bold">$${(total + tax).toFixed(2)}</span>.</div>
 									</div>
 								</div>
 							</div>

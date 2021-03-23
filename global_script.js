@@ -166,11 +166,23 @@ async function getPaymentMethods(token) {
 		});
 }
 
-async function getinvoices(id) {
+async function getinvoice(id) {
+	const method = "POST";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoice";
+	const body = {
+		id: id
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res.success;
+		});
+}
+
+async function getinvoices(token) {
 	const method = "POST";
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoices";
 	const body = {
-		id: id
+		token: token
 	};
 	return await request(method, url, body)
 		.then(res => {
