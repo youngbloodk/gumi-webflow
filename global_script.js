@@ -166,7 +166,7 @@ async function getPaymentMethods(token) {
 		});
 }
 
-async function getinvoice(id) {
+async function getInvoice(id) {
 	const method = "POST";
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoice";
 	const body = {
@@ -174,11 +174,11 @@ async function getinvoice(id) {
 	};
 	return await request(method, url, body)
 		.then(res => {
-			return res.success;
+			return res;
 		});
 }
 
-async function getinvoices(token) {
+async function getInvoices(token) {
 	const method = "POST";
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoices";
 	const body = {
@@ -186,7 +186,7 @@ async function getinvoices(token) {
 	};
 	return await request(method, url, body)
 		.then(res => {
-			return res.success;
+			return res;
 		});
 }
 
@@ -209,6 +209,10 @@ function evenRound(num, decimalPlaces) {
 	const i = Math.floor(n), f = n - i;
 	const e = 1e-8;
 	const r = (f > 0.5 - e && f < 0.5 + e) ? ((i % 2 == 0) ? i : i + 1) : Math.round(n); return d ? r / m : r;
+}
+
+function getURLParam(key) {
+	return new URLSearchParams(window.location.search).get('id');
 }
 
 //global on ready
