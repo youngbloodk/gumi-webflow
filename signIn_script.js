@@ -6,17 +6,19 @@ $(document).ready(function () {
         .on('click', '#signInButton', async function (e) {
             const $email = $('#signInEmail').val();
             const $pass = $('#signInPassword').val();
-            const $errorMessage = $('.errorMessage');
+            const $errorMessage = $('.error-message');
+            const $errorMessageText = $('#errorMessageText');
 
             e.preventDefault();
             $errorMessage.hide();
 
-            signIn($email, $pass)
+            await signIn($email, $pass)
                 .then(res => {
                     if (res.success) {
                         location.href = '/account';
                     } else {
-                        $errorMessage.show().html(res.error.replace('Server:', ''));
+                        $errorMessageText.html(res.error.replace('Server:', ''));
+                        $errorMessage.show();
                     }
                 });
             ;
