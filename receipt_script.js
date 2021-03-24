@@ -9,21 +9,29 @@ $(document).ready(function () {
 
 	async function renderReceipt() {
 		await getInvoice(getURLParam('id'))
-			.then(res => {
+			.then(async res => {
 				let invoice = res.success;
-				let card = invoice.charge.payment_method_details.card;
-				const cardIcons = {
-					visa: "",
-					amex: "",
-					mastercard: "",
-					jcb: "",
-					discover: "",
-					unionpay: ""
-				};
 				if (invoice.customer_email !== gumiAuth.email) {
-					alert(`You are not authorized to view this receipt. Please sign in to the correct account and try again.`);
+					alert(`You are not authorized to view this receipt. Please sign in and try again.`);
 					location.href = '/signin';
 				} else {
+					let card = invoice.charge.payment_method_details.card;
+					const cardIcons = {
+						visa: "",
+						amex: "",
+						mastercard: "",
+						jcb: "",
+						discover: "",
+						unionpay: ""
+					};
+					const shipping = invoice.lines.data.find(function (line, index) {
+						if (line.description.indexOf('Shipping') > 1) {
+							return true;
+						}
+					});
+
+					$('#receiptNumber').text(invoice.number);
+					$('#receiptDate').text(moment.unix(invoice.created).format("DD MMM YYYY"));
 					$('#receiptEmail').text(invoice.customer_email);
 					$('#receiptAddress')
 						.html(
@@ -36,16 +44,35 @@ $(document).ready(function () {
 					$('#cardBrand').text(cardIcons[card.brand]);
 					$('#cardExp').text(`${card.exp_month}/${card.exp_year}`);
 					$('#cardLast4').text(card.last4);
-					$('#orderNumber').text(invoice.number);
-					const shipping = invoice.lines.data.find(function (line, index) {
-						if (line.description.indexOf('Shipping') > 1) {
-							return true;
-						}
-					});
+					for (const lineItem of invoice.lines.data) {
+						await getProduct(lineItem.price.product)
+							.then(product => {
+								$('#invoiceItemList').append(`
+									<div class="w-layout-grid grid _3col auto-auto-1fr column-gap-10">
+										<img src="${product.images[0]}" loading="lazy" width="60" sizes="(max-width: 479px) 17vw, 60px" alt="">
+										<div class="w-layout-grid grid _1col row-gap-0">
+											<div class="text semibold">${product.name}</div>
+											<div class="text">Quantity: ${lineItem.quantity}</div>
+											<div class="text">Delivered: Every ${lineItem.price.recurring.interval_count} ${lineItem.price.recurring.interval}</div>
+										</div>
+										<div class="text right">$${((lineItem.price.unit_amount * .01) * lineItem.quantity).toFixed(2)}</div>
+									</div>
+									<div class="divider"></div>`);
+								;
+							});
+						;
+					};
+					$('#receiptSubtotal').text(`$${(invoice.subtotal / 100).toFixed(2)}`);
 					if (shipping) {
 						$('#receiptShipping').text(`$${(shipping.amount / 100).toFixed(2)}`);
+					}
+					if (invoice.total_discount_amounts) {
+						$('#receiptDiscount').text(`$${(invoice.total_discount_amounts[0].amount / 100).toFixed(2)}`);
 					} else {
-						$('#shippingLine').hide();
+						$('#discountLine').hide();
+					}
+					if (invoice.tax) {
+						$('#receiptTax').text(`$${(invoice.tax / 100).toFixed(2)}`);
 					}
 					$('#receiptTotal').text(`$${(invoice.amount_paid / 100).toFixed(2)}`);
 				}
