@@ -16,12 +16,14 @@ if (signedIn) {
 // global functions
 function renderBoxCount() {
 	const boxData = JSON.parse(localStorage.getItem('buildBox'));
-	let boxTotals = [];
-	boxData.forEach(element => boxTotals.push(element.quantity));
-	let boxCount = boxTotals.reduce((a, b) => a + b, 0);
-	$('#boxCount').text(boxCount);
-	return boxCount;
-};
+	if (boxData) {
+		let boxTotals = [];
+		boxData.forEach(element => boxTotals.push(element.quantity));
+		let boxCount = boxTotals.reduce((a, b) => a + b, 0);
+		$('#boxCount').text(boxCount);
+		return boxCount;
+	}
+}
 
 async function request(method, url, body) {
 	return await fetch(url, {
