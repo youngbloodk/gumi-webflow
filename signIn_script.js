@@ -1,6 +1,6 @@
 $(document).ready(function () {
     if (signedIn) {
-        window.location.href = '/account';
+        location.href = '/account';
     }
     $(document)
         .on('click', '#signInButton', async function (e) {
@@ -15,7 +15,11 @@ $(document).ready(function () {
             await signIn($email, $pass)
                 .then(res => {
                     if (res.success) {
-                        location.href = '/account';
+                        if (getURLParam('redirect') && document.referrer.indexOf(location.host) > 0) {
+                            location.href = document.referrer;
+                        } else {
+                            location.href = '/account';
+                        }
                     } else {
                         $errorMessageText.html(res.error.replace('Server:', ''));
                         $errorMessage.show();

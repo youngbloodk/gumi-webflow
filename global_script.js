@@ -212,7 +212,7 @@ function evenRound(num, decimalPlaces) {
 }
 
 function getURLParam(key) {
-	return new URLSearchParams(window.location.search).get('id');
+	return new URLSearchParams(window.location.search).get(key);
 }
 
 //global on ready

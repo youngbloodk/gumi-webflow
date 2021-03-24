@@ -1,8 +1,10 @@
 $(document).ready(function () {
-	if (PerformanceNavigation.type > 0 && !signedIn || location.href.indexOf('?id') < 0) {
+	if (location.href.indexOf('?id=') < 0) {
+		location.href = '/signin';
+	} else if (PerformanceNavigation.type > 0 && !signedIn || location.href.indexOf('?id') < 0) {
 		location.reload();
 	} else if (!signedIn || location.href.indexOf('?id') < 0) {
-		location.href = '/signin';
+		location.href = '/signin?redirect=true';
 	} else {
 		renderReceipt();
 	}
