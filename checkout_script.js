@@ -355,7 +355,7 @@ $(document).ready(function () {
 		const $totalText = $('#checkoutTotal');
 		const $subscriptionRenewalPriceText = $('[data-id="subscriptionPriceText"]');
 		const subtotalAfterDiscount = $subtotal + $discount;
-		const tax = evenRound((subtotalAfterDiscount * taxRate), 2);
+		const tax = evenRound(((subtotalAfterDiscount + shipping) * taxRate), 2);
 		const total = subtotalAfterDiscount + tax + shipping;
 		const subscriptionRenewalPrice = $subtotal + tax + shipping;
 
