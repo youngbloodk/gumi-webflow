@@ -217,6 +217,129 @@ function getURLParam(key) {
 	return new URLSearchParams(window.location.search).get(key);
 }
 
+function addCheckoutItem(item, quantity = 1) {
+	let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+	let freq_info = '';
+	let removeButton = '';
+	if (is_sub) {
+		let freq_name = $('.select option:selected').text();
+		freq_info = `${freq_name}`;
+	} else {
+		freq_info = `Just this once`;
+	} if (location.href.indexOf('box') > 0) {
+		removeButton = `<div style="color: red; cursor: pointer;" class="text remove-button">Remove</div>`;
+	}
+	$('#boxItemsList').append(`
+		<div data-sku="${item.sku}">
+			<div class="w-layout-grid grid _3col auto-auto-1fr column-gap-10">
+				<img src="${item.image}" loading="lazy" width="60" sizes="(max-width: 479px) 17vw, 60px" alt="">
+				<div class="w-layout-grid grid _1col row-gap-0">
+					<div class="text semibold">${item.name}</div>
+					<div class="text">Quantity: <span data-id="quantity">${quantity}</span></div>
+					<div class="text">Delivered: ${freq_info}</div>
+					${removeButton}
+				</div>
+				<div class="text right" data-item="price">$${(Number((item.price).replace(/[^0-9.-]+/g, '')) * quantity).toFixed(2)}</div>
+			</div>
+			<div class="divider"></div>
+		</div>
+	`);
+}
+
+function renderMetaFromStorage() {
+	let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
+	let sub_val = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+	if (sub_val != storage.is_sub) {
+		evaluateSub(storage);
+	}
+	$('.select').val(storage.freq).trigger('change');
+}
+
+function evaluateSub(storage = null) {
+	if (storage === null) {
+		storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
+	}
+	if (storage.is_sub) {
+		$('#true').click().attr('checked', true);
+		$('#true').closest('div').find('.text').addClass('light');
+		$('#false').closest('div').find('.text').removeClass('light');
+		$('#deliveryFrequencyWrap').show();
+	} else {
+		$('#false').click().attr('checked', true);
+		$('#false').closest('div').find('.text').addClass('light');
+		$('#true').closest('div').find('.text').removeClass('light');
+		$('#deliveryFrequencyWrap').hide();
+	}
+}
+
+function updateCheckoutRender() {
+	const $emptyMessage = $('.empty-box');
+	const $continueBlock = $('#continueToCheckout');
+
+	// Update subtotal
+	let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+	let storage = JSON.parse(localStorage.getItem('buildBox'));
+	let subtotal = 0.00;
+	let shipping = 0.00;
+	let totalQuant = renderBoxCount();
+
+	for (const item of storage) {
+		const item_data = getItemDataFromSku(item.sku);
+		subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
+	}
+	if (totalQuant == 1) {
+		shipping = 5.00;
+	} else if (totalQuant >= 2 && totalQuant <= 6) {
+		shipping = 8.50;
+	} else if (totalQuant > 6) {
+		shipping = 12.00;
+	}
+
+	if (is_sub) {
+		$('#shippingTitleText').text('Free Shipping 🎉');
+		$('#shippingAmount').text(`$0.00`);
+	} else {
+		$('#shippingTitleText').text('Shipping');
+		$('#shippingAmount').text(`$${shipping.toFixed(2)}`);
+	}
+
+	$('#oneTimeSubtotal').text(`$${(subtotal + shipping).toFixed(2)}`);
+	$('#subSubtotal').text(`$${subtotal.toFixed(2)}`);
+	$('#subtotalAcutal, #checkoutSubtotal').text(`$${subtotal.toFixed(2)}`);
+
+
+	if (storage.length > 0) {
+		$emptyMessage.hide();
+		$continueBlock.show();
+		$('#emptyWrap').addClass('middle');
+
+	} else {
+		$emptyMessage.show();
+		$continueBlock.hide();
+		$('#emptyWrap').removeClass('middle');
+
+	}
+}
+
+function getItemDataFromSku(sku) {
+	const $list_item = $(`.build-your-box-item .product-data
+		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
+	return getItemDataFromBuildBoxItem($list_item);
+}
+
+function getItemDataFromBuildBoxItem($el) {
+	const $product_data = $el.find('.product-data input');
+	let data = {
+		freq: parseInt($('#sub_frequency').val()) > 0 ? $('.product-select').val() : null
+	};
+	$product_data.each(function () {
+		const name = $(this).attr('name');
+		const value = $(this).attr('value');
+		data[name] = value;
+	});
+	return data;
+}
+
 //global on ready
 $(document).ready(async function () {
 
@@ -255,4 +378,5 @@ $(document).ready(async function () {
 			}
 		})
 		;
+	;
 });
