@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
 	if (!signedIn) {
 		window.location.href = '/signin';
 	} else {
@@ -7,7 +6,6 @@ $(document).ready(function () {
 			renderAccount(user);
 		});
 	}
-
 	$(document)
 		//active tab indication
 		.on('click', '[data-tab]', function () {
@@ -16,6 +14,28 @@ $(document).ready(function () {
 			$('[data-tabpane]').hide();
 			$(`[data-tabpane="${$(this).attr('data-tab')}"]`).show();
 			window.scrollTo({ top: 0, behavior: 'smooth' });
+		})
+		//dropdown menu handling
+		.on('click', '.menu-dropdown', function () {
+			$(this).closest('.menu-dropdown').find('.menu-dropdown-list').show();
+		})
+		.on('click', function (e) {
+			if (!$(e.target).hasClass('menu-dropdown')) {
+				$('.menu-dropdown-list').hide();
+			}
+		})
+		//modal handling
+		.on('click', '[data-modalopen]', function () {
+			const modalInfo = $(this).attr('data-modalopen');
+			$('#modalTitle').text(modalInfo.replaceAll('-', ' '));
+			$(`[data-modalform]`).hide();
+			$(`[data-modalform="${modalInfo}"]`).attr('data-stripeitemid', $(this).closest('[data-stripeitemid]').attr('data-stripeitemid')).show();
+			$('.modal').fadeIn(250);
+		})
+		.on('click', '[data-modal="close"]', function () {
+			$('.modal, [data-modalForm]').fadeOut(250);
+			$(`[data-modalform]`).attr('data-stripeitemid', '');
+			$('#modalTitle').text('');
 		})
 		//update or cancel update of email & pass
 		.on('click', '#updateProfileButton', function () {
@@ -54,31 +74,62 @@ $(document).ready(function () {
 				}
 			});
 		})
-		//subscription menu dropdown
-		.on('click', '#subscriptionMenuDropdownButton', function () {
-			$(this).closest('.subscription-menu-dropdown').find('.subscription-menu-dropdown-list').show();
+		//pause subscription
+		.on('click', '[data-modalopen="Pause-subscription"]', function () {
+			$('#pausedSubRenewalDate').text(moment($(this).closest('[data-stripeitemid]').find('[data-id="renewal-date"]').text()).add(parseFloat($('#pauseDuration').val()), 'months').format('D MMM YYYY'));
 		})
-		//click off for all elements
-		.on('click', function (e) {
-			if (!$(e.target).hasClass('subscription-menu-dropdown-button')) {
-				$('.subscription-menu-dropdown-list').hide();
-			}
+
+		.on('click', '#pauseSubscriptionConfirm', function (e) {
+			e.preventDefault();
+
+			const $duration = parseFloat($('#pauseDuration').val());
+			const $form = $(this).closest('[data-stripeitemid]');
+			const $subId = $form.attr('data-stripeitemid');
+			const renewaldate = moment($(this).closest('[data-stripeitemid]').find('[data-id="renewal-date"]').text()).add($duration, 'months').format('D MMM YYYY');
+
+			$form.find('.error-message').hide();
+			pauseSubscription($subId, renewaldate)
+				.then(res => {
+					if (res.success) {
+						$('#pausedSubRenewalDate').text(renewaldate);
+						$form.find('form').hide();
+						$form.find('.success-message').show();
+					} else {
+						$('.button-loader').hide();
+						$form.find('.text.error').text(res.error);
+						$form.find('.error-message').show();
+					}
+				});
 		})
-		//edit or cancel edit payment methods
-		.on('click', '#editPaymentMethods', function () {
-			$(this).hide();
-			$('.remove-card-bubble').show();
-			$('.payment-method-card').addClass('card-jiggle');
-			$('#cancelEditPaymentMethods').show();
+		//resume subscription
+		.on('click', '[data-modalopen="Resume-subscription"]', function () {
+			$('#resumeSubRenewalDate').text($(this).closest('[data-stripeitemid]').find('[data-id="renewal-date"]').text());
+			$('#resumeSubRenewalTotal').text($(this).closest('[data-stripeitemid]').find('[data-id="renewal-amount"]').text());
 		})
-		.on('click', '#cancelEditPaymentMethods', function () {
-			$(this).hide();
-			$('.remove-card-bubble').hide();
-			$('.payment-method-card').removeClass('card-jiggle');
-			$('#editPaymentMethods').show();
-		})
+		// .on('click', '#resumeSubscriptionConfirm', function (e) {
+		// 	e.preventDefault();
+
+		// 	const $form = $(this).closest('[data-stripeitemid]');
+		// 	const $subId = $form.attr('data-stripeitemid');
+		// 	const renewaldate = moment().add($duration, 'months').format('D MMM YYYY');
+
+		// 	$form.find('.error-message').hide();
+		// 	pauseSubscription($subId, renewaldate)
+		// 		.then(res => {
+		// 			if (res.success) {
+		// 				$('#pausedSubRenewalDate').text(renewaldate);
+		// 				$form.find('form').hide();
+		// 				$form.find('.success-message').show();
+		// 			} else {
+		// 				$('.button-loader').hide();
+		// 				$form.find('.text.error').text(res.error);
+		// 				$form.find('.error-message').show();
+		// 			}
+		// 		});
+		// })
 		;
 
+	//functions
 	async function renderAccount(user) {
 		//render profile
 		$('[data-customer="firstName"]').html(user.first_name);
@@ -100,14 +151,22 @@ $(document).ready(function () {
 		await getPaymentMethods(gumiAuth.token)
 			.then(methods => {
 				for (const method of methods.payment_methods) {
+					const cardIcons = {
+						visa: "",
+						amex: "",
+						mastercard: "",
+						jcb: "",
+						discover: "",
+						unionpay: ""
+					};
 					$('#paymentMethodsList').prepend(`
-						<div class="w-layout-grid grid payment-method-card" data-id="${method.id}">
+						<div class="w-layout-grid grid payment-method-card" data-stripeitemid="${method.id}">
 							<div class="w-layout-grid grid _2col">
 								<div class="cell a-end">
 									<img src="https://uploads-ssl.webflow.com/6012e1ca5effcb5c10935dc4/6054e16af351c7a1b1d8ff29_chip.svg" loading="lazy" width="40" alt="chip" class="chip-image">
 								</div>
 								<div class="cell a-start j-end">
-									<div class="font-awesome brands _40 white"></div>
+									<div class="font-awesome brands _40 white">${cardIcons[method.card.brand]}</div>
 								</div>
 							</div>
 							<div class="w-layout-grid grid _2col _1fr-auto center column-gap-0">
@@ -118,7 +177,14 @@ $(document).ready(function () {
 								<div class="text light">${method.billing_details.name}</div>
 								<div class="text right light">${method.card.exp_month}/${method.card.exp_year}</div>
 							</div>
-							<a href="#" class="remove-card-bubble"><span class="font-awesome center"></span></a>
+							<div href="#" class="edit-card-bubble menu-dropdown">
+								<div class="font-awesome _12 menu-dropdown"></div>
+								<div class="menu-dropdown-list">
+									<a href="#" class="dropdown-menu-item" data-modalopen="Update-payment-method"><span class="font-awesome _12"> &nbsp</span>Update billing info</a>
+									<div class="divider no-margin"></div>
+									<a href="#" class="dropdown-menu-item" data-modalopen="Remove-payment-method"><span class="font-awesome"> &nbsp</span>Remove card</a>
+								</div>
+							</div>
 						</div>
 					`);
 				};
@@ -172,22 +238,22 @@ $(document).ready(function () {
 
 					let status = 'active';
 					let renewalDate = subscription.current_period_end;
-					let pauseUpdateRenewButtons = `<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Update subscription</a>
+					let pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Update-subscription"><span class="font-awesome _12"> &nbsp</span> Update subscription</a>
 											<div class="divider no-margin"></div>
-											<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Pause subscription</a>
+											<a href="#" class="dropdown-menu-item" data-modalopen="Pause-subscription"><span class="font-awesome _12"> &nbsp</span> Pause subscription</a>
 											<div class="divider no-margin"></div>`;
 
 					if (subscription.pause_collection) {
 						status = 'paused';
 						renewalDate = subscription.pause_collection.resumes_at;
-						pauseUpdateRenewButtons = `<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Restart subscription</a>
-											<div class="divider no-margin"></div>
-											<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span> Change renewal date</a>
+						pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Resume-subscription"><span class="font-awesome _12"> &nbsp</span> Resume subscription</a>
 											<div class="divider no-margin"></div>`;
+						// <a href="#" class="dropdown-menu-item"><span class="font-awesome _12"> &nbsp</span> Change renewal date</a>
+						// <div class="divider no-margin"></div>
 					}
 
 					$('#subscriptionsList').append(`
-						<div class="cell vertical card" data-subscription="${subscription.id}">
+						<div class="cell vertical card" data-stripeitemid="${subscription.id}">
 							<div class="cell-header">
 								<div class="w-layout-grid grid _2col auto a-center">
 									<div class="h5">${subscriptionTitle}</div>
@@ -195,12 +261,11 @@ $(document).ready(function () {
 										<div id="discountName" class="text tag light">${status.charAt(0).toUpperCase()}${status.slice(1)}</div>
 									</div>
 								</div>
-								<div class="subscription-menu-dropdown">
-									<div id="subscriptionMenuDropdownButton" class="text subscription-menu-dropdown-button"><span
-											class="font-awesome _12 subscription-menu-dropdown-button"></span> Edit</div>
-									<div class="subscription-menu-dropdown-list">
+								<div class="menu-dropdown">
+									<div class="text menu-dropdown"><span class="font-awesome _12 menu-dropdown"></span> Edit</div>
+									<div class="menu-dropdown-list">
 										${pauseUpdateRenewButtons}
-										<a href="#" class="subscription-menu-item"><span class="font-awesome _12 margin-right _5"></span>Cancel subscription</a>
+										<a href="#" class="dropdown-menu-item" data-modalopen="Cancel-subscription"><span class="font-awesome _12"> &nbsp</span>Cancel subscription</a>
 									</div>
 								</div>
 							</div>
@@ -212,7 +277,7 @@ $(document).ready(function () {
 									${taxInfo}
 									<div class="w-layout-grid grid _1col row-gap-0">
 										<div class="text bold">Subscription Details</div>
-										<div class="text">Your subscription will renew on <span class="text bold">${moment.unix(renewalDate).format("DD MMM YYYY")}</span> for a total of <span class="text bold">$${(total + tax).toFixed(2)}</span>.</div>
+										<div class="text">Your subscription will renew on <span class="text bold" data-id="renewal-date">${moment.unix(renewalDate).format("DD MMM YYYY")}</span> for a total of <span class="text bold" data-id="renewal-amount">$${(total + tax).toFixed(2)}</span>.</div>
 									</div>
 								</div>
 							</div>

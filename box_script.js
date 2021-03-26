@@ -168,7 +168,7 @@ $(document).ready(function () {
 	// Initalize variables
 	function init() {
 		$('.minus, .ticker input').hide();
-		if (performance.navigation.type == 2) {
+		if (PerformanceNavigation.type == 2) {
 			location.reload();
 		}
 		let cart_meta = localStorage.getItem('buildBoxMeta');

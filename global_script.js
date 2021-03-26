@@ -143,12 +143,36 @@ async function getSubscriptions(token) {
 			return res.success;
 		});
 }
+async function pauseSubscription(id, date) {
+	const method = "POST";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/pause";
+	const body = {
+		id: id,
+		custom_date: date
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res;
+		});
+}
 
 async function getProduct(id) {
 	const method = "POST";
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/product";
 	const body = {
 		id: id
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res.success;
+		});
+}
+
+async function getPaymentMethods(token) {
+	const method = "POST";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods";
+	const body = {
+		token: token
 	};
 	return await request(method, url, body)
 		.then(res => {
@@ -367,6 +391,10 @@ $(document).ready(async function () {
 			setTimeout(function () {
 				$('.button-loader').hide();
 			}, 3000);
+		})
+
+		.on('click', '[data-button="reload"]', function () {
+			location.reload();
 		})
 
 		//prevent body scroll when mobile menu is open
