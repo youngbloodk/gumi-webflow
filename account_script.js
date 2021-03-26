@@ -1,4 +1,3 @@
-test;
 $(document).ready(function () {
 	if (!signedIn) {
 		window.location.href = '/signin';
@@ -77,16 +76,18 @@ $(document).ready(function () {
 		})
 		//pause subscription
 		.on('click', '[data-modalopen="Pause-subscription"]', function () {
-			$('#pausedSubRenewalDate').text(moment($(this).closest('[data-stripeitemid]').find('[data-id="renewal-date"]').text()).add(parseFloat($('#pauseDuration').val()), 'months').format('D MMM YYYY'));
+			renderPausedSubRenewalDate($(this));
 		})
-
+		.on('change', '#pauseDuration', function () {
+			renderPausedSubRenewalDate($('#subscriptionsList').find(`[data-stripeitemid="${$(this).closest('[data-stripeitemid]').attr('data-stripeitemid')}`));
+		})
 		.on('click', '#pauseSubscriptionConfirm', function (e) {
 			e.preventDefault();
 
 			const $duration = parseFloat($('#pauseDuration').val());
 			const $form = $(this).closest('[data-stripeitemid]');
 			const $subId = $form.attr('data-stripeitemid');
-			const renewaldate = moment($(this).closest('[data-stripeitemid]').find('[data-id="renewal-date"]').text()).add($duration, 'months').format('D MMM YYYY');
+			const renewaldate = $('#pauseSubRenewalDate').text();
 
 			$form.find('.error-message').hide();
 			pauseSubscription($subId, renewaldate)
@@ -131,6 +132,10 @@ $(document).ready(function () {
 		;
 
 	//functions
+	function renderPausedSubRenewalDate(target) {
+		let date = moment(target.closest('[data-stripeitemid]').find('[data-id="renewal-date"]').text()).add(parseFloat($('#pauseDuration').val()), 'months').format('D MMM YYYY');
+		$('#pauseSubRenewalDate').text(date);
+	}
 	async function renderAccount(user) {
 		//render profile
 		$('[data-customer="firstName"]').html(user.first_name);
