@@ -1,3 +1,4 @@
+test;
 $(document).ready(function () {
 	if (!signedIn) {
 		window.location.href = '/signin';
