@@ -1,6 +1,6 @@
 $(document).ready(function () {
     if (signedIn) {
-        location.href = '/account';
+        location.href = '/account/home';
     }
     $(document)
         .on('click', '#signInButton', async function (e) {
@@ -18,7 +18,7 @@ $(document).ready(function () {
                         if (getURLParam('redirect') && document.referrer.indexOf(location.host) > 0) {
                             location.href = document.referrer;
                         } else {
-                            location.href = '/account';
+                            location.href = '/account/home';
                         }
                     } else {
                         $errorMessageText.html(res.error.replace('Server:', ''));
