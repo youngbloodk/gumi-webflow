@@ -8,14 +8,14 @@ $(document).ready(function () {
 			renderPausedSubRenewalDate($(this));
 		})
 		.on('change', '#pauseDuration', function () {
-			renderPausedSubRenewalDate($('#subscriptionsList').find(`[data-stripeitemid="${$(this).closest('[data-stripeitemid]').attr('data-stripeitemid')}`));
+			renderPausedSubRenewalDate($('#subscriptionsList').find(`[data-stripeitem="${$(this).closest('[data-stripeitem]').attr('data-stripeitem')}`));
 		})
 		.on('click', '#pauseSubscriptionConfirm', function (e) {
 			e.preventDefault();
 
 			const $duration = parseFloat($('#pauseDuration').val());
-			const $form = $(this).closest('[data-stripeitemid]');
-			const $subId = $form.attr('data-stripeitemid');
+			const $form = $(this).closest('[data-stripeitem]');
+			const $subId = $form.attr('data-stripeitem');
 			const renewaldate = $('#pauseSubRenewalDate').text();
 
 			$form.find('.error-message').hide();
@@ -27,21 +27,21 @@ $(document).ready(function () {
 						$form.find('.success-message').show();
 					} else {
 						$('.button-loader').hide();
-						$form.find('.text.error').text(res.error);
+						$form.find('.text.error').text('Whoops, there appears to be an issue. If this keeps happening, please let us know support@guminutrition.com');
 						$form.find('.error-message').show();
 					}
 				});
 		})
 		//resume subscription
 		.on('click', '[data-modalopen="Resume-subscription"]', function () {
-			$('#resumeSubRenewalDate').text($(this).closest('[data-stripeitemid]').find('[data-id="renewal-date"]').text());
-			$('#resumeSubRenewalTotal').text($(this).closest('[data-stripeitemid]').find('[data-id="renewal-amount"]').text());
+			$('#resumeSubRenewalDate').text($(this).closest('[data-stripeitem]').attr('data-periodend').text());
+			$('#resumeSubRenewalTotal').text($(this).closest('[data-stripeitem]').find('[data-id="renewal-amount"]').text());
 		})
 		.on('click', '#resumeSubscriptionConfirm', function (e) {
 			e.preventDefault();
 
-			const $form = $(this).closest('[data-stripeitemid]');
-			const $subId = $form.attr('data-stripeitemid');
+			const $form = $(this).closest('[data-stripeitem]');
+			const $subId = $form.attr('data-stripeitem');
 
 			$form.find('.error-message').hide();
 			resumeSubscription($subId)
@@ -52,16 +52,41 @@ $(document).ready(function () {
 						$form.find('.success-message').show();
 					} else {
 						$('.button-loader').hide();
-						$form.find('.text.error').text(res.error);
+						$form.find('.text.error').text('Whoops, there appears to be an issue. If this keeps happening, please let us know support@guminutrition.com');
 						$form.find('.error-message').show();
 					}
 				});
+			;
+		})
+		//cancel subscription
+		.on('click', '[data-modalopen="Cancel-subscription"]', function () {
+
+		})
+		.on('click', '#cancelSubscriptionConfirm', function (e) {
+			e.preventDefault();
+
+			const $form = $(this).closest('[data-stripeitem]');
+			const $subId = $form.attr('data-stripeitem');
+
+			$form.find('.error-message').hide();
+			cancelSubscription($subId)
+				.then(res => {
+					if (res.success) {
+						$form.find('form').hide();
+						$form.find('.success-message').show();
+					} else {
+						$('.button-loader').hide();
+						$form.find('.text.error').text('Whoops, there appears to be an issue. If this keeps happening, please let us know support@guminutrition.com');
+						$form.find('.error-message').show();
+					}
+				});
+			;
 		})
 		;
 	;
 
 	function renderPausedSubRenewalDate(target) {
-		let date = moment(target.closest('[data-stripeitemid]').find('[data-id="renewal-date"]').text()).add(parseFloat($('#pauseDuration').val()), 'months').format('D MMM YYYY');
+		let date = moment(target.closest('[data-stripeitem]').find('[data-id="renewal-date"]').text()).add(parseFloat($('#pauseDuration').val()), 'months').format('D MMM YYYY');
 		$('#pauseSubRenewalDate').text(date);
 	}
 
@@ -112,23 +137,22 @@ $(document).ready(function () {
 					}
 
 					let status = 'active';
-					let renewalDate = subscription.current_period_end;
 					let pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Update-subscription"><span class="font-awesome _12"> &nbsp</span> Update subscription</a>
 											<div class="divider no-margin"></div>
 											<a href="#" class="dropdown-menu-item" data-modalopen="Pause-subscription"><span class="font-awesome _12"> &nbsp</span> Pause subscription</a>
 											<div class="divider no-margin"></div>`;
+					let subscriptionRenewalDetails = `Your subscription will renew on <span class="text bold" data-id="renewal-date">${moment.unix(subscription.current_period_end).format("DD MMM YYYY")}</span>`;
 
 					if (subscription.pause_collection) {
 						status = 'paused';
 						renewalDate = subscription.pause_collection.resumes_at;
 						pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Resume-subscription"><span class="font-awesome _12"> &nbsp</span> Resume subscription</a>
 											<div class="divider no-margin"></div>`;
-						// <a href="#" class="dropdown-menu-item"><span class="font-awesome _12"> &nbsp</span> Change renewal date</a>
-						// <div class="divider no-margin"></div>
+						subscriptionRenewalDetails = `Your subscription is paused until <span class="text bold" data-id="renewal-date">${moment.unix(subscription.pause_collection.resumes_at).format("DD MMM YYYY")}</span>, after which it will renew on it's original schedule`;
 					}
 
 					$('#subscriptionsList').append(`
-						<div class="cell vertical card" data-stripeitemid="${subscription.id}">
+						<div class="cell vertical card" data-stripeitem="${subscription.id}" data-periodend"${moment.unix(subscription.current_period_end).format("DD MMM YYYY")}">
 							<div class="cell-header">
 								<div class="w-layout-grid grid _2col auto a-center">
 									<div class="h5">${subscriptionTitle}</div>
@@ -152,7 +176,7 @@ $(document).ready(function () {
 									${taxInfo}
 									<div class="w-layout-grid grid _1col row-gap-0">
 										<div class="text bold">Subscription Details</div>
-										<div class="text">Your subscription will renew on <span class="text bold" data-id="renewal-date">${moment.unix(renewalDate).format("DD MMM YYYY")}</span> for a total of <span class="text bold" data-id="renewal-amount">$${(total + tax).toFixed(2)}</span>.</div>
+										<div class="text">${subscriptionRenewalDetails} for a total of <span class="text bold" data-id="renewal-amount">$${(total + tax).toFixed(2)}</span>.</div>
 									</div>
 								</div>
 							</div>

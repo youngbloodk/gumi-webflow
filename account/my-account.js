@@ -29,12 +29,12 @@ $(document).ready(function () {
 			const modalInfo = $(this).attr('data-modalopen');
 			$('#modalTitle').text(modalInfo.replaceAll('-', ' '));
 			$(`[data-modalform]`).hide();
-			$(`[data-modalform="${modalInfo}"]`).attr('data-stripeitemid', $(this).closest('[data-stripeitemid]').attr('data-stripeitemid')).show();
+			$(`[data-modalform="${modalInfo}"]`).attr('data-stripeitem', $(this).closest('[data-stripeitem]').attr('data-stripeitem')).show();
 			$('.modal').fadeIn(250);
 		})
 		.on('click', '[data-modal="close"]', function () {
 			$('.modal, [data-modalForm]').fadeOut(250);
-			$(`[data-modalform]`).attr('data-stripeitemid', '');
+			$(`[data-modalform]`).attr('data-stripeitem', '');
 			$('#modalTitle').text('');
 		})
 		//update or cancel update of email & pass
@@ -108,7 +108,7 @@ $(document).ready(function () {
 						unionpay: ""
 					};
 					$('#paymentMethodsList').prepend(`
-						<div class="w-layout-grid grid payment-method-card" data-stripeitemid="${method.id}">
+						<div class="w-layout-grid grid payment-method-card" data-stripeitem="${method.id}">
 							<div class="w-layout-grid grid _2col">
 								<div class="cell a-end">
 									<img src="https://uploads-ssl.webflow.com/6012e1ca5effcb5c10935dc4/6054e16af351c7a1b1d8ff29_chip.svg" loading="lazy" width="40" alt="chip" class="chip-image">
