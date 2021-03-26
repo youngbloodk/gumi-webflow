@@ -143,12 +143,25 @@ async function getSubscriptions(token) {
 			return res.success;
 		});
 }
+
 async function pauseSubscription(id, date) {
 	const method = "POST";
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/pause";
 	const body = {
 		id: id,
 		custom_date: date
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res;
+		});
+}
+
+async function resumeSubscription(id) {
+	const method = "POST";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/resume";
+	const body = {
+		id: id,
 	};
 	return await request(method, url, body)
 		.then(res => {
