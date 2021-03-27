@@ -5,10 +5,10 @@ $(document).ready(function () {
 	$(document)
 		//pause subscription
 		.on('click', '[data-modalopen="Pause-subscription"]', function () {
-			renderPausedSubRenewalDate($(this));
+			renderPauseSubRenewalDate($(this));
 		})
 		.on('change', '#pauseDuration', function () {
-			renderPausedSubRenewalDate($('#subscriptionsList').find(`[data-stripeitem="${$(this).closest('[data-stripeitem]').attr('data-stripeitem')}`));
+			renderPauseSubRenewalDate($('#subscriptionsList').find(`[data-stripeitem="${$(this).closest('[data-stripeitem]').attr('data-stripeitem')}`));
 		})
 		.on('click', '#pauseSubscriptionConfirm', function (e) {
 			e.preventDefault();
@@ -16,7 +16,7 @@ $(document).ready(function () {
 			const $duration = parseFloat($('#pauseDuration').val());
 			const $form = $(this).closest('[data-stripeitem]');
 			const $subId = $form.attr('data-stripeitem');
-			const renewaldate = $('#pauseSubRenewalDate').text();
+			const renewaldate = moment(Date.parse($('#pauseSubRenewalDate').text())).add(1, 'days').format('D MMM YYYY');
 
 			$form.find('.error-message').hide();
 			pauseSubscription($subId, renewaldate)
@@ -34,7 +34,7 @@ $(document).ready(function () {
 		})
 		//resume subscription
 		.on('click', '[data-modalopen="Resume-subscription"]', function () {
-			$('#resumeSubRenewalDate').text($(this).closest('[data-stripeitem]').attr('data-periodend').text());
+			$('#resumeSubRenewalDate, #resumedSubRenewalDate').text($(this).closest('[data-stripeitem]').attr('data-periodend'));
 			$('#resumeSubRenewalTotal').text($(this).closest('[data-stripeitem]').find('[data-id="renewal-amount"]').text());
 		})
 		.on('click', '#resumeSubscriptionConfirm', function (e) {
@@ -47,7 +47,6 @@ $(document).ready(function () {
 			resumeSubscription($subId)
 				.then(res => {
 					if (res.success) {
-						$('#resumedSubRenewalDate').text(renewaldate);
 						$form.find('form').hide();
 						$form.find('.success-message').show();
 					} else {
@@ -59,8 +58,12 @@ $(document).ready(function () {
 			;
 		})
 		//cancel subscription
-		.on('click', '[data-modalopen="Cancel-subscription"]', function () {
-
+		.on('change', '[name="cancellation-reason"]', function () {
+			if ($('[name="cancellation-reason"]:checked').val() == 'Other') {
+				$('#otherReasonText').show();
+			} else {
+				$('#otherReasonText').hide();
+			}
 		})
 		.on('click', '#cancelSubscriptionConfirm', function (e) {
 			e.preventDefault();
@@ -85,8 +88,8 @@ $(document).ready(function () {
 		;
 	;
 
-	function renderPausedSubRenewalDate(target) {
-		let date = moment(target.closest('[data-stripeitem]').find('[data-id="renewal-date"]').text()).add(parseFloat($('#pauseDuration').val()), 'months').format('D MMM YYYY');
+	function renderPauseSubRenewalDate(target) {
+		let date = moment(Date.parse(target.closest('[data-stripeitem]').find('[data-id="renewal-date"]').text())).add(parseFloat($('#pauseDuration').val()), 'months').subtract(1, 'days').format('D MMM YYYY');
 		$('#pauseSubRenewalDate').text(date);
 	}
 
@@ -152,7 +155,7 @@ $(document).ready(function () {
 					}
 
 					$('#subscriptionsList').append(`
-						<div class="cell vertical card" data-stripeitem="${subscription.id}" data-periodend"${moment.unix(subscription.current_period_end).format("DD MMM YYYY")}">
+						<div class="cell vertical card" data-stripeitem="${subscription.id}" data-periodend="${moment.unix(subscription.current_period_end).format("DD MMM YYYY")}">
 							<div class="cell-header">
 								<div class="w-layout-grid grid _2col auto a-center">
 									<div class="h5">${subscriptionTitle}</div>

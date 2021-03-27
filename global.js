@@ -54,7 +54,7 @@ async function signIn(email, pass) {
 			if (res.success) {
 				//set cookie with email and token
 				const date = new Date();
-				const minutes = 30;
+				const minutes = 1440;
 				date.setTime(date.getTime() + (minutes * 60 * 1000));
 				$.cookie.json = true;
 				const cookieData = { email: email, token: res.token };
@@ -160,6 +160,18 @@ async function pauseSubscription(id, date) {
 async function resumeSubscription(id) {
 	const method = "POST";
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/resume";
+	const body = {
+		id: id,
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res;
+		});
+}
+
+async function cancelSubscription(id) {
+	const method = "POST";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/cancel";
 	const body = {
 		id: id,
 	};
