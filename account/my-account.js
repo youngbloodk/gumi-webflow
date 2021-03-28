@@ -9,6 +9,7 @@ $(document).ready(function () {
 	$(document)
 		//active tab indication
 		.on('click', '[data-tab]', function () {
+			location.href;
 			$('.tab-indicator').removeClass('active');
 			$(this).find('.tab-indicator').addClass('active');
 			$('[data-tabpane]').hide();
