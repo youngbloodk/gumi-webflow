@@ -16,7 +16,7 @@ $(document).ready(function () {
 			const $duration = parseFloat($('#pauseDuration').val());
 			const $form = $(this).closest('[data-stripeitem]');
 			const $subId = $form.attr('data-stripeitem');
-			const renewaldate = moment(Date.parse($('#pauseSubRenewalDate').text())).add(1, 'days').format('D MMM YYYY');
+			const renewaldate = moment(Date.parse($('#pauseSubRenewalDate').text())).add(1, 'days').format('MMM Do, YYYY');
 
 			$form.find('.error-message').hide();
 			pauseSubscription($subId, renewaldate)
@@ -89,7 +89,7 @@ $(document).ready(function () {
 	;
 
 	function renderPauseSubRenewalDate(target) {
-		let date = moment(Date.parse(target.closest('[data-stripeitem]').find('[data-id="renewal-date"]').text())).add(parseFloat($('#pauseDuration').val()), 'months').subtract(1, 'days').format('D MMM YYYY');
+		let date = moment(Date.parse(target.closest('[data-stripeitem]').find('[data-id="renewal-date"]').text())).add(parseFloat($('#pauseDuration').val()), 'months').subtract(1, 'days').format('MMM Do, YYYY');
 		$('#pauseSubRenewalDate').text(date);
 	}
 
@@ -144,18 +144,18 @@ $(document).ready(function () {
 											<div class="divider no-margin"></div>
 											<a href="#" class="dropdown-menu-item" data-modalopen="Pause-subscription"><span class="font-awesome _12"> &nbsp</span> Pause subscription</a>
 											<div class="divider no-margin"></div>`;
-					let subscriptionRenewalDetails = `Your subscription will renew on <span class="text bold" data-id="renewal-date">${moment.unix(subscription.current_period_end).format("DD MMM YYYY")}</span>`;
+					let subscriptionRenewalDetails = `Your subscription will renew on <span class="text bold" data-id="renewal-date">${moment.unix(subscription.current_period_end).format('MMM Do, YYYY')}</span>`;
 
 					if (subscription.pause_collection) {
 						status = 'paused';
 						renewalDate = subscription.pause_collection.resumes_at;
 						pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Resume-subscription"><span class="font-awesome _12"> &nbsp</span> Resume subscription</a>
 											<div class="divider no-margin"></div>`;
-						subscriptionRenewalDetails = `Your subscription is paused until <span class="text bold" data-id="renewal-date">${moment.unix(subscription.pause_collection.resumes_at).format("DD MMM YYYY")}</span>, after which it will renew on it's original schedule`;
+						subscriptionRenewalDetails = `Your subscription is paused until <span class="text bold" data-id="renewal-date">${moment.unix(subscription.pause_collection.resumes_at).format('MMM Do, YYYY')}</span>, after which it will renew on it's original schedule`;
 					}
 
 					$('#subscriptionsList').append(`
-						<div class="cell vertical card" data-stripeitem="${subscription.id}" data-periodend="${moment.unix(subscription.current_period_end).format("DD MMM YYYY")}">
+						<div class="cell vertical card" data-stripeitem="${subscription.id}" data-periodend="${moment.unix(subscription.current_period_end).format('MMM Do, YYYY')}">
 							<div class="cell-header">
 								<div class="w-layout-grid grid _2col auto a-center">
 									<div class="h5">${subscriptionTitle}</div>
