@@ -2,7 +2,7 @@ $(document).ready(function () {
 	//condiditonal redirects
 	if (location.href.indexOf('?id=') < 0) {
 		location.href = '/signin';
-	} else if (PerformanceNavigation.type > 0 && !signedIn || location.href.indexOf('?id') < 0) {
+	} else if (performance.navigation.type > 0 && !signedIn || location.href.indexOf('?id') < 0) {
 		location.reload();
 	} else if (!signedIn || location.href.indexOf('?id') < 0) {
 		location.href = '/signin?redirect=true';

@@ -6,10 +6,19 @@ $(document).ready(function () {
 			renderProfile(user);
 		});
 	}
+
+	//account tab persist
+	let currentAccountTab = sessionStorage.getItem('accountTab');
+	if (currentAccountTab && performance.navigation.type > 0) {
+		setTimeout(() => {
+			$(`[data-tab="${currentAccountTab}"]`).trigger('click');
+		}, 1);
+	}
+
 	$(document)
 		//active tab indication
 		.on('click', '[data-tab]', function () {
-			location.href;
+			sessionStorage.setItem('accountTab', `${$(this).attr('data-tab')}`);
 			$('.tab-indicator').removeClass('active');
 			$(this).find('.tab-indicator').addClass('active');
 			$('[data-tabpane]').hide();
@@ -75,6 +84,38 @@ $(document).ready(function () {
 				}
 			});
 		})
+
+		//remove payment method
+		.on('click', '#removePaymentMethodConfirm', function (e) {
+			e.preventDefault();
+
+			const $form = $(this).closest('[data-stripeitem]');
+			const $id = $form.attr('data-stripeitem');
+			const $pass = $('#removePaymentMethodPass').val();
+
+			$form.find('.error-message').hide();
+			signIn(gumiAuth.email, $pass)
+				.then(res => {
+					if (res.success) {
+						removePaymentMethod($id)
+							.then(res => {
+								if (res.success) {
+									$form.find('form').hide();
+									$form.find('.success-message').show();
+								} else {
+									$('.button-loader').hide();
+									$form.find('.text.error').text('Whoops, there appears to be an issue. If this keeps happening, please let us know support@guminutrition.com');
+									$form.find('.error-message').show();
+								}
+							});
+						;
+					} else {
+						$('.button-loader').hide();
+						$form.find('.text.error').text(res.error);
+						$form.find('.error-message').show();
+					}
+				});
+		})
 		;
 	;
 
@@ -99,16 +140,17 @@ $(document).ready(function () {
 		//render payment methods
 		await getPaymentMethods(gumiAuth.token)
 			.then(methods => {
-				for (const method of methods.payment_methods) {
-					const cardIcons = {
-						visa: "",
-						amex: "",
-						mastercard: "",
-						jcb: "",
-						discover: "",
-						unionpay: ""
-					};
-					$('#paymentMethodsList').prepend(`
+				if (methods.payment_method_count > 0) {
+					for (const method of methods.payment_methods) {
+						const cardIcons = {
+							visa: "",
+							amex: "",
+							mastercard: "",
+							jcb: "",
+							discover: "",
+							unionpay: ""
+						};
+						$('#paymentMethodsList').prepend(`
 						<div class="w-layout-grid grid payment-method-card" data-stripeitem="${method.id}">
 							<div class="w-layout-grid grid _2col">
 								<div class="cell a-end">
@@ -129,14 +171,17 @@ $(document).ready(function () {
 							<div href="#" class="edit-card-bubble menu-dropdown">
 								<div class="font-awesome _12 menu-dropdown"></div>
 								<div class="menu-dropdown-list">
-									<a href="#" class="dropdown-menu-item" data-modalopen="Update-payment-method"><span class="font-awesome _12"> &nbsp</span>Update billing info</a>
-									<div class="divider no-margin"></div>
-									<a href="#" class="dropdown-menu-item" data-modalopen="Remove-payment-method"><span class="font-awesome"> &nbsp</span>Remove card</a>
+									<!-- <a href="#" class="dropdown-menu-item" data-modalopen="Update-payment-method"><span class="font-awesome _12"> &nbsp</span>Update billing info</a>
+									<div class="divider no-margin"></div> -->
+									<a href="#" class="dropdown-menu-item" data-modalopen="Remove-payment-method"><span class="font-awesome"> &nbsp</span>Remove payment method</a>
 								</div>
 							</div>
 						</div>
 					`);
-				};
+					};
+				} else {
+					$('.empty-payment-methods').show();
+				}
 			});
 		;
 	}
