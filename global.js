@@ -193,15 +193,13 @@ async function getProduct(id) {
 		});
 }
 
-async function getPaymentMethods(token) {
-	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods";
-	const body = {
-		token: token
-	};
-	return await request(method, url, body)
+async function getReviews(sku = '') {
+	const method = "GET";
+	const url = `https://gumi-api-dcln6.ondigitalocean.app/v1/reviews/${sku}`;
+
+	return await request(method, url)
 		.then(res => {
-			return res.success;
+			return res;
 		});
 }
 
@@ -217,9 +215,9 @@ async function getPaymentMethods(token) {
 		});
 }
 
-async function getInvoice(id) {
+async function removePaymentMethod(id) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoice";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods/detach";
 	const body = {
 		id: id
 	};
@@ -234,6 +232,18 @@ async function getInvoices(token) {
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoices";
 	const body = {
 		token: token
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res;
+		});
+}
+
+async function getInvoice(id) {
+	const method = "POST";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoice";
+	const body = {
+		id: id
 	};
 	return await request(method, url, body)
 		.then(res => {

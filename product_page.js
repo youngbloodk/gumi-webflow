@@ -1,4 +1,41 @@
 $(document).ready(function () {
+	getReviews($('#productcode').val())
+		.then(res => {
+			const reviews = res.success;
+			const count = reviews.length;
+			let ratings = {};
+			let ratingTotal = 0.00;
+			for (const review of reviews) {
+				if (!ratings[review.rating[0]]) {
+					ratings[review.rating[0]] = 0;
+				}
+				ratings[review.rating[0]]++;
+				ratingTotal += parseFloat(review.rating);
+			}
+			const meters = $('[data-reviewmeter]');
+			for (const meter of meters) {
+				const ratingNumber = ratings[$(meter).attr('data-reviewmeter')];
+				let percent = 0;
+				if (ratingNumber) {
+					percent = ratingNumber / count;
+				}
+				$(meter).find('.rating-meter-fill').css('width', `${percent * 100}%`);
+			}
+			const rating = Math.round((ratingTotal / reviews.length) * 4) / 4;
+
+			$('[data-reviews="count"]').text(count);
+			let finalRating;
+			if (rating.toString().indexOf('.') > 0) {
+				finalRating = rating.toFixed(2);
+			} else {
+				finalRating = rating.toFixed(1);
+			}
+			$('[data-reviews="rating"]').text(finalRating);
+			$('.stars-fill').css('width', `${rating / 5 * 100}%`);
+
+		});
+	;
+
 	$('form').trigger('change');
 	$(document)
 		.on('change', 'form', function () {
@@ -96,10 +133,8 @@ $(document).ready(function () {
 				});
 			}
 			localStorage.setItem('buildBox', JSON.stringify(storage));
-			window.location.pathname = "/box";
-		});
+			location.pathname = "/box";
+		})
+		;
+	;
 });
-
-// fbq('track', 'ViewContent', {
-	// content_name: "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
-// });
