@@ -1,38 +1,7 @@
 $(document).ready(function () {
 	getReviews($('#productcode').val())
 		.then(res => {
-			const reviews = res.success;
-			const count = reviews.length;
-			let ratings = {};
-			let ratingTotal = 0.00;
-			for (const review of reviews) {
-				if (!ratings[review.rating[0]]) {
-					ratings[review.rating[0]] = 0;
-				}
-				ratings[review.rating[0]]++;
-				ratingTotal += parseFloat(review.rating);
-			}
-			const meters = $('[data-reviewmeter]');
-			for (const meter of meters) {
-				const ratingNumber = ratings[$(meter).attr('data-reviewmeter')];
-				let percent = 0;
-				if (ratingNumber) {
-					percent = ratingNumber / count;
-				}
-				$(meter).find('.rating-meter-fill').css('width', `${percent * 100}%`);
-			}
-			const rating = Math.round((ratingTotal / reviews.length) * 4) / 4;
-
-			$('[data-reviews="count"]').text(count);
-			let finalRating;
-			if (rating.toString().indexOf('.') > 0) {
-				finalRating = rating.toFixed(2);
-			} else {
-				finalRating = rating.toFixed(1);
-			}
-			$('[data-reviews="rating"]').text(finalRating);
-			$('.stars-fill').css('width', `${rating / 5 * 100}%`);
-
+			renderReveiws(res);
 		});
 	;
 
@@ -137,4 +106,69 @@ $(document).ready(function () {
 		})
 		;
 	;
+	function renderReveiws(reviewData) {
+		const reviews = reviewData.success;
+
+		//calc & render review count
+		const count = reviews.length;
+		$('[data-reviews="count"]').text(count);
+
+		//calc rating totals
+		let ratings = {};
+		let ratingTotal = 0.00;
+		for (const review of reviews) {
+			if (!ratings[review.rating[0]]) {
+				ratings[review.rating[0]] = 0;
+			}
+			ratings[review.rating[0]]++;
+			ratingTotal += parseFloat(review.rating);
+		}
+		const rating = Math.round((ratingTotal / reviews.length) * 4) / 4;
+		let finalRating;
+		if (rating.toString().indexOf('.') > 0) {
+			finalRating = rating.toFixed(2);
+		} else {
+			finalRating = rating.toFixed(1);
+		}
+		$('[data-reviews="rating"]').text(finalRating);
+		$('.stars-fill').css('width', `${rating / 5 * 100}%`);
+
+		//render rating meters
+		const meters = $('[data-reviewmeter]');
+		for (const meter of meters) {
+			const ratingNumber = ratings[$(meter).attr('data-reviewmeter')];
+			let percent = 0;
+			if (ratingNumber) {
+				percent = ratingNumber / count;
+			}
+			$(meter).find('.rating-meter-fill').css('width', `${percent * 100}%`);
+		}
+
+		//render reviews
+		for (const review of reviews) {
+			const rating = parseInt(review.rating);
+			const percent = rating / 5;
+			const date = moment(review.review_date).format('MMM Do, YYYY');
+			let title = review.review_title;
+			if (!title) {
+				title = `${rating} stars`;
+			}
+			$('#reviewsList').append(`
+				<div class="w-layout-grid grid _1col row-gap-10">
+					<div class="w-layout-grid grid _2col _1fr-auto">
+						<div class="cell">
+							<div class="cell relative">
+								<div class="font-awesome stars-fill yellow" style="width: ${percent}%;"></div>
+								<div class="font-awesome-reg stars yellow"></div>
+							</div>
+						</div>
+						<div id="w-node-_252682f1-4915-c3a6-34d0-354212e5a59c-0f76a0b3" class="text right">${date}</div>
+					</div>
+					<div class="h5 semibold">${title}</div>
+					<div class="text">"${review.review}"</div>
+					<div class="text secondary bold">${review.first_name} ${review.last_name[0].toUpperCase()}. - Verified Buyer <span class="font-awesome blue"></span></div>
+				</div>
+			`);
+		}
+	}
 });
