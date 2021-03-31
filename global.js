@@ -226,6 +226,16 @@ async function getPaymentMethods(token) {
 		});
 }
 
+async function getPaymentMethod(id) {
+	const method = "GET";
+	const url = `https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods/${id}`;
+
+	return await request(method, url)
+		.then(res => {
+			return res.success;
+		});
+}
+
 async function removePaymentMethod(id) {
 	const method = "POST";
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods/detach";

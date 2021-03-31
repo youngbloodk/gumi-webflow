@@ -22,33 +22,62 @@ $(document).ready(function () {
 		} else {
 			displayError.textContent = '';
 		};
-
-		$pay.on('click', function (ev) {
-			ev.preventDefault();
-			const $newCard = $('#newPaymentMethod');
-			if ($newPaymentMethod.is(':checked')) {
-				stripe.createToken(card, {
-					name: `${storage.firstName} ${storage.lastName}`,
-					address_line1: storage.address.street,
-					address_city: storage.address.city,
-					address_state: storage.address.state,
-					address_zip: storage.address.zip,
-					address_country: "US"
-				}).then(result => {
-					if (result.error) {
-						console.log(result.error);
-						alert(result.error.message);
-					} else {
-						api_pay(result);
-					}
-				});
-			} else {
-				api_pay('', $newCard.val());
-			}
-		});
 	});
 
-	function api_pay(card_token, payment_method) {
+	$pay.on('click', function (ev) {
+		ev.preventDefault();
+		const $newCard = $('#newPaymentMethod');
+
+		if ($newCard.is(':checked')) {
+			stripe.createToken(card, {
+				name: `${storage.firstName} ${storage.lastName}`,
+				address_line1: storage.address.street,
+				address_city: storage.address.city,
+				address_state: storage.address.state,
+				address_zip: storage.address.zip,
+				address_country: "US"
+			}).then(result => {
+				if (result.error) {
+					$('.button-loader').hide();
+					console.log(result.error);
+					alert(result.error.message);
+				} else {
+					api_pay('card', result.token.id);
+				}
+			});
+		} else {
+			const $paymentMethodId = $('[name="paymentMethod"]:checked').val();
+			getPaymentMethod($paymentMethodId).then(p_m => {
+				api_pay('payment_method', p_m);
+			});
+		};
+
+	});
+	//type is either 'payment_method' or 'card' and data is the payment method object or token 
+	function api_pay(type, data) {
+
+		const body = {
+			email: storage.email,
+			password: "test",
+			first_name: storage.firstName,
+			last_name: storage.lastName,
+			street_address: storage.address.street,
+			city: storage.address.city,
+			state: storage.address.state,
+			zip: storage.address.zip,
+			items: JSON.parse(localStorage.buildBox),
+			coupon: $('#discountCode').val(),
+			meta: JSON.parse(localStorage.buildBoxMeta)
+		};
+		//add payment method to body
+		if (type == 'card') {
+			body.card = {
+				token: data
+			};
+		} else if (type == 'payment_method') {
+			body.payment_method = data;
+		}
+
 		fetch('https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/pay', {
 			method: "POST",
 			headers: {
@@ -57,37 +86,19 @@ $(document).ready(function () {
 				"Accept": "application/json",
 			},
 			mode: 'cors',
-			body: JSON.stringify({
-				email: storage.email,
-				password: "test",
-				first_name: storage.firstName,
-				last_name: storage.lastName,
-				street_address: storage.address.street,
-				city: storage.address.city,
-				state: storage.address.state,
-				zip: storage.address.zip,
-				card: {
-					token: card_token.token.id,
-					payment_method: payment_method
-				},
-				items: JSON.parse(localStorage.buildBox),
-				coupon: $('#discountCode').val(),
-				meta: JSON.parse(localStorage.buildBoxMeta)
-			})
+			body: JSON.stringify(body)
 		}).then(response => response.json())
 			.then(function (res) {
 				if (res.error) {
 					alert(res.error);
-					$pay.html(prev_pay_html);
+					$('.button-loader').hide();
 				} else {
 					$pay.html('Paid!');
 					localStorage.removeItem('buildBox');
 					localStorage.removeItem('buildBoxMeta');
-					localStorage.removeItem('discountcode');
+					sessionStorage.removeItem('discountcode');
 					location.href = `/receipt?id=${res.success.invoice_id}`;
 				}
-			}).catch(function (res) {
-				$pay.html(prev_pay_html);
 			});
 	}
 });

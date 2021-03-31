@@ -114,6 +114,7 @@ $(document).ready(function () {
 			$('#discountCode').val('');
 			$('#discountFieldRow').show();
 			$('#checkoutDiscount').text('$0.00');
+			sessionStorage.removeItem('discountcode');
 			renderCheckoutTotals('full');
 		})
 		.on('change', '[name="paymentMethod"]', function () {
@@ -242,9 +243,9 @@ $(document).ready(function () {
 		}
 		tax += evenRound(shipping * taxRate, 2);
 		$taxText.text(`$${tax.toFixed(2)}`);
-		$subscriptionRenewalPriceText.text(`$${subscriptionRenewalPrice.toFixed(2)}`);
-		$totalText.text(`$${total.toFixed(2)}`);
-		$('#payButton').text(`Pay $${total.toFixed(2)}`);
+		$subscriptionRenewalPriceText.text(`$${(subscriptionRenewalPrice + tax).toFixed(2)}`);
+		$totalText.text(`$${(total + tax).toFixed(2)}`);
+		$('#payButton').text(`Pay $${(total + tax).toFixed(2)}`);
 
 		// renewal date render
 		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -328,18 +329,18 @@ $(document).ready(function () {
 							let checked = '';
 							if (method == methods.payment_methods[0]) {
 								//needed to show which radio is checked with webflows elements
-								checkedClass = 'w--redirected-checked';
+								checkedClass = 'w--redirected-checked w--redirected-focus';
 								checked = 'checked';
 							}
 							$('#paymentMethodsList').append(`
-							<label id="w-node-_57bd3ecc-5e70-5d25-66a3-6afb99c0ebab-dc76a0ba" class="radio-button-field w-radio">
+							<label class="radio-button-field w-radio">
 								<div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button-basic w-radio-input ${checkedClass}" style="margin-right:10px;"></div>
-								<input type="radio" data-name="paymentMethod" id="paymentMethod" name="paymentMethod" value="${method.id}" required=""
+								<input type="radio" data-name="paymentMethod" name="paymentMethod" value="${method.id}" required=""
 									style="opacity:0;position:absolute;z-index:-1" checked="${checked}">
 								<div class="w-layout-grid grid _3col auto-auto-1fr column-gap-10 a-center">
-									<div id="cardBrand" class="font-awesome brands _20 grey">${cardIcons[method.card.brand]}</div>
-									<div id="cardExp" class="text">${method.card.exp_month}/${method.card.exp_year}</div>
-									<div id="cardLast4" class="text">${method.card.last4}</div>
+									<div class="font-awesome brands _20 grey">${cardIcons[method.card.brand]}</div>
+									<div class="text">${method.card.exp_month}/${method.card.exp_year}</div>
+									<div class="text">${method.card.last4}</div>
 								</div>
 							</label>
 							`);
