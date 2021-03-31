@@ -349,7 +349,7 @@ $(document).ready(function () {
 							<label id="addPaymentMethod" class="radio-button-field w-node-c90fe6ae-9af2-159e-65e9-06162562c27d-dc76a0ba w-radio">
 								<div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button-basic w-radio-input"></div>
 								<input type="radio" data-name="paymentMethod" id="newPaymentMethod" name="paymentMethod"
-									value="newPaymentMethod" required="" style="opacity:0;position:absolute;z-index:-1"><span for="newPaymentMethod"
+									value="" required="" style="opacity:0;position:absolute;z-index:-1"><span for="newPaymentMethod"
 									class="radio-button-label w-form-label">Add payment method</span>
 							</label>
 						`);

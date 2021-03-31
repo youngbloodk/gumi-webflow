@@ -25,7 +25,7 @@ $(document).ready(function () {
 
 		$pay.on('click', function (ev) {
 			ev.preventDefault();
-			const $newPaymentMethod = $('#newPaymentMethod');
+			const $newCard = $('#newPaymentMethod');
 			if ($newPaymentMethod.is(':checked')) {
 				stripe.createToken(card, {
 					name: `${storage.firstName} ${storage.lastName}`,
@@ -43,7 +43,7 @@ $(document).ready(function () {
 					}
 				});
 			} else {
-				api_pay('', $newPaymentMethod.val());
+				api_pay('', $newCard.val());
 			}
 		});
 	});
