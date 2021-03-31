@@ -506,7 +506,7 @@ $(document).ready(async function () {
 			$(this).closest('.button-wrap').find('.button-loader').show();
 			setTimeout(function () {
 				$('.button-loader').hide();
-			}, 3000);
+			}, 30000);
 		})
 
 		.on('click', '[data-button="reload"]', function () {
