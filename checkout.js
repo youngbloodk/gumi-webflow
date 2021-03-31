@@ -5,13 +5,13 @@ $(document).ready(function () {
 	renderCheckoutTotals('full');
 	updateCheckoutForm('render');
 	updateCheckoutRender();
+	renderPaymentOptions();
 
 	$(document)
 		.on('change', 'form :input', function () {
 			updateCheckoutForm('save');
 			renderCheckoutTotals();
 		})
-
 		.on('change', '#checkoutEmail', function () {
 			$('#welcomeMessageWrap').hide();
 			emailExists($(this).val())
@@ -33,7 +33,6 @@ $(document).ready(function () {
 				})
 				;
 		})
-
 		.on('click', '#signIn', async function () {
 			const $errorMessage = $('#errorMessage');
 			$errorMessage.hide();
@@ -51,11 +50,9 @@ $(document).ready(function () {
 				});
 
 		})
-
 		.on('input', '#checkoutZip', function () {
 			$(this).val($(this).val().replace(/[^0-9\.]/g, ''));
 		})
-
 		.on('click', '#payButton', function () {
 			$('.button-loader').show();
 			setTimeout(
@@ -64,7 +61,6 @@ $(document).ready(function () {
 				}, 20000);
 
 		})
-
 		.on('click', '#discountApply', function () {
 			const $error = $('#discountError');
 			const $discountAmountText = $('#checkoutDiscount');
@@ -113,13 +109,20 @@ $(document).ready(function () {
 				}, 5000);
 			}
 		})
-
 		.on('click', '#removeDiscount', function () {
 			localStorage.setItem('discountcode', '');
 			$('#discountCode').val('');
 			$('#discountFieldRow').show();
 			$('#checkoutDiscount').text('$0.00');
 			renderCheckoutTotals('full');
+		})
+		.on('change', '[name="paymentMethod"]', function () {
+			let $stripeCardElement = $('#stripeCardElement').show();
+			if ($('#newPaymentMethod').is(':checked')) {
+				$stripeCardElement.show();
+			} else {
+				$stripeCardElement.hide();
+			}
 		});
 	;
 
@@ -303,5 +306,57 @@ $(document).ready(function () {
 		}
 
 		renderCheckoutTotals();
+	}
+
+	async function renderPaymentOptions() {
+		if (signedIn) {
+			getPaymentMethods(gumiAuth.token)
+				.then(methods => {
+					if (methods.payment_method_count > 0) {
+						$('#stripeCardElement').hide();
+
+						for (const method of methods.payment_methods) {
+							const cardIcons = {
+								visa: "",
+								amex: "",
+								mastercard: "",
+								jcb: "",
+								discover: "",
+								unionpay: ""
+							};
+							let checkedClass = '';
+							let checked = '';
+							if (method == methods.payment_methods[0]) {
+								//needed to show which radio is checked with webflows elements
+								checkedClass = 'w--redirected-checked';
+								checked = 'checked';
+							}
+							$('#paymentMethodsList').append(`
+							<label id="w-node-_57bd3ecc-5e70-5d25-66a3-6afb99c0ebab-dc76a0ba" class="radio-button-field w-radio">
+								<div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button-basic w-radio-input ${checkedClass}" style="margin-right:10px;"></div>
+								<input type="radio" data-name="paymentMethod" id="paymentMethod" name="paymentMethod" value="${method.id}" required=""
+									style="opacity:0;position:absolute;z-index:-1" checked="${checked}">
+								<div class="w-layout-grid grid _3col auto-auto-1fr column-gap-10 a-center">
+									<div id="cardBrand" class="font-awesome brands _20 grey">${cardIcons[method.card.brand]}</div>
+									<div id="cardExp" class="text">${method.card.exp_month}/${method.card.exp_year}</div>
+									<div id="cardLast4" class="text">${method.card.last4}</div>
+								</div>
+							</label>
+							`);
+						};
+						$('#paymentMethodsList').append(`
+							<div class="divider no-margin"></div>
+							<label id="addPaymentMethod" class="radio-button-field w-node-c90fe6ae-9af2-159e-65e9-06162562c27d-dc76a0ba w-radio">
+								<div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button-basic w-radio-input"></div>
+								<input type="radio" data-name="paymentMethod" id="newPaymentMethod" name="paymentMethod"
+									value="newPaymentMethod" required="" style="opacity:0;position:absolute;z-index:-1"><span for="newPaymentMethod"
+									class="radio-button-label w-form-label">Add payment method</span>
+							</label>
+						`);
+					}
+				});
+			;
+		};
+
 	}
 });

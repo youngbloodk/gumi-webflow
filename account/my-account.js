@@ -150,7 +150,7 @@ $(document).ready(function () {
 							discover: "",
 							unionpay: ""
 						};
-						$('#paymentMethodsList').prepend(`
+						$('#paymentMethodsList').append(`
 						<div class="w-layout-grid grid payment-method-card" data-stripeitem="${method.id}">
 							<div class="w-layout-grid grid _2col">
 								<div class="cell a-end">
