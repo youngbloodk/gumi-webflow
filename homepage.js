@@ -1,4 +1,9 @@
 $(document).ready(function () {
+	getReviews()
+		.then(res => {
+			renderReveiws(res);
+		});
+	;
 	$(document)
 		.on('click', '#searchButton', function () {
 			//change search icon

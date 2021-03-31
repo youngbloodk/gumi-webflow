@@ -104,71 +104,65 @@ $(document).ready(function () {
 			localStorage.setItem('buildBox', JSON.stringify(storage));
 			location.pathname = "/box";
 		})
+
+		//review form handling
+		.on('click', '#writeReview', function () {
+			$('.modal').fadeIn(250);
+			$('#postReviewSku').val($('#productcode').val());
+		})
+		.on('click', '#closeModal', function () {
+			$('.modal').fadeOut(250);
+		})
+		.on('mouseover', '.radio-button-field.star.w-radio', function () {
+			if (!$("input[name='postReviewRating']:checked").val()) {
+				renderLeaveReviewStars($(this));
+			}
+		})
+		.on('click', '.radio-button-field.star.w-radio', function () {
+			renderLeaveReviewStars($(this));
+		})
+		.on('mouseout', '#starsRatingWrap', function () {
+			if (!$("input[name='postReviewRating']:checked").val()) {
+				$(this).find('.hide').hide();
+			}
+		})
+		.on('click', '#submitReview', function (e) {
+			e.preventDefault();
+			const reviewData = {
+				email: $('#postReviewEmail').val(),
+				first_name: $('#postReviewFirstName').val(),
+				last_name: $('#postReviewLastName').val(),
+				review_title: $('#postReviewTitle').val(),
+				review: $('#postReviewText').val(),
+				rating: $('[name="postReviewRating"]:checked').val(),
+				product_sku: $('#postReviewSku').val(),
+				review_date: moment()._d
+			};
+			postReview(reviewData)
+				.then(res => {
+					let $form = $('#postReviewFormWrap');
+					if (res.success) {
+						$form.find('form').hide();
+						$form.find('.success-message').show();
+					} else {
+						$('.button-loader').hide();
+						$form.find('.text.error').text('Whoops, there appears to be an issue. If this keeps happening, please let us know support@guminutrition.com');
+						$form.find('.error-message').show();
+					}
+				});
+			;
+		})
 		;
 	;
-	function renderReveiws(reviewData) {
-		const reviews = reviewData.success;
-
-		//calc & render review count
-		const count = reviews.length;
-		$('[data-reviews="count"]').text(count);
-
-		//calc rating totals
-		let ratings = {};
-		let ratingTotal = 0.00;
-		for (const review of reviews) {
-			if (!ratings[review.rating[0]]) {
-				ratings[review.rating[0]] = 0;
+	function renderLeaveReviewStars(target) {
+		let stars = $('.radio-button-field.star.w-radio');
+		let starNumber = parseInt(target.find('input').val());
+		for (const star of stars) {
+			if ($(star).find('input').val() <= starNumber) {
+				$(star).find('.hide').show();
+			} else {
+				$(star).find('.hide').hide();
 			}
-			ratings[review.rating[0]]++;
-			ratingTotal += parseFloat(review.rating);
-		}
-		const rating = Math.round((ratingTotal / reviews.length) * 4) / 4;
-		let finalRating;
-		if (rating.toString().indexOf('.') > 0) {
-			finalRating = rating.toFixed(2);
-		} else {
-			finalRating = rating.toFixed(1);
-		}
-		$('[data-reviews="rating"]').text(finalRating);
-		$('.stars-fill').css('width', `${rating / 5 * 100}%`);
-
-		//render rating meters
-		const meters = $('[data-reviewmeter]');
-		for (const meter of meters) {
-			const ratingNumber = ratings[$(meter).attr('data-reviewmeter')];
-			let percent = 0;
-			if (ratingNumber) {
-				percent = ratingNumber / count;
-			}
-			$(meter).find('.rating-meter-fill').css('width', `${percent * 100}%`);
-		}
-
-		//render reviews
-		for (const review of reviews) {
-			const rating = parseInt(review.rating);
-			const percent = rating / 5;
-			const date = moment(review.review_date).format('MMM Do, YYYY');
-			let title = review.review_title;
-			if (!title) {
-				title = `${rating} stars`;
-			}
-			$('#reviewsList').append(`
-				<div class="w-layout-grid grid _1col row-gap-10">
-					<div class="w-layout-grid grid _2col _1fr-auto">
-						<div class="cell">
-							<div class="cell relative">
-								<div class="font-awesome stars-fill yellow" style="width: ${percent}%;"></div>
-								<div class="font-awesome-reg stars yellow"></div>
-							</div>
-						</div>
-						<div id="w-node-_252682f1-4915-c3a6-34d0-354212e5a59c-0f76a0b3" class="text right">${date}</div>
-					</div>
-					<div class="h5 semibold">${title}</div>
-					<div class="text">"${review.review}"</div>
-					<div class="text secondary bold">${review.first_name} ${review.last_name[0].toUpperCase()}. - Verified Buyer <span class="font-awesome blue"></span></div>
-				</div>
-			`);
 		}
 	}
 });
