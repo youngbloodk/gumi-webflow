@@ -95,6 +95,9 @@ $(document).ready(function () {
 				event.preventDefault();
 				alert('Your Box is empty. Add some products to get started!');
 			}
+			if (!$('#sub_frequency').val()) {
+				alert('Please choose a subscription frequency.');
+			}
 		});
 	;
 

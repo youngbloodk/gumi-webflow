@@ -402,7 +402,10 @@ function renderMetaFromStorage() {
 	if (sub_val != storage.is_sub) {
 		evaluateSub(storage);
 	}
-	$('.select').val(storage.freq).trigger('change');
+	if (!$('#sub_frequency').val()) {
+		$('#subFrequency').val('1m').trigger('change');
+	}
+	$('#subFrequency').val(storage.freq).trigger('change');
 }
 
 function evaluateSub(storage = null) {
