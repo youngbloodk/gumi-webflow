@@ -1,6 +1,6 @@
 $(document).ready(function () {
 	if (!signedIn) {
-		window.location.href = '/signin';
+		location.href = '/signin';
 	} else {
 		currentUser.then(user => {
 			renderProfile(user);
