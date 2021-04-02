@@ -144,6 +144,42 @@ async function getSubscriptions(token) {
 		});
 }
 
+async function updateSubItemQuantity(id, quantity) {
+	const method = "POST";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/item/quantity";
+	const body = {
+		item_id: id,
+		quantity: quantity
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res;
+		});
+}
+
+async function deleteSubItem(id) {
+	const method = "DELETE";
+	const url = `https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/item/${id}`;
+
+	return await request(method, url)
+		.then(res => {
+			return res;
+		});
+}
+
+async function updateSubFreq(sub_id, freq) {
+	const method = "POST";
+	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/change-freq";
+	const body = {
+		sub_id: sub_id,
+		freq: freq
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res;
+		});
+}
+
 async function pauseSubscription(id, date) {
 	const method = "POST";
 	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/pause";
@@ -326,7 +362,7 @@ function renderReveiws(reviewData) {
 	for (const review of reviews) {
 		const rating = parseInt(review.rating);
 		const percent = rating / 5;
-		const date = moment(review.review_date).format('MMM Do, YYYY');
+		const date = moment(review.review_date).format('MMM D, YYYY');
 		let title = review.review_title;
 		if (!title) {
 			title = `${rating} stars`;

@@ -36,7 +36,7 @@ $(document).ready(function () {
 					});
 
 					$('#receiptNumber').text(invoice.number);
-					$('#receiptDate').text(moment.unix(invoice.created).format("DD MMM YYYY"));
+					$('#receiptDate').text(moment.unix(invoice.created).format("MMM D, YYYY"));
 					$('#receiptEmail').text(invoice.customer_email);
 					$('#receiptAddress')
 						.html(

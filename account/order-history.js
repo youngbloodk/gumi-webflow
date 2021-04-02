@@ -14,7 +14,7 @@ $(document).ready(function () {
 						<div class="w-layout-grid grid _3col row-gap-0 tablet-3-col mobile-portait-1-col">
 							<div class="text semibold">${order.number}</div>
 							<div class="text">$${(order.amount_paid / 100).toFixed(2)}</div>
-							<div class="text">${moment.unix(order.created).format('MMM Do, YYYY')}</div>
+							<div class="text">${moment.unix(order.created).format('MMM D, YYYY')}</div>
 						</div>
 						<div class="font-awesome grey"></div>
 					</a>
