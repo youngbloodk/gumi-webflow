@@ -2,6 +2,7 @@
 let signedIn = !$.cookie('gumiAuth') == false;
 let gumiAuth;
 let currentUser;
+const apiUrl = 'https://gumi-api-dcln6.ondigitalocean.app/v1';
 
 
 if (signedIn) {
@@ -44,7 +45,7 @@ async function request(method, url, body) {
 
 async function signIn(email, pass) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/sign-in";
+	const url = `${apiUrl}/user/sign-in`;
 	const body = {
 		email: email,
 		password: pass
@@ -69,9 +70,36 @@ function signOut() {
 	location.reload();
 }
 
+async function forgotPass(email) {
+	const method = "POST";
+	const url = `${apiUrl}/user/forgot-password`;
+	const body = {
+		email: email
+	};
+	return await request(method, url, body)
+		.then(async res => {
+			return res;
+		});
+	;
+}
+
+async function uuidPassChange(uuid, pass) {
+	const method = "POST";
+	const url = `${apiUrl}/user/uuid-password-change`;
+	const body = {
+		uuid: uuid,
+		password: pass
+	};
+	return await request(method, url, body)
+		.then(async res => {
+			return res;
+		});
+	;
+}
+
 async function verifyToken(token) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user//verify-token";
+	const url = `${apiUrl}/user/verify-token`;
 	const body = {
 		token: token
 	};
@@ -84,7 +112,7 @@ async function verifyToken(token) {
 
 async function emailExists(email) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/email-exists";
+	const url = `${apiUrl}/user/email-exists`;
 	const body = {
 		email: email
 	};
@@ -96,7 +124,7 @@ async function emailExists(email) {
 
 async function getUser(email, token) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/get-user";
+	const url = `${apiUrl}/user/get-user`;
 	const body = {
 		email: email,
 		token: token
@@ -110,7 +138,7 @@ async function getUser(email, token) {
 //token required in body
 async function updateUser(data) {
 	const method = "PUT";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/";
+	const url = `${apiUrl}/user/`;
 	return await request(method, url, data)
 		.then(res => {
 			return res.success;
@@ -119,7 +147,7 @@ async function updateUser(data) {
 
 async function changePass(token, currentPass, newPass) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/user/change-password";
+	const url = `${apiUrl}/user/change-password`;
 	const body = {
 		token: token,
 		current_pass: currentPass,
@@ -134,7 +162,7 @@ async function changePass(token, currentPass, newPass) {
 
 async function getSubscriptions(token) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions";
+	const url = `${apiUrl}/stripe/subscriptions`;
 	const body = {
 		token: token
 	};
@@ -143,12 +171,23 @@ async function getSubscriptions(token) {
 			return res.success;
 		});
 }
-
-async function updateSubItemQuantity(id, quantity) {
+async function getSubitemOptions(sub_id) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/item/quantity";
+	const url = `${apiUrl}/stripe/subscriptions/item/options`;
 	const body = {
-		item_id: id,
+		sub_id: sub_id,
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res;
+		});
+}
+
+async function updateSubItemQuantity(item_id, quantity) {
+	const method = "POST";
+	const url = `${apiUrl}/stripe/subscriptions/item/quantity`;
+	const body = {
+		item_id: item_id,
 		quantity: quantity
 	};
 	return await request(method, url, body)
@@ -157,9 +196,9 @@ async function updateSubItemQuantity(id, quantity) {
 		});
 }
 
-async function deleteSubItem(id) {
+async function deleteSubItem(item_id) {
 	const method = "DELETE";
-	const url = `https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/item/${id}`;
+	const url = `${apiUrl}/stripe/subscriptions/item/${item_id}`;
 
 	return await request(method, url)
 		.then(res => {
@@ -169,7 +208,7 @@ async function deleteSubItem(id) {
 
 async function updateSubFreq(sub_id, freq) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/change-freq";
+	const url = `${apiUrl}/stripe/subscriptions/change-freq`;
 	const body = {
 		sub_id: sub_id,
 		freq: freq
@@ -182,7 +221,7 @@ async function updateSubFreq(sub_id, freq) {
 
 async function pauseSubscription(id, date) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/pause";
+	const url = `${apiUrl}/stripe/subscriptions/pause`;
 	const body = {
 		id: id,
 		custom_date: date
@@ -195,7 +234,7 @@ async function pauseSubscription(id, date) {
 
 async function resumeSubscription(id) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/resume";
+	const url = `${apiUrl}/stripe/subscriptions/resume`;
 	const body = {
 		id: id,
 	};
@@ -207,7 +246,7 @@ async function resumeSubscription(id) {
 
 async function cancelSubscription(id) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/subscriptions/cancel";
+	const url = `${apiUrl}/stripe/subscriptions/cancel`;
 	const body = {
 		id: id,
 	};
@@ -219,7 +258,7 @@ async function cancelSubscription(id) {
 
 async function getProduct(id) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/product";
+	const url = `${apiUrl}/stripe/product`;
 	const body = {
 		id: id
 	};
@@ -231,7 +270,7 @@ async function getProduct(id) {
 
 async function getReviews(sku = '') {
 	const method = "GET";
-	const url = `https://gumi-api-dcln6.ondigitalocean.app/v1/reviews/${sku}`;
+	const url = `${apiUrl}/reviews/${sku}`;
 
 	return await request(method, url)
 		.then(res => {
@@ -241,7 +280,7 @@ async function getReviews(sku = '') {
 
 async function postReview(reviewData) {
 	const method = "POST";
-	const url = `https://gumi-api-dcln6.ondigitalocean.app/v1/reviews`;
+	const url = `${apiUrl}/reviews`;
 	const body = reviewData;
 
 	return await request(method, url, body)
@@ -252,7 +291,7 @@ async function postReview(reviewData) {
 
 async function getPaymentMethods(token) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods";
+	const url = `${apiUrl}/stripe/payment-methods`;
 	const body = {
 		token: token
 	};
@@ -264,7 +303,7 @@ async function getPaymentMethods(token) {
 
 async function getPaymentMethod(id) {
 	const method = "GET";
-	const url = `https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods/${id}`;
+	const url = `${apiUrl}/stripe/payment-methods/${id}`;
 
 	return await request(method, url)
 		.then(res => {
@@ -274,7 +313,7 @@ async function getPaymentMethod(id) {
 
 async function removePaymentMethod(id) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/payment-methods/detach";
+	const url = `${apiUrl}/stripe/payment-methods/detach`;
 	const body = {
 		id: id
 	};
@@ -286,7 +325,7 @@ async function removePaymentMethod(id) {
 
 async function getInvoices(token) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoices";
+	const url = `${apiUrl}/stripe/invoices`;
 	const body = {
 		token: token
 	};
@@ -298,7 +337,7 @@ async function getInvoices(token) {
 
 async function getInvoice(id) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/invoice";
+	const url = `${apiUrl}/stripe/invoice`;
 	const body = {
 		id: id
 	};
@@ -310,7 +349,7 @@ async function getInvoice(id) {
 
 async function couponExists(coupon) {
 	const method = "POST";
-	const url = "https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/coupon-exists";
+	const url = `${apiUrl}/stripe/coupon-exists`;
 	const body = {
 		value: coupon.toLowerCase()
 	};

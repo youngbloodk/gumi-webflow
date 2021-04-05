@@ -1,6 +1,6 @@
 $(document).ready(function () {
     if (signedIn) {
-        location.href = '/account/home';
+        location.href = '/account';
     }
     $(document)
         .on('click', '#signInButton', async function (e) {
@@ -18,7 +18,7 @@ $(document).ready(function () {
                         if (getURLParam('redirect') && document.referrer.indexOf(location.host) > 0) {
                             location.href = document.referrer;
                         } else {
-                            location.href = '/account/home';
+                            location.href = '/account';
                         }
                     } else {
                         $errorMessageText.html(res.error.replace('Server:', ''));
@@ -26,6 +26,28 @@ $(document).ready(function () {
                     }
                 });
             ;
-        });
+        })
+        .on('click', '#forgotPass', function () {
+            $('.modal').fadeIn(250);
+        })
+        .on('click', '#forgotPassConfirm', function () {
+            const $form = $(this).closest('.form');
+
+            $form.find('.error-message').hide();
+            forgotPass($('#forgotPassEmail').val()).then(res => {
+                if (res.success) {
+                    $form.find('form').hide();
+                    $form.find('.success-message').show();
+                } else {
+                    $('.button-loader').hide();
+                    $form.find('.text.error').text(errorText);
+                    $form.find('.error-message').show();
+                }
+            });
+        })
+        .on('click', '[data-modal="close"]', function () {
+            $('.modal').fadeOut(250);
+        })
+        ;
     ;
 });
