@@ -5,7 +5,7 @@ let currentUser;
 const apiUrl = 'https://gumi-api-dcln6.ondigitalocean.app/v1';
 
 
-if (signedIn) {
+if(signedIn) {
 	// verifyToken(JSON.parse($.cookie('gumiAuth')).token).then(res => {
 	// 	if (res.valid == true) {
 	gumiAuth = JSON.parse($.cookie('gumiAuth'));
@@ -17,7 +17,7 @@ if (signedIn) {
 // global functions
 function renderBoxCount() {
 	const boxData = JSON.parse(localStorage.getItem('buildBox'));
-	if (boxData) {
+	if(boxData) {
 		let boxTotals = [];
 		boxData.forEach(element => boxTotals.push(element.quantity));
 		let boxCount = boxTotals.reduce((a, b) => a + b, 0);
@@ -52,14 +52,14 @@ async function signIn(email, pass) {
 	};
 	return await request(method, url, body)
 		.then(async res => {
-			if (res.success) {
+			if(res.success) {
 				//set cookie with email and token
 				const date = new Date();
 				const minutes = 1440;
 				date.setTime(date.getTime() + (minutes * 60 * 1000));
 				$.cookie.json = true;
-				const cookieData = { email: email, token: res.token };
-				$.cookie('gumiAuth', cookieData, { expires: date });
+				const cookieData = {email: email, token: res.token};
+				$.cookie('gumiAuth', cookieData, {expires: date});
 			}
 			return res;
 		});
@@ -160,6 +160,16 @@ async function changePass(token, currentPass, newPass) {
 
 }
 
+async function apiPay(body) {
+	const method = "POST";
+	const url = `${apiUrl}/stripe/pay`;
+
+	return await request(method, url, body)
+		.then(res => {
+			return res;
+		});
+}
+
 async function getSubscriptions(token) {
 	const method = "POST";
 	const url = `${apiUrl}/stripe/subscriptions`;
@@ -171,6 +181,7 @@ async function getSubscriptions(token) {
 			return res.success;
 		});
 }
+
 async function getSubitemOptions(sub_id) {
 	const method = "POST";
 	const url = `${apiUrl}/stripe/subscriptions/item/options`;
@@ -369,8 +380,8 @@ function renderReveiws(reviewData) {
 	//calc rating totals
 	let ratings = {};
 	let ratingTotal = 0.00;
-	for (const review of reviews) {
-		if (!ratings[review.rating[0]]) {
+	for(const review of reviews) {
+		if(!ratings[review.rating[0]]) {
 			ratings[review.rating[0]] = 0;
 		}
 		ratings[review.rating[0]]++;
@@ -378,7 +389,7 @@ function renderReveiws(reviewData) {
 	}
 	const rating = Math.round((ratingTotal / reviews.length) * 4) / 4;
 	let finalRating;
-	if (rating.toString().indexOf('.') > 0) {
+	if(rating.toString().indexOf('.') > 0) {
 		finalRating = rating.toFixed(2);
 	} else {
 		finalRating = rating.toFixed(1);
@@ -388,26 +399,26 @@ function renderReveiws(reviewData) {
 
 	//render rating meters
 	const meters = $('[data-reviewmeter]');
-	for (const meter of meters) {
+	for(const meter of meters) {
 		const ratingNumber = ratings[$(meter).attr('data-reviewmeter')];
 		let percent = 0;
-		if (ratingNumber) {
+		if(ratingNumber) {
 			percent = ratingNumber / count;
 		}
 		$(meter).find('.rating-meter-fill').css('width', `${percent * 100}%`);
 	}
 
 	//render reviews
-	for (const review of reviews) {
+	for(const review of reviews) {
 		const rating = parseInt(review.rating);
 		const percent = rating / 5;
 		const date = moment(review.review_date).format('MMM D, YYYY');
 		let title = review.review_title;
-		if (!title) {
+		if(!title) {
 			title = `${rating} stars`;
 		}
 		let name = `${review.first_name} ${review.last_name[0].toUpperCase()}. - `;
-		if (!review.first_name) {
+		if(!review.first_name) {
 			name = '';
 		}
 		$('#reviewsList').append(`
@@ -446,12 +457,12 @@ function addCheckoutItem(item, quantity = 1) {
 	let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
 	let freq_info = '';
 	let removeButton = '';
-	if (is_sub) {
+	if(is_sub) {
 		let freq_name = $('.select option:selected').text();
 		freq_info = `${freq_name}`;
 	} else {
 		freq_info = `Just this once`;
-	} if (location.href.indexOf('box') > 0) {
+	} if(location.href.indexOf('box') > 0) {
 		removeButton = `<div style="color: red; cursor: pointer;" class="text remove-button">Remove</div>`;
 	}
 	$('#boxItemsList').append(`
@@ -474,20 +485,20 @@ function addCheckoutItem(item, quantity = 1) {
 function renderMetaFromStorage() {
 	let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 	let sub_val = $('input[type="radio"][name="subscription"]:checked').val() == "true";
-	if (sub_val != storage.is_sub) {
+	if(sub_val != storage.is_sub) {
 		evaluateSub(storage);
 	}
-	if (!$('#sub_frequency').val()) {
+	if(!$('#sub_frequency').val()) {
 		$('#subFrequency').val('1m').trigger('change');
 	}
 	$('#subFrequency').val(storage.freq).trigger('change');
 }
 
 function evaluateSub(storage = null) {
-	if (storage === null) {
+	if(storage === null) {
 		storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 	}
-	if (storage.is_sub) {
+	if(storage.is_sub) {
 		$('#true').click().attr('checked', true);
 		$('#true').closest('div').find('.text').addClass('light');
 		$('#false').closest('div').find('.text').removeClass('light');
@@ -511,19 +522,19 @@ function updateCheckoutRender() {
 	let shipping = 0.00;
 	let totalQuant = renderBoxCount();
 
-	for (const item of storage) {
+	for(const item of storage) {
 		const item_data = getItemDataFromSku(item.sku);
 		subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
 	}
-	if (totalQuant == 1) {
+	if(totalQuant == 1) {
 		shipping = 5.00;
-	} else if (totalQuant >= 2 && totalQuant <= 6) {
+	} else if(totalQuant >= 2 && totalQuant <= 6) {
 		shipping = 8.50;
-	} else if (totalQuant > 6) {
+	} else if(totalQuant > 6) {
 		shipping = 12.00;
 	}
 
-	if (is_sub) {
+	if(is_sub) {
 		$('#shippingTitleText').text('Free Shipping 🎉');
 		$('#shippingAmount').text(`$0.00`);
 	} else {
@@ -536,7 +547,7 @@ function updateCheckoutRender() {
 	$('#subtotalAcutal, #checkoutSubtotal').text(`$${subtotal.toFixed(2)}`);
 
 
-	if (storage.length > 0) {
+	if(storage.length > 0) {
 		$emptyMessage.hide();
 		$continueBlock.show();
 		$('#emptyWrap').addClass('middle');
@@ -560,7 +571,7 @@ function getItemDataFromBuildBoxItem($el) {
 	let data = {
 		freq: parseInt($('#sub_frequency').val()) > 0 ? $('.product-select').val() : null
 	};
-	$product_data.each(function () {
+	$product_data.each(function() {
 		const name = $(this).attr('name');
 		const value = $(this).attr('value');
 		data[name] = value;
@@ -569,11 +580,11 @@ function getItemDataFromBuildBoxItem($el) {
 }
 
 //global on ready
-$(document).ready(async function () {
+$(document).ready(async function() {
 
 	renderBoxCount();
 
-	if (signedIn) {
+	if(signedIn) {
 		$('[data-id="signIn"]').hide();
 		$('[data-id="myAccount"]').show();
 		$('[data-id="signOut"]').show();
@@ -585,25 +596,25 @@ $(document).ready(async function () {
 
 	$(document)
 
-		.on('click', '[data-id="signOut"]', function () {
+		.on('click', '[data-id="signOut"]', function() {
 			signOut();
 		})
 
 		//button loaders global
-		.on('click', '.button', function () {
+		.on('click', '.button', function() {
 			$(this).closest('.button-wrap').find('.button-loader').show();
-			setTimeout(function () {
+			setTimeout(function() {
 				$('.button-loader').hide();
 			}, 30000);
 		})
 
-		.on('click', '[data-button="reload"]', function () {
+		.on('click', '[data-button="reload"]', function() {
 			location.reload();
 		})
 
 		//prevent body scroll when mobile menu is open
-		.on('click', 'mobile-menu-icon', function () {
-			if ($('.nav-menu').is(':visible')) {
+		.on('click', 'mobile-menu-icon', function() {
+			if($('.nav-menu').is(':visible')) {
 				$('body').css('overflow', 'hidden');
 			} else {
 				$('body').css('overflow', 'auto');
