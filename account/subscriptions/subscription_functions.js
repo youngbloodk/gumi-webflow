@@ -25,17 +25,17 @@ async function renderSubscriptions() {
 					taxRate = subscription.default_tax_rates[0].percentage / 100;
 					tax = total * taxRate;
 					taxInfo = `<div class="w-layout-grid grid _1col row-gap-0">
-										<div class="w-layout-grid grid _2col _1fr-auto">
-											<div class="text">Tax:</div>
-											<div class="text right">$${tax}</div>
-										</div>
-										<div class="w-layout-grid grid _2col _1fr-auto">
-											<div class="text bold">Total:</div>
-											<div class="text right bold">$${(total + tax).toFixed(2)}</div>
-										</div>
+									<div class="w-layout-grid grid _2col _1fr-auto">
+										<div class="text">Tax:</div>
+										<div class="text right">$${tax}</div>
 									</div>
-									<div class="divider no-margin"></div>
-									`;
+									<div class="w-layout-grid grid _2col _1fr-auto">
+										<div class="text bold">Total:</div>
+										<div class="text right bold">$${(total + tax).toFixed(2)}</div>
+									</div>
+								</div>
+								<div class="divider no-margin"></div>
+								`;
 				}
 
 				let status = 'active';
@@ -129,6 +129,19 @@ async function renderSubItems(subItems, type) {
 		;
 	};
 	return subItemsList;
+}
+async function renderItemAddOptions(sub_id) {
+	let optionsList = [];
+
+	await getSubitemOptions(sub_id)
+		.then(options => {
+			for (const option of options.success) {
+				optionsList.push(`
+					<option value="${option.price_id}">${option.name}</option>
+				`);
+			}
+		});
+	return optionsList;
 }
 
 /*data should be an object with subscription data to update

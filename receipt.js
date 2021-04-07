@@ -1,11 +1,11 @@
-$(document).ready(function () {
+$(document).ready(function() {
 	//condiditonal redirects
-	if (location.href.indexOf('?id=') < 0) {
+	if(location.href.indexOf('?id=') < 0) {
 		location.href = '/signin';
-	} else if (performance.navigation.type > 0 && !signedIn || location.href.indexOf('?id') < 0) {
+	} else if(performance.navigation.type > 0 && !signedIn || location.href.indexOf('?id') < 0) {
 		location.reload();
-	} else if (!signedIn || location.href.indexOf('?id') < 0) {
-		location.href = '/signin?redirect=true';
+	} else if(getURLParam('paid')) {
+		renderReceipt();
 	} else {
 		renderReceipt();
 	}
@@ -14,7 +14,7 @@ $(document).ready(function () {
 		await getInvoice(getURLParam('id'))
 			.then(async res => {
 				let invoice = res.success;
-				if (invoice.customer_email !== gumiAuth.email) {
+				if(invoice.customer_email !== gumiAuth.email && document.referrer.indexOf('pay') < 0) {
 					alert(`You are not authorized to view this receipt. Please sign in and try again.`);
 					location.href = '/signin';
 				} else {
@@ -29,8 +29,8 @@ $(document).ready(function () {
 						unionpay: ""
 					};
 					//get shipping amount
-					const shipping = invoice.lines.data.find(function (line, index) {
-						if (line.description.toLowerCase().indexOf('shipping') > 1) {
+					const shipping = invoice.lines.data.find(function(line, index) {
+						if(line.description.toLowerCase().indexOf('shipping') > 1) {
 							return true;
 						}
 					});
@@ -49,15 +49,15 @@ $(document).ready(function () {
 					$('#cardBrand').text(cardIcons[card.brand]);
 					$('#cardExp').text(`${card.exp_month}/${card.exp_year}`);
 					$('#cardLast4').text(card.last4);
-					for (const lineItem of invoice.lines.data) {
+					for(const lineItem of invoice.lines.data) {
 						//render only non-shipping products
-						if (lineItem.description.toLowerCase().indexOf('shipping') < 0) {
+						if(lineItem.description.toLowerCase().indexOf('shipping') < 0) {
 							await getProduct(lineItem.price.product)
 								.then(product => {
 									let frequencyInfo = "Just this once";
-									if (lineItem.price.type == "recurring") {
+									if(lineItem.price.type == "recurring") {
 										let interval = lineItem.price.recurring.interval;
-										if (lineItem.price.recurring.interval_count > 1) {
+										if(lineItem.price.recurring.interval_count > 1) {
 											interval = `${lineItem.price.recurring.interval}s`;
 										}
 										frequencyInfo = `Every ${lineItem.price.recurring.interval_count} ${interval}`;
@@ -79,11 +79,11 @@ $(document).ready(function () {
 						}
 					};
 					$('#receiptSubtotal').text(`$${(invoice.subtotal / 100).toFixed(2)}`);
-					if (shipping) {
+					if(shipping) {
 						$('#receiptShipping').text(`$${(shipping.amount / 100).toFixed(2)}`);
 					}
 					//calculate discount total
-					if (invoice.total_discount_amounts.length > 0) {
+					if(invoice.total_discount_amounts.length > 0) {
 						invoice.total_discount_amounts.forEach(discount => {
 							discountTotal += (discount.amount / 100);
 						});
@@ -91,7 +91,7 @@ $(document).ready(function () {
 					} else {
 						$('#discountLine').hide();
 					}
-					if (invoice.tax) {
+					if(invoice.tax) {
 						$('#receiptTax').text(`$${(invoice.tax / 100).toFixed(2)}`);
 					}
 					$('#receiptTotal').text(`$${(invoice.amount_paid / 100).toFixed(2)}`);

@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).ready(function() {
 	init();
 	renderMetaFromStorage();
 	renderCheckoutFromStorage();
@@ -8,21 +8,21 @@ $(document).ready(function () {
 	renderPaymentOptions();
 
 	$(document)
-		.on('change', 'form :input', function () {
+		.on('change', 'form :input', function() {
 			updateCheckoutForm('save');
 			renderCheckoutTotals();
 		})
-		.on('change', '#checkoutEmail', function () {
+		.on('change', '#checkoutEmail', function() {
 			$('#welcomeMessageWrap').hide();
 			emailExists($(this).val())
 				.then(async res => {
-					if (res.exists == true && !signedIn) {
+					if(res.exists == true && !signedIn) {
 						$('#passwordWrap').show();
 						$('#checkoutPassword').prop('required', true);
-					} else if (res.exists == true && signedIn && gumiAuth.email == $('#checkoutEmail').val()) {
+					} else if(res.exists == true && signedIn && gumiAuth.email == $('#checkoutEmail').val()) {
 						$('#passwordWrap').hide();
 						$('#welcomeMessageWrap').show();
-					} else if (res.exists == true && signedIn && gumiAuth.email !== $('#checkoutEmail').val()) {
+					} else if(res.exists == true && signedIn && gumiAuth.email !== $('#checkoutEmail').val()) {
 						$('#passwordWrap').show();
 						$('#welcomeMessageWrap').hide();
 					} else {
@@ -33,7 +33,7 @@ $(document).ready(function () {
 				})
 				;
 		})
-		.on('click', '#signIn', async function () {
+		.on('click', '#signIn', async function() {
 			const $errorMessage = $('#errorMessage');
 			$errorMessage.hide();
 
@@ -41,7 +41,7 @@ $(document).ready(function () {
 			let $pass = $('#checkoutPassword').val();
 			await signIn($email, $pass)
 				.then(res => {
-					if (res.error) {
+					if(res.error) {
 						$errorMessage.text(res.error).show();
 					} else {
 						location.reload();
@@ -50,18 +50,18 @@ $(document).ready(function () {
 				});
 
 		})
-		.on('input', '#checkoutZip', function () {
+		.on('input', '#checkoutZip', function() {
 			$(this).val($(this).val().replace(/[^0-9\.]/g, ''));
 		})
-		.on('click', '#payButton', function () {
+		.on('click', '#payButton', function() {
 			$('.button-loader').show();
 			setTimeout(
-				function () {
+				function() {
 					$('.button-loader').hide();
 				}, 20000);
 
 		})
-		.on('click', '#discountApply', function () {
+		.on('click', '#discountApply', function() {
 			const $error = $('#discountError');
 			const $discountAmountText = $('#checkoutDiscount');
 			const $discountLineItem = $('#discountLineItem');
@@ -73,11 +73,11 @@ $(document).ready(function () {
 			$discountLineItem.hide();
 			$discountAppliedWrap.hide();
 
-			if ($discountInput !== '') {
+			if($discountInput !== '') {
 				couponExists($discountInput)
 					.then(data => {
-						if (data.error) {
-							if (data.error.startsWith('No such coupon:')) {
+						if(data.error) {
+							if(data.error.startsWith('No such coupon:')) {
 								$error.show().text(`Sorry! ${$discountInput} is not a valid coupon...`);
 								setTimeout(() => {
 									$error.hide();
@@ -89,7 +89,7 @@ $(document).ready(function () {
 								}, 5000);
 							}
 						} else {
-							if (data.amount_off !== null) {
+							if(data.amount_off !== null) {
 								$discountAmountText.text(`-$${(data.amount_off / 100).toFixed(2)}`);
 							} else {
 								$discountAmountText.text(`-$${(evenRound((data.percent_off / 100) * Number($('#checkoutSubtotal').text().replace(/[^0-9.-]+/g, "")), 2)).toFixed(2)}`);
@@ -109,7 +109,7 @@ $(document).ready(function () {
 				}, 5000);
 			}
 		})
-		.on('click', '#removeDiscount', function () {
+		.on('click', '#removeDiscount', function() {
 			localStorage.setItem('discountcode', '');
 			$('#discountCode').val('');
 			$('#discountFieldRow').show();
@@ -117,9 +117,9 @@ $(document).ready(function () {
 			sessionStorage.removeItem('discountcode');
 			renderCheckoutTotals('full');
 		})
-		.on('change', '[name="paymentMethod"]', function () {
+		.on('change', '[name="paymentMethod"]', function() {
 			let $stripeCardElement = $('#stripeCardElement').show();
-			if ($('#newPaymentMethod').is(':checked')) {
+			if($('#newPaymentMethod').is(':checked')) {
 				$stripeCardElement.show();
 			} else {
 				$stripeCardElement.hide();
@@ -130,7 +130,7 @@ $(document).ready(function () {
 	function renderCheckoutFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
 
-		for (const item of storage) {
+		for(const item of storage) {
 			const item_data = getItemDataFromSku(item.sku);
 			addCheckoutItem(item_data, item.quantity);
 		}
@@ -147,17 +147,17 @@ $(document).ready(function () {
 	// Initalize variables
 	function init() {
 		let cart_meta = localStorage.getItem('buildBoxMeta');
-		if (cart_meta == null) {
+		if(cart_meta == null) {
 			localStorage.setItem('buildBoxMeta', JSON.stringify({
 				is_sub: true,
-				freq: '1'
+				freq: '1m'
 			}));
 		}
 		let cart = localStorage.getItem('buildBox');
-		if (cart == null || cart == "[]") {
+		if(cart == null || cart == "[]") {
 			localStorage.setItem('buildBox', "[]");
 		}
-		if (signedIn) {
+		if(signedIn) {
 			currentUser.then(res => {
 				$('#passwordWrap').hide();
 				$('#welcomeMessageWrap').show();
@@ -183,16 +183,16 @@ $(document).ready(function () {
 		const $boxCount = renderBoxCount();
 		let shipping = 0.00;
 
-		if (!is_sub) {
-			if ($boxCount == 1) {
+		if(!is_sub) {
+			if($boxCount == 1) {
 				$shippingText.text('$5.00');
 				$shippingMethodPriceText.text('$5.00');
 				shipping = 5.00;
-			} else if ($boxCount >= 2 && $boxCount < 6) {
+			} else if($boxCount >= 2 && $boxCount < 6) {
 				$shippingText.text('$8.50');
 				$shippingMethodPriceText.text('$8.50');
 				shipping = 8.50;
-			} else if ($boxCount > 6) {
+			} else if($boxCount > 6) {
 				$shippingText.text('$12.00');
 				$shippingMethodPriceText.text('$12.00');
 				shipping = 12.00;
@@ -206,10 +206,10 @@ $(document).ready(function () {
 		//discount code render
 		const code = sessionStorage.getItem('discountcode');
 
-		if (code == null || code == '') {
+		if(code == null || code == '') {
 			$('#discountLineItem').hide();
 			$('#discountAppliedWrap').hide();
-		} else if (code !== null && type == 'full') {
+		} else if(code !== null && type == 'full') {
 			$('#discountCode').val(code);
 			setTimeout(() => {
 				$('#discountApply').click();
@@ -233,10 +233,10 @@ $(document).ready(function () {
 		const subscriptionRenewalPrice = $subtotal + subscriptionTax + shipping;
 
 		//tax, subtotal, total, subscription renewal price render
-		if ($customerState === 'UT') {
+		if($customerState === 'UT') {
 			taxRate = .03;
 		}
-		for (const item of storage) {
+		for(const item of storage) {
 			const item_data = getItemDataFromSku(item.sku);
 			let itemTax = evenRound(((parseFloat(item_data.price) * parseFloat(item.quantity)) * (1 + discountPercent)) * taxRate, 2);
 			tax += itemTax;
@@ -256,13 +256,13 @@ $(document).ready(function () {
 		renewalDate = new Date(renewalDate.setMonth(renewalDate.getMonth() + frequency));
 		let renewalMonth = new Date(today.getFullYear(), today.getMonth() + frequency).getMonth();
 		let lastDayOfRenewalMonth = new Date(renewalDate.getFullYear(), renewalMonth + 1, 0);
-		if (is_sub) {
+		if(is_sub) {
 			//if 31st is last day -> renew on last day of every month
-			if (new Date(today.getTime() + 86400000).getDate() === 1 && today.getDate() === 31) {
+			if(new Date(today.getTime() + 86400000).getDate() === 1 && today.getDate() === 31) {
 				renewalDate = new Date(renewalDate.getFullYear(), renewalDate.getMonth(), 0);
 			}
 			//if last of renewal month is 28th or 29th renew on that end day respectively
-			else if (lastDayOfRenewalMonth.getDate() == 28 || lastDayOfRenewalMonth.getDate() == 29) {
+			else if(lastDayOfRenewalMonth.getDate() == 28 || lastDayOfRenewalMonth.getDate() == 29) {
 				renewalDate = new Date(renewalDate.getFullYear(), renewalMonth + 1, 0);
 			}
 			$renewalDateText.text(`${renewalDate.getDate()} ${months[renewalDate.getMonth()]} ${renewalDate.getFullYear()}`);
@@ -287,9 +287,9 @@ $(document).ready(function () {
 				"city" : "${$city.val()}",
 				"state" : "${$state.val()}",
 				"zip" : "${$zip.val()}" } }`;
-		if (method == 'save') {
+		if(method == 'save') {
 			localStorage.setItem('gumiCheckout', checkoutData);
-		} else if (method == 'render' && checkoutDataStorage != null) {
+		} else if(method == 'render' && checkoutDataStorage != null) {
 			checkoutData = JSON.parse(checkoutDataStorage);
 			$email.val(checkoutData.email);
 			$firstName.val(checkoutData.firstName);
@@ -300,8 +300,8 @@ $(document).ready(function () {
 			$zip.val(checkoutData.address.zip);
 		}
 
-		if ($email.val() !== '' && method == 'render') {
-			setTimeout(function () {
+		if($email.val() !== '' && method == 'render') {
+			setTimeout(function() {
 				$email.trigger('change');
 			}, 10);
 		}
@@ -310,13 +310,13 @@ $(document).ready(function () {
 	}
 
 	async function renderPaymentOptions() {
-		if (signedIn) {
+		if(signedIn) {
 			getPaymentMethods(gumiAuth.token)
 				.then(methods => {
-					if (methods.payment_method_count > 0) {
+					if(methods.payment_method_count > 0) {
 						$('#stripeCardElement').hide();
 
-						for (const method of methods.payment_methods) {
+						for(const method of methods.payment_methods) {
 							const cardIcons = {
 								visa: "",
 								amex: "",
@@ -327,7 +327,7 @@ $(document).ready(function () {
 							};
 							let checkedClass = '';
 							let checked = '';
-							if (method == methods.payment_methods[0]) {
+							if(method == methods.payment_methods[0]) {
 								//needed to show which radio is checked with webflows elements
 								checkedClass = 'w--redirected-checked w--redirected-focus';
 								checked = 'checked';

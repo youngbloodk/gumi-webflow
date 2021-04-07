@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).ready(function() {
 	const stripe = Stripe('pk_test_51GxkpfCPdzv45ixk8Za5c697vUb1FNkvXbyCm2gnLwK5UEbty0SWdkXgIMAmOGLwrtEsopIJgZSDtvdI5kLHeiW700mAsnbgiy');
 	const elements = stripe.elements();
 	const style = {
@@ -9,26 +9,30 @@ $(document).ready(function () {
 		},
 	};
 	// Create an instance of the card Element.
-	const card = elements.create('card', { style });
+	const card = elements.create('card', {style});
 	const $pay = $('#payButton');
 	const storage = JSON.parse(localStorage.getItem('gumiCheckout'));
 
 	card.mount('#card-element');
 
-	card.on('change', ({ error }) => {
+	card.on('change', ({error}) => {
 		let displayError = document.getElementById('card-errors');
-		if (error) {
+		if(error) {
 			displayError.textContent = error.message;
 		} else {
 			displayError.textContent = '';
 		};
 	});
 
-	$pay.on('click', function (ev) {
+	$pay.on('click', function(ev) {
 		ev.preventDefault();
-		const $newCard = $('#newPaymentMethod');
 
-		if ($newCard.is(':checked')) {
+		if($('[name="paymentMethod"]:checked').val()) {
+
+			getPaymentMethod($('[name="paymentMethod"]:checked').val()).then(p_m => {
+				api_pay('payment_method', p_m);
+			});
+		} else {
 			stripe.createToken(card, {
 				name: `${storage.firstName} ${storage.lastName}`,
 				address_line1: storage.address.street,
@@ -37,7 +41,7 @@ $(document).ready(function () {
 				address_zip: storage.address.zip,
 				address_country: "US"
 			}).then(result => {
-				if (result.error) {
+				if(result.error) {
 					$('.button-loader').hide();
 					console.log(result.error);
 					alert(result.error.message);
@@ -45,12 +49,7 @@ $(document).ready(function () {
 					api_pay('card', result.token.id);
 				}
 			});
-		} else {
-			const $paymentMethodId = $('[name="paymentMethod"]:checked').val();
-			getPaymentMethod($paymentMethodId).then(p_m => {
-				api_pay('payment_method', p_m);
-			});
-		};
+		}
 
 	});
 	//type is either 'payment_method' or 'card' and data is the payment method object or token 
@@ -70,26 +69,17 @@ $(document).ready(function () {
 			meta: JSON.parse(localStorage.buildBoxMeta)
 		};
 		//add payment method to body
-		if (type == 'card') {
+		if(type == 'card') {
 			body.card = {
 				token: data
 			};
-		} else if (type == 'payment_method') {
+		} else if(type == 'payment_method') {
 			body.payment_method = data;
 		}
 
-		fetch('https://gumi-api-dcln6.ondigitalocean.app/v1/stripe/pay', {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"Access-Control-Allow-Origin": "*",
-				"Accept": "application/json",
-			},
-			mode: 'cors',
-			body: JSON.stringify(body)
-		}).then(response => response.json())
-			.then(function (res) {
-				if (res.error) {
+		apiPay(body)
+			.then(function(res) {
+				if(res.error) {
 					alert(res.error);
 					$('.button-loader').hide();
 				} else {
@@ -97,7 +87,7 @@ $(document).ready(function () {
 					localStorage.removeItem('buildBox');
 					localStorage.removeItem('buildBoxMeta');
 					sessionStorage.removeItem('discountcode');
-					location.href = `/receipt?id=${res.success.invoice_id}`;
+					location.href = `/receipt?id=${res.success.invoice_id}$paid=true`;
 				}
 			});
 	}
