@@ -2,19 +2,23 @@ $(document).ready(function() {
 	//condiditonal redirects
 	if(location.href.indexOf('?id=') < 0) {
 		location.href = '/signin';
-	} else if(performance.navigation.type > 0 && !signedIn || location.href.indexOf('?id') < 0) {
+	} else if(performance.navigation.type > 0 && !signedIn && !getURLParam('paid')) {
 		location.reload();
 	} else if(getURLParam('paid')) {
 		renderReceipt();
 	} else {
 		renderReceipt();
 	}
+	if(!signedIn) {
+		$('#passDots').hide();
+		$('#setPass').show();
+	}
 
 	async function renderReceipt() {
 		await getInvoice(getURLParam('id'))
 			.then(async res => {
 				let invoice = res.success;
-				if(invoice.customer_email !== gumiAuth.email && document.referrer.indexOf('pay') < 0) {
+				if(signedIn && invoice.customer_email !== gumiAuth.email) {
 					alert(`You are not authorized to view this receipt. Please sign in and try again.`);
 					location.href = '/signin';
 				} else {
@@ -87,7 +91,7 @@ $(document).ready(function() {
 						invoice.total_discount_amounts.forEach(discount => {
 							discountTotal += (discount.amount / 100);
 						});
-						$('#receiptDiscount').text(`$${discountTotal.toFixed(2)}`);
+						$('#receiptDiscount').text(`-$${discountTotal.toFixed(2)}`);
 					} else {
 						$('#discountLine').hide();
 					}
@@ -95,6 +99,11 @@ $(document).ready(function() {
 						$('#receiptTax').text(`$${(invoice.tax / 100).toFixed(2)}`);
 					}
 					$('#receiptTotal').text(`$${(invoice.amount_paid / 100).toFixed(2)}`);
+					if(invoice.billing_reason !== 'manual') {
+						$('#subDetails').show();
+						$('#subRenewalDate').text(moment.unix(invoice.period_end).format('MMM D, YYYY'));
+						$('#subRenewalAmount').text(`$${((invoice.amount_paid / 100) + discountTotal).toFixed(2)}`);
+					}
 				}
 			});
 		;
