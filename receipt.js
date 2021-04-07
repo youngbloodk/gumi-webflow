@@ -2,8 +2,6 @@ $(document).ready(function() {
 	//condiditonal redirects
 	if(location.href.indexOf('?id=') < 0) {
 		location.href = '/signin';
-	} else if(performance.navigation.type > 0 && !signedIn && !getURLParam('paid')) {
-		location.reload();
 	} else if(getURLParam('paid')) {
 		renderReceipt();
 	} else {
@@ -11,9 +9,28 @@ $(document).ready(function() {
 	}
 	if(!signedIn) {
 		$('#passDots').hide();
-		$('#setPass').show();
+		$('#activateAccount').show();
 	}
-
+	if(sessionStorage.getItem('gumiActivateSent') || signedIn) {
+		$('#activateAccount').hide();
+		$('#activationSent').show();
+	}
+	$(document)
+		.on('click', '#activateAccount', function() {
+			resetPass($('#receiptEmail').text(), 'activate_account').then(res => {
+				if(res.success) {
+					$('.modal').fadeIn(250);
+					$('#activateAccount').hide();
+					$('#activationSent').show();
+					sessionStorage.setItem('gumiActivateSent', true);
+				}
+			});
+		})
+		.on('click', '[data-modal="close"]', function() {
+			$('.modal').fadeOut(250);
+		})
+		;
+	;
 	async function renderReceipt() {
 		await getInvoice(getURLParam('id'))
 			.then(async res => {

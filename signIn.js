@@ -27,20 +27,21 @@ $(document).ready(function() {
                 });
             ;
         })
-        .on('click', '#forgotPass', function() {
+        .on('click', '#forgot_password, #activate_account', function() {
             $('.modal').fadeIn(250);
+            $('#resetPassConfirm').attr('data-reason', $(this).attr('id'));
         })
-        .on('click', '#forgotPassConfirm', function() {
+        .on('click', '#resetPassConfirm', function() {
             const $form = $(this).closest('.form');
 
             $form.find('.error-message').hide();
-            resetPass($('#forgotPassEmail').val(), 'forgot_password').then(res => {
+            resetPass($('#resetPassEmail').val(), $('#resetPassConfirm').attr('data-reason')).then(res => {
                 if(res.success) {
                     $form.find('form').hide();
                     $form.find('.success-message').show();
                 } else {
                     $('.button-loader').hide();
-                    $form.find('.text.error').text(errorText);
+                    $form.find('.text.error').text(res.error);
                     $form.find('.error-message').show();
                 }
             });
