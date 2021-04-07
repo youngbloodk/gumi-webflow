@@ -8,10 +8,9 @@ $(document).ready(function() {
 			color: 'grey',
 		},
 	};
-	// Create an instance of the card Element.
 	const card = elements.create('card', {style});
 	const $pay = $('#payButton');
-	const storage = JSON.parse(localStorage.getItem('gumiCheckout'));
+
 
 	card.mount('#card-element');
 
@@ -25,39 +24,42 @@ $(document).ready(function() {
 	});
 
 	$pay.on('click', function(ev) {
+		const storage = JSON.parse(localStorage.getItem('gumiCheckout'));
 		ev.preventDefault();
 
 		if($('[name="paymentMethod"]:checked').val()) {
-
-			getPaymentMethod($('[name="paymentMethod"]:checked').val()).then(p_m => {
-				api_pay('payment_method', p_m);
+			getPaymentMethod($('[name="paymentMethod"]:checked').val()).then(payment_method => {
+				api_pay(payment_method);
 			});
 		} else {
-			stripe.createToken(card, {
-				name: `${storage.firstName} ${storage.lastName}`,
-				address_line1: storage.address.street,
-				address_city: storage.address.city,
-				address_state: storage.address.state,
-				address_zip: storage.address.zip,
-				address_country: "US"
-			}).then(result => {
-				if(result.error) {
+			stripe.createPaymentMethod({
+				type: 'card',
+				card: card,
+				billing_details: {
+					name: `${storage.firstName} ${storage.lastName}`,
+					"address": {
+						"line1": storage.address.street,
+						"city": storage.address.city,
+						"state": storage.address.state,
+						"country": 'US',
+						"postal_code": storage.address.zip
+					}
+				}
+			}).then(res => {
+				if(res.error) {
 					$('.button-loader').hide();
-					console.log(result.error);
-					alert(result.error.message);
+					alert(res.error.message);
 				} else {
-					api_pay('card', result.token.id);
+					api_pay(res.paymentMethod);
 				}
 			});
 		}
-
 	});
-	//type is either 'payment_method' or 'card' and data is the payment method object or token 
-	function api_pay(type, data) {
 
+	function api_pay(payment_method) {
+		const storage = JSON.parse(localStorage.getItem('gumiCheckout'));
 		const body = {
 			email: storage.email,
-			password: "test",
 			first_name: storage.firstName,
 			last_name: storage.lastName,
 			street_address: storage.address.street,
@@ -66,16 +68,9 @@ $(document).ready(function() {
 			zip: storage.address.zip,
 			items: JSON.parse(localStorage.buildBox),
 			coupon: $('#discountCode').val(),
-			meta: JSON.parse(localStorage.buildBoxMeta)
+			meta: JSON.parse(localStorage.buildBoxMeta),
+			payment_method: payment_method
 		};
-		//add payment method to body
-		if(type == 'card') {
-			body.card = {
-				token: data
-			};
-		} else if(type == 'payment_method') {
-			body.payment_method = data;
-		}
 
 		apiPay(body)
 			.then(function(res) {
@@ -86,9 +81,11 @@ $(document).ready(function() {
 					$pay.html('Paid!');
 					localStorage.removeItem('buildBox');
 					localStorage.removeItem('buildBoxMeta');
+					localStorage.removeItem('gumiCheckout');
 					sessionStorage.removeItem('discountcode');
-					location.href = `/receipt?id=${res.success.invoice_id}$paid=true`;
+					location.href = `/receipt?id=${res.success.invoice_id}&paid=true`;
 				}
 			});
+		;
 	}
 });
