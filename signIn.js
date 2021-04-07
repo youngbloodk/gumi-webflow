@@ -1,9 +1,9 @@
-$(document).ready(function () {
-    if (signedIn) {
+$(document).ready(function() {
+    if(signedIn) {
         location.href = '/account';
     }
     $(document)
-        .on('click', '#signInButton', async function (e) {
+        .on('click', '#signInButton', async function(e) {
             const $email = $('#signInEmail').val();
             const $pass = $('#signInPassword').val();
             const $errorMessage = $('.error-message');
@@ -14,8 +14,8 @@ $(document).ready(function () {
 
             await signIn($email, $pass)
                 .then(res => {
-                    if (res.success) {
-                        if (getURLParam('redirect') && document.referrer.indexOf(location.host) > 0) {
+                    if(res.success) {
+                        if(getURLParam('redirect') && document.referrer.indexOf(location.host) > 0) {
                             location.href = document.referrer;
                         } else {
                             location.href = '/account';
@@ -27,15 +27,15 @@ $(document).ready(function () {
                 });
             ;
         })
-        .on('click', '#forgotPass', function () {
+        .on('click', '#forgotPass', function() {
             $('.modal').fadeIn(250);
         })
-        .on('click', '#forgotPassConfirm', function () {
+        .on('click', '#forgotPassConfirm', function() {
             const $form = $(this).closest('.form');
 
             $form.find('.error-message').hide();
-            forgotPass($('#forgotPassEmail').val()).then(res => {
-                if (res.success) {
+            resetPass($('#forgotPassEmail').val(), 'forgot_password').then(res => {
+                if(res.success) {
                     $form.find('form').hide();
                     $form.find('.success-message').show();
                 } else {
@@ -45,7 +45,7 @@ $(document).ready(function () {
                 }
             });
         })
-        .on('click', '[data-modal="close"]', function () {
+        .on('click', '[data-modal="close"]', function() {
             $('.modal').fadeOut(250);
         })
         ;

@@ -70,11 +70,13 @@ function signOut() {
 	location.reload();
 }
 
-async function forgotPass(email) {
+//reason MUST be either 'forgot_password' or 'activate_account'
+async function resetPass(email, reason) {
 	const method = "POST";
-	const url = `${apiUrl}/user/forgot-password`;
+	const url = `${apiUrl}/user/reset-password`;
 	const body = {
-		email: email
+		email: email,
+		reason: reason
 	};
 	return await request(method, url, body)
 		.then(async res => {
