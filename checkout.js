@@ -124,7 +124,29 @@ $(document).ready(function() {
 			} else {
 				$stripeCardElement.hide();
 			}
-		});
+		})
+		.on('click', '#forgotPass', function() {
+			$('.modal').fadeIn(250);
+		})
+		.on('click', '#forgotPassConfirm', function() {
+			const $form = $(this).closest('.form');
+
+			$form.find('.error-message').hide();
+			resetPass($('#forgotPassEmail').val(), 'forgot_password').then(res => {
+				if(res.success) {
+					$form.find('form').hide();
+					$form.find('.success-message').show();
+				} else {
+					$('.button-loader').hide();
+					$form.find('.text.error').text(errorText);
+					$form.find('.error-message').show();
+				}
+			});
+		})
+		.on('click', '[data-modal="close"]', function() {
+			$('.modal').fadeOut(250);
+		})
+		;
 	;
 
 	function renderCheckoutFromStorage() {
@@ -332,7 +354,7 @@ $(document).ready(function() {
 								checkedClass = 'w--redirected-checked w--redirected-focus';
 								checked = 'checked';
 							}
-							$('#paymentMethodsList').append(`
+							$('#paymentMethodsList').show().css('display', 'grid').append(`
 							<label class="radio-button-field w-radio">
 								<div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button-basic w-radio-input ${checkedClass}" style="margin-right:10px;"></div>
 								<input type="radio" data-name="paymentMethod" name="paymentMethod" value="${method.id}" required=""
