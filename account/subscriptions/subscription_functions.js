@@ -9,7 +9,7 @@ function renderPauseSubRenewalDate(target) {
 async function renderSubscriptions() {
 	await getSubscriptions(gumiAuth.token)
 		.then(async subscriptions => {
-			for (const subscription of subscriptions.subscriptions) {
+			for(const subscription of subscriptions.subscriptions) {
 				let total = 0.00;
 				let taxRate;
 				let tax = 0;
@@ -17,11 +17,11 @@ async function renderSubscriptions() {
 				let subscriptionTitle = subscription.items.total_count > 1 ? `${subscription.items.total_count} items` : `${subscription.items.total_count} item`;
 				let subItems = await renderSubItems(subscription.items.data);
 
-				for (const subItem of subscription.items.data) {
+				for(const subItem of subscription.items.data) {
 					total += ((subItem.price.unit_amount * .01) * subItem.quantity);
 				};
 
-				if (subscription.default_tax_rates[0]) {
+				if(subscription.default_tax_rates[0]) {
 					taxRate = subscription.default_tax_rates[0].percentage / 100;
 					tax = total * taxRate;
 					taxInfo = `<div class="w-layout-grid grid _1col row-gap-0">
@@ -45,7 +45,7 @@ async function renderSubscriptions() {
 											<div class="divider no-margin"></div>`;
 				let subscriptionRenewalDetails = `Your subscription will renew on <span class="text bold" data-id="renewal-date">${moment.unix(subscription.current_period_end).format('MMM D, YYYY')}</span>`;
 
-				if (subscription.pause_collection) {
+				if(subscription.pause_collection) {
 					status = 'paused';
 					renewalDate = subscription.pause_collection.resumes_at;
 					pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Resume-subscription"><span class="font-awesome _12"> &nbsp</span> Resume subscription</a>
@@ -91,9 +91,9 @@ async function renderSubscriptions() {
 async function renderSubItems(subItems, type) {
 	let subItemsList = [];
 
-	for (const subItem of subItems) {
+	for(const subItem of subItems) {
 		let quantity = `<div class="text" style="margin-left:5px;">${subItem.quantity}</div>`;
-		if (type == 'update') {
+		if(type == 'update') {
 			quantity =
 				`<div class="select-wrapper small black" style="width:40px; margin-left:5px;">
 						<select class="field select" style="color:black; font-size:16px; height:24px; padding-left:2px;" data-id="update_item_quant">
@@ -135,7 +135,7 @@ async function renderItemAddOptions(sub_id) {
 
 	await getSubitemOptions(sub_id)
 		.then(options => {
-			for (const option of options.success) {
+			for(const option of options.success) {
 				optionsList.push(`
 					<option value="${option.price_id}">${option.name}</option>
 				`);
@@ -166,22 +166,22 @@ async function updateSubscription(data) {
 	const response = {
 		success: []
 	};
-	for (const item of data.update_items) {
-		if (item.quant > 0) {
+	for(const item of data.update_items) {
+		if(item.quant > 0) {
 			await updateSubItemQuantity(item.id, item.quant)
 				.then(res => {
-					response.success.push({ quant_update: res });
+					response.success.push({quant_update: res});
 				});
-		} else if (item.quant === 0) {
+		} else if(item.quant === 0) {
 			await deleteSubItem(item.id)
 				.then(res => {
-					response.success.push({ removed: res });
+					response.success.push({removed: res});
 				});
 		}
 	}
 	updateSubFreq(data.sub_id, data.freq)
 		.then(res => {
-			response.success.push({ freq_update: res });
+			response.success.push({freq_update: res});
 		});;
 	return response;
 }
