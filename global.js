@@ -552,13 +552,9 @@ function updateCheckoutRender() {
 	if(storage.length > 0) {
 		$emptyMessage.hide();
 		$continueBlock.show();
-		$('#emptyWrap').addClass('middle');
-
 	} else {
 		$emptyMessage.show();
 		$continueBlock.hide();
-		$('#emptyWrap').removeClass('middle');
-
 	}
 }
 
