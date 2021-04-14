@@ -55,6 +55,7 @@ $(document).ready(function() {
 							return true;
 						}
 					});
+					const shipping_amount = shipping.amount;
 
 					$('#receiptNumber').text(invoice.number);
 					$('#receiptDate').text(moment.unix(invoice.created).format("MMM D, YYYY"));
@@ -101,7 +102,8 @@ $(document).ready(function() {
 					};
 					$('#receiptSubtotal').text(`$${(invoice.subtotal / 100).toFixed(2)}`);
 					if(shipping) {
-						$('#receiptShipping').text(`$${(shipping.amount / 100).toFixed(2)}`);
+						$('#receiptShipping').text(`$${(shipping_amount / 100).toFixed(2)}`);
+						$('#receiptSubtotal').text(`$${((invoice.subtotal - shipping_amount) / 100).toFixed(2)}`);
 					}
 					//calculate discount total
 					if(invoice.total_discount_amounts.length > 0) {
