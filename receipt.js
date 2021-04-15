@@ -50,12 +50,16 @@ $(document).ready(function() {
 						unionpay: ""
 					};
 					//get shipping amount
-					const shipping = invoice.lines.data.find(function(line, index) {
+					let shipping = invoice.lines.data.find(function(line, index) {
 						if(line.description.toLowerCase().indexOf('shipping') > 1) {
 							return true;
 						}
 					});
-					const shipping_amount = shipping.amount;
+					if(shipping) {
+						shipping = shipping.amount;
+					} else {
+						shipping = 0;
+					}
 
 					$('#receiptNumber').text(invoice.number);
 					$('#receiptDate').text(moment.unix(invoice.created).format("MMM D, YYYY"));
@@ -102,8 +106,8 @@ $(document).ready(function() {
 					};
 					$('#receiptSubtotal').text(`$${(invoice.subtotal / 100).toFixed(2)}`);
 					if(shipping) {
-						$('#receiptShipping').text(`$${(shipping_amount / 100).toFixed(2)}`);
-						$('#receiptSubtotal').text(`$${((invoice.subtotal - shipping_amount) / 100).toFixed(2)}`);
+						$('#receiptShipping').text(`$${(shipping / 100).toFixed(2)}`);
+						$('#receiptSubtotal').text(`$${((invoice.subtotal - shipping) / 100).toFixed(2)}`);
 					}
 					//calculate discount total
 					if(invoice.total_discount_amounts.length > 0) {
