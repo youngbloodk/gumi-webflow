@@ -46,9 +46,8 @@ $(document).ready(function() {
 					} else {
 						location.reload();
 					}
-
 				});
-
+			;
 		})
 		.on('input', '#checkoutZip', function() {
 			$(this).val($(this).val().replace(/[^0-9\.]/g, ''));
@@ -59,7 +58,6 @@ $(document).ready(function() {
 				function() {
 					$('.button-loader').hide();
 				}, 20000);
-
 		})
 		.on('click', '#discountApply', function() {
 			const $error = $('#discountError');
@@ -183,7 +181,8 @@ $(document).ready(function() {
 			currentUser.then(res => {
 				$('#passwordWrap').hide();
 				$('#welcomeMessageWrap').show();
-				$('#checkoutFirstName, [data-id="customerFirstName"]').html(res.first_name);
+				$('#checkoutFirstName').val(res.first_name);
+				$('[data-id="customerFirstName"]').html(res.first_name);
 				$('#checkoutLastName').val(res.last_name);
 				$('#checkoutStreetAddress').val(res.street_address);
 				$('#checkoutCity').val(res.city);
