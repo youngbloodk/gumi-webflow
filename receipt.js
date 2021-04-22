@@ -11,7 +11,8 @@ $(document).ready(function() {
 		$('#passDots').hide();
 		$('#activateAccount').show();
 	}
-	if(sessionStorage.getItem('gumiActivateSent') || signedIn) {
+	if(sessionStorage.getItem('gumiActivateSent') && signedIn) {
+		$('#passDots').hide();
 		$('#activateAccount').hide();
 		$('#activationSent').show();
 	}
@@ -124,7 +125,7 @@ $(document).ready(function() {
 					$('#receiptTotal').text(`$${(invoice.amount_paid / 100).toFixed(2)}`);
 					if(invoice.billing_reason !== 'manual') {
 						$('#subDetails').show();
-						$('#subRenewalDate').text(moment.unix(invoice.period_end).format('MMM D, YYYY'));
+						$('#subRenewalDate').text(moment.unix(invoice.subscription.current_period_end).format('MMM D, YYYY'));
 						$('#subRenewalAmount').text(`$${((invoice.amount_paid / 100) + discountTotal).toFixed(2)}`);
 					}
 				}
