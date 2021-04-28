@@ -371,8 +371,7 @@ async function couponExists(coupon) {
 			return res;
 		});
 }
-
-function renderReveiws(reviewData) {
+function formatReviewData(reviewData) {
 	const reviews = reviewData.success;
 
 	//calc & render review count
@@ -396,8 +395,21 @@ function renderReveiws(reviewData) {
 	} else {
 		finalRating = rating.toFixed(1);
 	}
-	$('[data-reviews="rating"]').text(finalRating);
-	$('.stars-fill').css('width', `${rating / 5 * 100}%`);
+	return {
+		count: count,
+		finalRating: finalRating,
+		rating: rating,
+		ratings: ratings,
+		ratingTotal: ratingTotal,
+		reviews: reviews
+	};
+}
+function renderReviewStars(reviewData, target) {
+	$(target).find($('[data-reviews="rating"]')).text(reviewData.finalRating);
+	$(target).find($('.stars-fill')).css('width', `${reviewData.rating / 5 * 100}%`);
+}
+function renderReviews(reviewData) {
+	const reviewMeta = formatReviewData(reviewData);
 
 	//render rating meters
 	const meters = $('[data-reviewmeter]');
@@ -424,21 +436,21 @@ function renderReveiws(reviewData) {
 			name = '';
 		}
 		$('#reviewsList').append(`
-				<div class="w-layout-grid grid _1col row-gap-10">
-					<div class="w-layout-grid grid _2col _1fr-auto">
-						<div class="cell">
-							<div class="cell relative">
-								<div class="font-awesome stars-fill yellow" style="width: ${percent}%;"></div>
-								<div class="font-awesome-reg stars yellow"></div>
+					<div class="w-layout-grid grid _1col row-gap-10">
+						<div class="w-layout-grid grid _2col _1fr-auto">
+							<div class="cell">
+								<div class="cell relative">
+									<div class="font-awesome stars-fill yellow" style="width: ${percent}%;"></div>
+									<div class="font-awesome-reg stars yellow"></div>
+								</div>
 							</div>
+							<div id="w-node-_252682f1-4915-c3a6-34d0-354212e5a59c-0f76a0b3" class="text right">${date}</div>
 						</div>
-						<div id="w-node-_252682f1-4915-c3a6-34d0-354212e5a59c-0f76a0b3" class="text right">${date}</div>
+						<div class="h5 semibold">${title}</div>
+						<div class="text">"${review.review}"</div>
+						<div class="text secondary bold">${name}Verified Buyer <span class="font-awesome blue"></span></div>
 					</div>
-					<div class="h5 semibold">${title}</div>
-					<div class="text">"${review.review}"</div>
-					<div class="text secondary bold">${name}Verified Buyer <span class="font-awesome blue"></span></div>
-				</div>
-			`);
+				`);
 	}
 }
 

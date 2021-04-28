@@ -1,5 +1,5 @@
 $(document).ready(function() {
-	const stripe = Stripe('pk_test_51GxkpfCPdzv45ixk8Za5c697vUb1FNkvXbyCm2gnLwK5UEbty0SWdkXgIMAmOGLwrtEsopIJgZSDtvdI5kLHeiW700mAsnbgiy');
+	const stripe = Stripe('pk_live_51GxkpfCPdzv45ixkbLQvPRK8cFrSCBVwOHoGlyFNYFk4FdA2670GKbNxiOeAFEblAMyxUXNlXSDAQH4rRvEmWz6200zrSqyGXu');
 	const elements = stripe.elements();
 	const style = {
 		base: {

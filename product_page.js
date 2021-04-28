@@ -1,13 +1,15 @@
-$(document).ready(function () {
+$(document).ready(function() {
 	getReviews($('#productcode').val())
 		.then(res => {
-			renderReveiws(res);
+			renderReveiwStars(res, $('[data-review="main"]'));
+			renderReviews(res);
 		});
 	;
+	// renderCardReviews();
 
 	$('form').trigger('change');
 	$(document)
-		.on('change', 'form', function () {
+		.on('change', 'form', function() {
 			const is_sub = $('#true').is(':checked');
 			const $pic = $('#productImage');
 			const $quant = parseInt($('#quantity option:selected').val());
@@ -20,15 +22,15 @@ $(document).ready(function () {
 
 			let shipping = 0.00;
 
-			if ($quant == 1) {
+			if($quant == 1) {
 				shipping = 5.00;
-			} else if ($quant >= 2 && $quant <= 6) {
+			} else if($quant >= 2 && $quant <= 6) {
 				shipping = 8.50;
-			} else if ($quant > 6) {
+			} else if($quant > 6) {
 				shipping = 12.00;
 			}
 
-			if (is_sub) {
+			if(is_sub) {
 				$('#shippingTitleText').html('Free shipping 🎉');
 				$('#shippingAmount').html(`$0.00`);
 			} else {
@@ -45,11 +47,11 @@ $(document).ready(function () {
 			const $deliveryFrequencyText = $('#deliveryFrequencyText');
 			const $subPriceWrap = $('.sub-price-wrap');
 
-			if ($deliveryFrequency === 0) {
+			if($deliveryFrequency === 0) {
 				$deliveryFrequencyText.hide();
 				$subPriceWrap.hide();
 			} else {
-				if ($deliveryFrequency == 1) {
+				if($deliveryFrequency == 1) {
 					$deliveryFrequencyText.text(`Every month`);
 				} else {
 					$deliveryFrequencyText.text(`Every ${$deliveryFrequency} months`);
@@ -57,7 +59,7 @@ $(document).ready(function () {
 				$deliveryFrequencyText.show();
 				$subPriceWrap.show();
 			}
-			if ($('#true').is(':checked')) {
+			if($('#true').is(':checked')) {
 				$('#deliveryFrequencyWrap').show();
 				$('#deliveryFrequencyWrap').prop('disabled', false);
 
@@ -67,7 +69,7 @@ $(document).ready(function () {
 			}
 		})
 
-		.on('submit', '#product-form', function (e) {
+		.on('submit', '#product-form', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			const sku = $('#productcode').val();
@@ -83,10 +85,10 @@ $(document).ready(function () {
 			// Add product
 			let storage = JSON.parse(localStorage.getItem('buildBox') || "[]");
 			let quantity_added = false;
-			for (const item of storage) {
-				if (item.sku == sku) {
+			for(const item of storage) {
+				if(item.sku == sku) {
 					item.quantity = parseInt(item.quantity);
-					if (item.quantity + quantity > 6) {
+					if(item.quantity + quantity > 6) {
 						window.alert(`You cannot add more than 6 of a single item and you currently have: ${item.quantity}`);
 						return;
 					}
@@ -95,7 +97,7 @@ $(document).ready(function () {
 					break;
 				}
 			}
-			if (!quantity_added) {
+			if(!quantity_added) {
 				storage.push({
 					sku: sku,
 					quantity: quantity
@@ -106,27 +108,27 @@ $(document).ready(function () {
 		})
 
 		//review form handling
-		.on('click', '#writeReview', function () {
+		.on('click', '#writeReview', function() {
 			$('.modal').fadeIn(250);
 			$('#postReviewSku').val($('#productcode').val());
 		})
-		.on('click', '#closeModal', function () {
+		.on('click', '#closeModal', function() {
 			$('.modal').fadeOut(250);
 		})
-		.on('mouseover', '.radio-button-field.star.w-radio', function () {
-			if (!$("input[name='postReviewRating']:checked").val()) {
+		.on('mouseover', '.radio-button-field.star.w-radio', function() {
+			if(!$("input[name='postReviewRating']:checked").val()) {
 				renderLeaveReviewStars($(this));
 			}
 		})
-		.on('click', '.radio-button-field.star.w-radio', function () {
+		.on('click', '.radio-button-field.star.w-radio', function() {
 			renderLeaveReviewStars($(this));
 		})
-		.on('mouseout', '#starsRatingWrap', function () {
-			if (!$("input[name='postReviewRating']:checked").val()) {
+		.on('mouseout', '#starsRatingWrap', function() {
+			if(!$("input[name='postReviewRating']:checked").val()) {
 				$(this).find('.hide').hide();
 			}
 		})
-		.on('click', '#submitReview', function (e) {
+		.on('click', '#submitReview', function(e) {
 			e.preventDefault();
 			const reviewData = {
 				email: $('#postReviewEmail').val(),
@@ -141,7 +143,7 @@ $(document).ready(function () {
 			postReview(reviewData)
 				.then(res => {
 					let $form = $('#postReviewFormWrap');
-					if (res.success) {
+					if(res.success) {
 						$form.find('form').hide();
 						$form.find('.success-message').show();
 					} else {
@@ -157,12 +159,25 @@ $(document).ready(function () {
 	function renderLeaveReviewStars(target) {
 		let stars = $('.radio-button-field.star.w-radio');
 		let starNumber = parseInt(target.find('input').val());
-		for (const star of stars) {
-			if ($(star).find('input').val() <= starNumber) {
+		for(const star of stars) {
+			if($(star).find('input').val() <= starNumber) {
 				$(star).find('.hide').show();
 			} else {
 				$(star).find('.hide').hide();
 			}
+		}
+	}
+
+	//render product card reiviews
+	async function renderCardReviews() {
+		const cards = $('.product-card');
+
+		for(const card of cards) {
+			getReviews($(card).find('[data-product="sku"]').text())
+				.then(res => {
+					$(card).find('[data-product="sku"]');
+				});
+			;
 		}
 	}
 });
