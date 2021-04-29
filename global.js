@@ -610,6 +610,10 @@ $(document).ready(async function() {
 			signOut();
 		})
 
+		.on('click', '[data-chat="open"]', function() {
+			$('#Embed > div > div > button').click();
+		})
+
 		//button loaders global
 		.on('click', '.button', function() {
 			$(this).closest('.button-wrap').find('.button-loader').show();
