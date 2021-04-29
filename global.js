@@ -611,7 +611,7 @@ $(document).ready(async function() {
 		})
 
 		.on('click', '[data-chat="open"]', function() {
-			$('#Embed > div > div > button').click();
+			$zopim.livechat.window.show();
 		})
 
 		//button loaders global
