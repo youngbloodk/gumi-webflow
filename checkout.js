@@ -278,6 +278,7 @@ $(document).ready(function() {
 		let renewalMonth = new Date(today.getFullYear(), today.getMonth() + frequency).getMonth();
 		let lastDayOfRenewalMonth = new Date(renewalDate.getFullYear(), renewalMonth + 1, 0);
 		if(is_sub) {
+			$('#subscription_details').show().display('grid');
 			//if 31st is last day -> renew on last day of every month
 			if(new Date(today.getTime() + 86400000).getDate() === 1 && today.getDate() === 31) {
 				renewalDate = new Date(renewalDate.getFullYear(), renewalDate.getMonth(), 0);
@@ -287,6 +288,8 @@ $(document).ready(function() {
 				renewalDate = new Date(renewalDate.getFullYear(), renewalMonth + 1, 0);
 			}
 			$renewalDateText.text(`${renewalDate.getDate()} ${months[renewalDate.getMonth()]} ${renewalDate.getFullYear()}`);
+		} else {
+			$('#subscription_details').hide();
 		}
 	}
 
