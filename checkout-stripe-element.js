@@ -67,7 +67,7 @@ $(document).ready(function() {
 			state: storage.address.state,
 			zip: storage.address.zip,
 			items: JSON.parse(localStorage.buildBox),
-			coupon: $('#discountCode').val(),
+			coupon: $('#discountCode').val().toLowerCase(),
 			meta: JSON.parse(localStorage.buildBoxMeta),
 			payment_method: payment_method
 		};

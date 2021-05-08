@@ -65,7 +65,7 @@ $(document).ready(function() {
 			const $discountLineItem = $('#discountLineItem');
 			const $discountAppliedWrap = $('#discountAppliedWrap');
 			const $discountName = $('#discountName');
-			const $discountInput = $('#discountCode').val();
+			const $discountInput = $('#discountCode').val().toLowerCase();
 
 			$error.hide();
 			$discountLineItem.hide();
