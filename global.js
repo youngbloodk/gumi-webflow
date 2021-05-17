@@ -423,7 +423,7 @@ function renderReviews(reviewData) {
 	}
 
 	//render reviews
-	for(const review of reviews) {
+	for(const review of reviewMeta.reviews) {
 		const rating = parseInt(review.rating);
 		const percent = rating / 5;
 		const date = moment(review.review_date).format('MMM D, YYYY');
@@ -636,4 +636,10 @@ $(document).ready(async function() {
 		})
 		;
 	;
+});
+
+//global on load
+$(window).on('load', function() {
+	//zendesk widget styling
+	$('[title="Button to launch messaging window"]').css('border-radius', '100%');
 });
