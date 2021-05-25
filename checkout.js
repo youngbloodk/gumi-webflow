@@ -14,6 +14,7 @@ $(document).ready(function() {
 		})
 		.on('change', '#checkoutEmail', function() {
 			$('#welcomeMessageWrap').hide();
+			startCheckout($(this).val());
 			emailExists($(this).val())
 				.then(async res => {
 					if(res.exists == true && !signedIn) {
@@ -145,7 +146,6 @@ $(document).ready(function() {
 			$('.modal').fadeOut(250);
 		})
 		;
-	;
 
 	function renderCheckoutFromStorage() {
 		let storage = JSON.parse(localStorage.getItem('buildBox'));
@@ -383,5 +383,37 @@ $(document).ready(function() {
 			;
 		};
 
+	}
+
+	function startCheckout(email) {
+		const storage = JSON.parse(localStorage.getItem('buildBox'));
+		let items = [];
+		let itemNames = [];
+		let value = 0;
+
+		for(const item of storage) {
+			let data = getItemDataFromSku(item.sku);
+			items.push({
+				"ProductID": data.sku,
+				"SKU": data.sku,
+				"ProductName": data.name,
+				"Quantity": item.quantity,
+				"ItemPrice": parseFloat(data.price),
+				"RowTotal": parseFloat(data.price) * item.quantity,
+				"ProductURL": data.url,
+				"ImageURL": data.image,
+			}
+			);
+			itemNames.push(data.name);
+			value += parseFloat(data.price) * item.quantity;
+		}
+
+		_learnq.push(["track", "Started Checkout", {
+			"$event_id": email + "_" + moment().unix(),
+			"$value": value,
+			"ItemNames": itemNames,
+			"CheckoutURL": "http://www.guminutrition.com/pay",
+			"Items": items
+		}]);
 	}
 });
