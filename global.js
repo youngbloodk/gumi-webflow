@@ -414,10 +414,10 @@ function renderReviews(reviewData) {
 	//render rating meters
 	const meters = $('[data-reviewmeter]');
 	for(const meter of meters) {
-		const ratingNumber = ratings[$(meter).attr('data-reviewmeter')];
+		const ratingNumber = reviewMeta.ratings[$(meter).attr('data-reviewmeter')];
 		let percent = 0;
 		if(ratingNumber) {
-			percent = ratingNumber / count;
+			percent = ratingNumber / reviewMeta.count;
 		}
 		$(meter).find('.rating-meter-fill').css('width', `${percent * 100}%`);
 	}
