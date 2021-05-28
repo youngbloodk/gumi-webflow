@@ -1,4 +1,11 @@
 $(document).ready(function() {
+
+	$(window).on('load', function() {
+		if(getURLParam('leavereview')) {
+			$('#writeReview').click();
+		}
+	});
+
 	getReviews($('#productcode').val())
 		.then(res => {
 			renderReviewStars(res, $('[data-review="main"]'));
