@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	getReviews($('#productcode').val())
 		.then(res => {
-			renderReveiwStars(res, $('[data-review="main"]'));
+			renderReviewStars(res, $('[data-review="main"]'));
 			renderReviews(res);
 		});
 	;
@@ -130,29 +130,42 @@ $(document).ready(function() {
 		})
 		.on('click', '#submitReview', function(e) {
 			e.preventDefault();
-			const reviewData = {
-				email: $('#postReviewEmail').val(),
-				first_name: $('#postReviewFirstName').val(),
-				last_name: $('#postReviewLastName').val(),
-				review_title: $('#postReviewTitle').val(),
-				review: $('#postReviewText').val(),
-				rating: $('[name="postReviewRating"]:checked').val(),
-				product_sku: $('#postReviewSku').val(),
-				review_date: moment()._d
-			};
-			postReview(reviewData)
-				.then(res => {
-					let $form = $('#postReviewFormWrap');
-					if(res.success) {
-						$form.find('form').hide();
-						$form.find('.success-message').show();
-					} else {
-						$('.button-loader').hide();
-						$form.find('.text.error').text('Whoops, there appears to be an issue. If this keeps happening, please let us know support@guminutrition.com');
-						$form.find('.error-message').show();
-					}
-				});
-			;
+			let $email = $('#postReviewEmail').val();
+			let $first_name = $('#postReviewFirstName').val();
+			let $last_name = $('#postReviewLastName').val();
+			let $review_title = $('#postReviewTitle').val();
+			let $review = $('#postReviewText').val();
+			let $rating = $('[name="postReviewRating"]:checked').val();
+			let $product_sku = $('#postReviewSku').val();
+
+			if(!$email || !$first_name || !$last_name || !$review_title || !$review || !$rating) {
+				alert("Please complete all fields before submitting your review :)");
+				$('.button-loader').hide();
+			} else {
+				const reviewData = {
+					email: $email,
+					first_name: $first_name,
+					last_name: $last_name,
+					review_title: $review_title,
+					review: $review,
+					rating: $rating,
+					product_sku: $product_sku,
+					review_date: moment()._d
+				};
+				postReview(reviewData)
+					.then(res => {
+						let $form = $('#postReviewFormWrap');
+						if(res.success) {
+							$form.find('form').hide();
+							$form.find('.success-message').show();
+						} else {
+							$('.button-loader').hide();
+							$form.find('.text.error').text('Whoops, there appears to be an issue. If this keeps happening, please let us know support@guminutrition.com');
+							$form.find('.error-message').show();
+						}
+					});
+				;
+			}
 		})
 		;
 	;
