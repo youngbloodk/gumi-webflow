@@ -387,13 +387,14 @@ $(document).ready(function() {
 
 	function startCheckout(email) {
 		const storage = JSON.parse(localStorage.getItem('buildBox'));
-		let items = [];
+		let itemsKlaviyo = [];
+		let itemsGoogle = [];
 		let itemNames = [];
 		let value = 0;
 
 		for(const item of storage) {
 			let data = getItemDataFromSku(item.sku);
-			items.push({
+			itemsKlaviyo.push({
 				"ProductID": data.sku,
 				"SKU": data.sku,
 				"ProductName": data.name,
@@ -402,8 +403,13 @@ $(document).ready(function() {
 				"RowTotal": parseFloat(data.price) * item.quantity,
 				"ProductURL": data.url,
 				"ImageURL": data.image,
-			}
-			);
+			});
+			itemsGoogle.push({
+				"id": data.sku,
+				"name": data.name,
+				"quantity": item.quantity,
+				"price": parseFloat(data.price)
+			});
 			itemNames.push(data.name);
 			value += parseFloat(data.price) * item.quantity;
 		}
@@ -413,7 +419,12 @@ $(document).ready(function() {
 			"$value": value,
 			"ItemNames": itemNames,
 			"CheckoutURL": "http://www.guminutrition.com/pay",
-			"Items": items
+			"Items": itemsKlaviyo
 		}]);
+
+		gtag('event', 'begin_checkout', {
+			"items": itemsGoogle,
+			"coupon": ""
+		});
 	}
 });
