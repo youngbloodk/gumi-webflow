@@ -6,12 +6,8 @@ const apiUrl = 'https://gumi-api-dcln6.ondigitalocean.app/v1';
 
 
 if(signedIn) {
-	// verifyToken(JSON.parse($.cookie('gumiAuth')).token).then(res => {
-	// 	if (res.valid == true) {
 	gumiAuth = JSON.parse($.cookie('gumiAuth'));
 	currentUser = getUser(gumiAuth.email, gumiAuth.token);
-	// }
-	// });
 }
 
 // global functions
