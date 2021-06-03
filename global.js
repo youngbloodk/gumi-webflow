@@ -600,6 +600,11 @@ $(document).ready(async function() {
 		$('[data-id="signOut"]').hide();
 	}
 
+	//cookie consent pop-up
+	if(!$.cookie('_cookieConsent')) {
+		$('#cookie_consent').css('display', 'grid').fadeIn();
+	}
+
 	$(document)
 
 		.on('click', '[data-id="signOut"]', function() {
@@ -629,6 +634,11 @@ $(document).ready(async function() {
 			} else {
 				$('body').css('overflow', 'auto');
 			}
+		})
+
+		.on('click', '#accept_cookies', function() {
+			$.cookie('_cookieConsent', 'true', {expires: 14});
+			$('#cookie_consent').fadeOut();
 		})
 		;
 	;
