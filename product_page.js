@@ -3,6 +3,8 @@ $(document).ready(function() {
 	$(window).on('load', function() {
 		if(getURLParam('leavereview')) {
 			$('#writeReview').click();
+		} else {
+			trackViewedProduct();
 		}
 	});
 
@@ -186,6 +188,72 @@ $(document).ready(function() {
 				$(star).find('.hide').hide();
 			}
 		}
+	}
+	function trackViewedProduct() {
+		//klaviyo item tracking
+		const item = {
+			"ProductName": "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
+			"ProductID": "{{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
+			"ImageURL": "{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}",
+			"URL": "{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
+			"Price": "{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
+		};
+
+		_learnq.push(["track", "Viewed Product", item]);
+
+		_learnq.push(["trackViewedItem", {
+			"Title": item.ProductName,
+			"ItemId": item.ProductID,
+			"ImageUrl": item.ImageURL,
+			"Url": item.URL,
+		}]);
+
+		//google item tracking
+		const googleItem = [{
+			id: item.ProductID,
+			name: item.ProductName,
+			price: item.Price
+		}];
+		gtag('event', 'view_item', {
+			items: googleItem
+		});
+		gtag('event', 'select_content', {
+			content_type: "product",
+			items: googleItem
+		});
+	}
+	function trackAddToCart() {
+		//klaviyo item tracking
+		const item = {
+			"ProductName": "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
+			"ProductID": "{{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
+			"ImageURL": "{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}",
+			"URL": "{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
+			"Price": "{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
+		};
+
+		_learnq.push(["track", "Viewed Product", item]);
+
+		_learnq.push(["trackViewedItem", {
+			"Title": item.ProductName,
+			"ItemId": item.ProductID,
+			"ImageUrl": item.ImageURL,
+			"Url": item.URL,
+		}]);
+
+		//google item tracking
+		const googleItem = [{
+			id: item.ProductID,
+			name: item.ProductName,
+			price: item.Price
+		}];
+		gtag('event', 'view_item', {
+			items: googleItem
+		});
+		gtag('event', 'select_content', {
+			content_type: "product",
+			items: googleItem
+		});
 	}
 
 	//render product card reiviews
