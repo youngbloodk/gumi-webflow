@@ -78,17 +78,17 @@ $(document).ready(function() {
 					alert(res.error);
 					$('.button-loader').hide();
 				} else {
+					let invoice_id = res.success.invoice_id;
 					$pay.html('Paid!');
+					trackCheckout(body.email, 'purchase', invoice_id);
 					localStorage.removeItem('buildBox');
 					localStorage.removeItem('buildBoxMeta');
 					localStorage.removeItem('gumiCheckout');
 					sessionStorage.removeItem('discountcode');
 					rewardful('convert', {email: storage.email});
-					location.href = `/receipt?id=${res.success.invoice_id}&paid=true`;
+					location.href = `/receipt?id=${invoice_id}&paid=true`;
 				}
 			});
 		;
 	}
-
-
 });

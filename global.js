@@ -586,6 +586,62 @@ function getItemDataFromBuildBoxItem($el) {
 	return data;
 }
 
+/**
+	 * 
+	 * @param {string} email 
+	 * @param {string} event - the type of event, must be 'begin_checkout' or 'purchase'
+	 * @param {string} invoice_id
+	 */
+function trackCheckout(email, event, invoice_id) {
+	const storage = JSON.parse(localStorage.getItem('buildBox'));
+	let itemsKlaviyo = [];
+	let itemsGoogle = [];
+	let itemNames = [];
+	let value = $('#checkoutTotal').text().replace('$', '');
+	let shipping = parseInt($('#checkoutShipping').text().replace('$', ''));
+	let coupon = $('#discountCode').val().toLowerCase();
+	let tax = $('#checkoutTax').text().replace('$', '');
+
+	for(const item of storage) {
+		let data = getItemDataFromSku(item.sku);
+		itemsKlaviyo.push({
+			"ProductID": data.sku,
+			"SKU": data.sku,
+			"ProductName": data.name,
+			"Quantity": item.quantity,
+			"ItemPrice": parseFloat(data.price),
+			"RowTotal": parseFloat(data.price) * item.quantity,
+			"ProductURL": data.url,
+			"ImageURL": data.image,
+		});
+		itemsGoogle.push({
+			"id": data.sku,
+			"name": data.name,
+			"quantity": item.quantity,
+			"price": parseFloat(data.price)
+		});
+		itemNames.push(data.name);
+	}
+	if(event == 'begin_checkout') {
+		_learnq.push(["track", "Started Checkout", {
+			"$event_id": email + "_" + moment().unix(),
+			"$value": value,
+			"ItemNames": itemNames,
+			"CheckoutURL": "http://www.guminutrition.com/pay",
+			"Items": itemsKlaviyo
+		}]);
+	}
+
+	gtag('event', event, {
+		"transaction_id": invoice_id,
+		"value": value,
+		"items": itemsGoogle,
+		"coupon": coupon,
+		"shipping": shipping,
+		"tax": tax
+	});
+}
+
 //global on ready
 $(document).ready(async function() {
 
