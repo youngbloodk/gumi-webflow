@@ -1,20 +1,13 @@
 $(document).ready(function() {
 
-	$(window).on('load', function() {
-		if(getURLParam('leavereview')) {
-			$('#writeReview').click();
-		} else {
-			trackViewedProduct();
-		}
-	});
-
+	trackProduct('view_item', 1);
+	trackProduct('select_item', 1);
 	getReviews($('#productcode').val())
 		.then(res => {
 			renderReviewStars(res, $('[data-review="main"]'));
 			renderReviews(res);
 		});
 	;
-	// renderCardReviews();
 
 	$('form').trigger('change');
 	$(document)
@@ -86,6 +79,8 @@ $(document).ready(function() {
 			const is_sub = $('#true').is(':checked');
 			const quantity = parseInt($('#quantity').val());
 
+			trackProduct('add_to_cart', quantity);
+
 			// Set sub info
 			localStorage.setItem('buildBoxMeta', JSON.stringify({
 				is_sub: is_sub,
@@ -115,157 +110,57 @@ $(document).ready(function() {
 			localStorage.setItem('buildBox', JSON.stringify(storage));
 			location.pathname = "/box";
 		})
+		.on('click', '#write_review', function() {
+			location.href = "/review?product_sku={{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}";
+		});
 
-		//review form handling
-		.on('click', '#writeReview', function() {
-			$('.modal').fadeIn(250);
-			$('#postReviewSku').val($('#productcode').val());
-		})
-		.on('click', '#closeModal', function() {
-			$('.modal').fadeOut(250);
-		})
-		.on('mouseover', '.radio-button-field.star.w-radio', function() {
-			if(!$("input[name='postReviewRating']:checked").val()) {
-				renderLeaveReviewStars($(this));
-			}
-		})
-		.on('click', '.radio-button-field.star.w-radio', function() {
-			renderLeaveReviewStars($(this));
-		})
-		.on('mouseout', '#starsRatingWrap', function() {
-			if(!$("input[name='postReviewRating']:checked").val()) {
-				$(this).find('.hide').hide();
-			}
-		})
-		.on('click', '#submitReview', function(e) {
-			e.preventDefault();
-			let $email = $('#postReviewEmail').val();
-			let $first_name = $('#postReviewFirstName').val();
-			let $last_name = $('#postReviewLastName').val();
-			let $review_title = $('#postReviewTitle').val();
-			let $review = $('#postReviewText').val();
-			let $rating = $('[name="postReviewRating"]:checked').val();
-			let $product_sku = $('#postReviewSku').val();
-
-			if(!$email || !$first_name || !$last_name || !$review_title || !$review || !$rating) {
-				alert("Please complete all fields before submitting your review :)");
-				$('.button-loader').hide();
-			} else {
-				const reviewData = {
-					email: $email,
-					first_name: $first_name,
-					last_name: $last_name,
-					review_title: $review_title,
-					review: $review,
-					rating: $rating,
-					product_sku: $product_sku,
-					review_date: moment()._d
-				};
-				postReview(reviewData)
-					.then(res => {
-						let $form = $('#postReviewFormWrap');
-						if(res.success) {
-							$form.find('form').hide();
-							$form.find('.success-message').show();
-						} else {
-							$('.button-loader').hide();
-							$form.find('.text.error').text('Whoops, there appears to be an issue. If this keeps happening, please let us know support@guminutrition.com');
-							$form.find('.error-message').show();
-						}
-					});
-				;
-			}
-		})
-		;
-	;
-	function renderLeaveReviewStars(target) {
-		let stars = $('.radio-button-field.star.w-radio');
-		let starNumber = parseInt(target.find('input').val());
-		for(const star of stars) {
-			if($(star).find('input').val() <= starNumber) {
-				$(star).find('.hide').show();
-			} else {
-				$(star).find('.hide').hide();
-			}
-		}
-	}
-	function trackViewedProduct() {
-		//klaviyo item tracking
+	function trackProduct(event, quantity) {
+		//klaviyo item
 		const item = {
 			"ProductName": "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
 			"ProductID": "{{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
+			"Categories": ["Gummies"],
 			"ImageURL": "{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}",
-			"URL": "{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
-			"Price": "{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
+			"URL": "https://www.guminutrition.com/goods/{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
+			"Brand": "Gumi",
+			"Price": parseInt("{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}")
 		};
 
-		_learnq.push(["track", "Viewed Product", item]);
-
-		_learnq.push(["trackViewedItem", {
-			"Title": item.ProductName,
-			"ItemId": item.ProductID,
-			"ImageUrl": item.ImageURL,
-			"Url": item.URL,
-		}]);
-
-		//google item tracking
-		const googleItem = [{
+		//google item
+		const googleItem = {
 			id: item.ProductID,
 			name: item.ProductName,
 			price: item.Price
-		}];
-		gtag('event', 'view_item', {
-			items: googleItem
-		});
-		gtag('event', 'select_content', {
-			content_type: "product",
-			items: googleItem
-		});
-	}
-	function trackAddToCart() {
-		//klaviyo item tracking
-		const item = {
-			"ProductName": "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
-			"ProductID": "{{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
-			"ImageURL": "{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}",
-			"URL": "{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
-			"Price": "{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}"
 		};
 
-		_learnq.push(["track", "Viewed Product", item]);
-
-		_learnq.push(["trackViewedItem", {
-			"Title": item.ProductName,
-			"ItemId": item.ProductID,
-			"ImageUrl": item.ImageURL,
-			"Url": item.URL,
-		}]);
-
-		//google item tracking
-		const googleItem = [{
-			id: item.ProductID,
-			name: item.ProductName,
-			price: item.Price
-		}];
-		gtag('event', 'view_item', {
-			items: googleItem
-		});
-		gtag('event', 'select_content', {
-			content_type: "product",
-			items: googleItem
-		});
-	}
-
-	//render product card reiviews
-	async function renderCardReviews() {
-		const cards = $('.product-card');
-
-		for(const card of cards) {
-			getReviews($(card).find('[data-product="sku"]').text())
-				.then(res => {
-					$(card).find('[data-product="sku"]');
-				});
-			;
+		if(event == 'view_item') {
+			_learnq.push(["track", "Viewed Product", item]);
+			_learnq.push(["trackViewedItem", {
+				"Title": item.ProductName,
+				"ItemId": item.ProductID,
+				"Categories": item.Categories,
+				"ImageUrl": item.ImageURL,
+				"Url": item.URL,
+				"Metadata": {
+					"Brand": item.Brand,
+					"Price": item.Price,
+				}
+			}]);
+		} else if(event == 'add_to_cart') {
+			_learnq.push(["track", "Added to Cart", {
+				"$value": item.Price * quantity,
+				"AddedItemProductName": item.ProductName,
+				"AddedItemProductID": item.ProductID,
+				"AddedItemSKU": item.ProductID,
+				"AddedItemImageURL": item.ImageURL,
+				"AddedItemURL": item.URL,
+				"AddedItemPrice": item.Price,
+				"AddedItemQuantity": quantity,
+			}]);
 		}
+		gtag('event', event, {
+			value: googleItem.price * quantity,
+			items: [googleItem]
+		});
 	}
 });

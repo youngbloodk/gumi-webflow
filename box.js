@@ -69,8 +69,23 @@ $(document).ready(function() {
 		.on('click', '.remove-button', function() {
 			let $item = $(this).closest('[data-sku]');
 			let sku = $item.attr('data-sku');
+			const item = getItemDataFromSku(sku);
+			const quantity = parseFloat($(this).closest('[data-sku]').find('[data-id=quantity]').text());
 			removeCartItem(sku);
 			updateCheckoutRender();
+
+			gtag('event', 'remove_from_cart', {
+				currency: 'USD',
+				items: [{
+					item_id: item.sku,
+					item_name: item.name,
+					affiliation: 'Gumi Site',
+					price: item.price,
+					currency: 'USD',
+					quantity: quantity
+				}],
+				value: item.price * quantity
+			});
 		})
 
 		.on('change', 'input[type="radio"]', function() {
@@ -110,6 +125,19 @@ $(document).ready(function() {
 			if(method == 'add') {
 				$quantity[0].innerText = quantity + 1;
 				$linePrice[0].innerText = `$${(item.price * (quantity + 1)).toFixed(2)}`;
+
+				gtag('event', 'add_to_cart', {
+					currency: 'USD',
+					items: [{
+						item_id: item.sku,
+						item_name: item.name,
+						affiliation: 'Gumi Site',
+						price: item.price,
+						currency: 'USD',
+						quantity: 1
+					}],
+					value: item.price
+				});
 			}
 			if(method == 'sub') {
 				$quantity[0].innerText = quantity - 1;
@@ -117,6 +145,19 @@ $(document).ready(function() {
 				if((quantity - 1) == 0) {
 					removeCartItem(sku);
 				}
+
+				gtag('event', 'remove_from_cart', {
+					currency: 'USD',
+					items: [{
+						item_id: item.sku,
+						item_name: item.name,
+						affiliation: 'Gumi Site',
+						price: item.price,
+						currency: 'USD',
+						quantity: 1
+					}],
+					value: item.price
+				});
 			}
 		}
 	}
@@ -150,6 +191,8 @@ $(document).ready(function() {
 		localStorage.setItem('buildBox', JSON.stringify(storage));
 		$(`[data-sku="${sku}"]`).remove();
 		updateBuildBoxQuantity(sku, 0);
+
+
 	}
 
 	function updateBuildBoxQuantity(sku, quantity) {
