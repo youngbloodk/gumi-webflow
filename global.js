@@ -597,10 +597,10 @@ function trackCheckout(email, event, invoice_id) {
 	let itemsKlaviyo = [];
 	let itemsGoogle = [];
 	let itemNames = [];
-	let value = $('#checkoutTotal').text().replace('$', '');
+	let value = parseInt($('#checkoutTotal').text().replace('$', ''));
 	let shipping = parseInt($('#checkoutShipping').text().replace('$', ''));
 	let coupon = $('#discountCode').val().toLowerCase();
-	let tax = $('#checkoutTax').text().replace('$', '');
+	let tax = parseInt($('#checkoutTax').text().replace('$', ''));
 
 	for(const item of storage) {
 		let data = getItemDataFromSku(item.sku);
@@ -611,7 +611,7 @@ function trackCheckout(email, event, invoice_id) {
 			"Quantity": item.quantity,
 			"ItemPrice": parseFloat(data.price),
 			"RowTotal": parseFloat(data.price) * item.quantity,
-			"ProductURL": data.url,
+			"ProductURL": `https://guminutrition.com/goods/${data.url}`,
 			"ImageURL": data.image,
 		});
 		itemsGoogle.push({
