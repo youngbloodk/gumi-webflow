@@ -634,9 +634,10 @@ function trackCheckout(email, event, invoice_id) {
 
 	gtag('event', event, {
 		"transaction_id": invoice_id,
+		"currency": "USD",
+		"coupon": coupon,
 		"value": value,
 		"items": itemsGoogle,
-		"coupon": coupon,
 		"shipping": shipping,
 		"tax": tax
 	});
