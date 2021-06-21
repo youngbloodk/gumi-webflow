@@ -254,11 +254,14 @@ async function resumeSubscription(id) {
 		});
 }
 
-async function cancelSubscription(id) {
+async function cancelSubscription(id, reason) {
 	const method = "POST";
 	const url = `${apiUrl}/stripe/subscriptions/cancel`;
+	const customer = await currentUser;
 	const body = {
 		id: id,
+		customer: customer.stripe_customer_id,
+		reason: reason
 	};
 	return await request(method, url, body)
 		.then(res => {
