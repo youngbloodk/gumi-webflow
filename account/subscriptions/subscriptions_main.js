@@ -148,7 +148,6 @@ $(document).ready(function() {
 			const $subId = $form.attr('data-stripeitem');
 			let reason = {
 				reason: $('[name="cancellation-reason"]:checked').val(),
-				id: $('[name="cancellation-reason"]:checked').attr('id'),
 				comment: $('#cancelation_comment').val()
 			};
 

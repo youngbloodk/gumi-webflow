@@ -81,11 +81,11 @@ $(document).ready(function() {
 					let invoice_id = res.success.invoice_id;
 					$pay.html('Paid!');
 					trackCheckout(body.email, 'purchase', invoice_id);
+					rewardful('convert', {email: storage.email});
 					localStorage.removeItem('buildBox');
 					localStorage.removeItem('buildBoxMeta');
 					localStorage.removeItem('gumiCheckout');
 					sessionStorage.removeItem('discountcode');
-					rewardful('convert', {email: storage.email});
 					location.href = `/receipt?id=${invoice_id}&paid=true`;
 				}
 			});
