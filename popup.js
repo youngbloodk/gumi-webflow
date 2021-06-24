@@ -41,7 +41,9 @@ $(document).ready(function() {
         };
 
         $.ajax(settings).done(res => {
-            console.log(res);
+            gtag('event', 'email_singup', {
+                'email_list_id': 'TdSCNw'
+            });
         });
     }
 
