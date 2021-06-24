@@ -56,7 +56,9 @@ async function signIn(email, pass) {
 				$.cookie.json = true;
 				const cookieData = {email: email, token: res.token};
 				$.cookie('gumiAuth', cookieData, {expires: date});
-				gtag('event', 'login');
+				gtag('event', 'login', {
+					'method': 'Gumi Auth'
+				});
 			}
 			return res;
 		});
