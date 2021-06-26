@@ -1,7 +1,6 @@
 $(document).ready(function() {
 
 	trackProduct('view_item', 1);
-	trackProduct('select_item', 1);
 	getReviews($('#productcode').val())
 		.then(res => {
 			renderReviewStars(res, $('[data-review="main"]'));
@@ -41,7 +40,7 @@ $(document).ready(function() {
 			}
 
 			$subtotalText.html(`$${subtotal.toFixed(2)}`);
-			$oneTimeSubtotal.html(`$${(subtotal + shipping).toFixed(2)}`);
+			$oneTimeSubtotal.html(`$${subtotal.toFixed(2)} + $${shipping.toFixed(2)} shipping`);
 			$subSubtotal.html(`$${subtotal.toFixed(2)} + Free shipping 🎉`);
 			$pic.css("background-image", `url(${pics[$quant - 1]})`);
 
