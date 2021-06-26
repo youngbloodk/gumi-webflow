@@ -558,8 +558,8 @@ function updateCheckoutRender() {
 		$('#shippingAmount').text(`$${shipping.toFixed(2)}`);
 	}
 
-	$('#oneTimeSubtotal').text(`$${(subtotal + shipping).toFixed(2)}`);
-	$('#subSubtotal').text(`$${subtotal.toFixed(2)}`);
+	$('#oneTimeSubtotal').text(`$${subtotal.toFixed(2)} + $${shipping.toFixed(2)} shipping`);
+	$('#subSubtotal').text(`$${subtotal.toFixed(2)} + Free shipping 🎉`);
 	$('#subtotalAcutal, #checkoutSubtotal').text(`$${subtotal.toFixed(2)}`);
 
 
