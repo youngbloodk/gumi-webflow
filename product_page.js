@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
 	trackProduct('view_item', 1);
-	getReviews($('#productcode').val())
+	getReviews('{{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}') //sku
 		.then(res => {
 			renderReviewStars(res, $('[data-review="main"]'));
 			renderReviews(res);
@@ -17,9 +17,9 @@ $(document).ready(function() {
 			const $oneTimeSubtotal = $('#oneTimeSubtotal');
 			const $subSubtotal = $('#subSubtotal');
 			const $subtotalText = $('#subtotalActual');
-			const prices = ['{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:2-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:3-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:4-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:5-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}', '{{wf {&quot;path&quot;:&quot;pricing-structure:6-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}'];
+			const price = parseInt('{{wf {&quot;path&quot;:&quot;price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}');
 			const pics = ['{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;2-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;3-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;4-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;5-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}', '{{wf {&quot;path&quot;:&quot;6-bottle-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}'];
-			const subtotal = parseInt(prices[$quant - 1]);
+			const subtotal = price * $quant;
 
 			let shipping = 0.00;
 
@@ -116,13 +116,13 @@ $(document).ready(function() {
 	function trackProduct(event, quantity) {
 		//klaviyo item
 		const item = {
-			"ProductName": "{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
-			"ProductID": "{{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
-			"Categories": ["Gummies"],
-			"ImageURL": "{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}",
-			"URL": "https://www.guminutrition.com/goods/{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}",
-			"Brand": "Gumi",
-			"Price": parseInt("{{wf {&quot;path&quot;:&quot;pricing-structure:1-bottle-price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}")
+			'ProductName': '{{wf {&quot;path&quot;:&quot;name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}',
+			'ProductID': '{{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}',
+			'Categories': ['Gummies'],
+			'ImageURL': '{{wf {&quot;path&quot;:&quot;main-image&quot;,&quot;type&quot;:&quot;ImageRef&quot;\} }}',
+			'URL': 'https://www.guminutrition.com/goods/{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}',
+			'Brand': 'Gumi',
+			'Price': parseInt('{{wf {&quot;path&quot;:&quot;price&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}')
 		};
 
 		//google item
@@ -133,28 +133,28 @@ $(document).ready(function() {
 		};
 
 		if(event == 'view_item') {
-			_learnq.push(["track", "Viewed Product", item]);
-			_learnq.push(["trackViewedItem", {
-				"Title": item.ProductName,
-				"ItemId": item.ProductID,
-				"Categories": item.Categories,
-				"ImageUrl": item.ImageURL,
-				"Url": item.URL,
-				"Metadata": {
-					"Brand": item.Brand,
-					"Price": item.Price,
+			_learnq.push(['track', 'Viewed Product', item]);
+			_learnq.push(['trackViewedItem', {
+				'Title': item.ProductName,
+				'ItemId': item.ProductID,
+				'Categories': item.Categories,
+				'ImageUrl': item.ImageURL,
+				'Url': item.URL,
+				'Metadata': {
+					'Brand': item.Brand,
+					'Price': item.Price,
 				}
 			}]);
 		} else if(event == 'add_to_cart') {
-			_learnq.push(["track", "Added to Cart", {
-				"$value": item.Price * quantity,
-				"AddedItemProductName": item.ProductName,
-				"AddedItemProductID": item.ProductID,
-				"AddedItemSKU": item.ProductID,
-				"AddedItemImageURL": item.ImageURL,
-				"AddedItemURL": item.URL,
-				"AddedItemPrice": item.Price,
-				"AddedItemQuantity": quantity,
+			_learnq.push(['track', 'Added to Cart', {
+				'$value': item.Price * quantity,
+				'AddedItemProductName': item.ProductName,
+				'AddedItemProductID': item.ProductID,
+				'AddedItemSKU': item.ProductID,
+				'AddedItemImageURL': item.ImageURL,
+				'AddedItemURL': item.URL,
+				'AddedItemPrice': item.Price,
+				'AddedItemQuantity': quantity,
 			}]);
 		}
 		gtag('event', event, {
