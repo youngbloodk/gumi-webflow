@@ -283,8 +283,7 @@ async function getProduct(id) {
 		});
 }
 
-async function getReviews(sku) {
-	if(!sku) sku = '';
+async function getReviews(sku = '') {
 	const method = "GET";
 	const url = `${apiUrl}/reviews/${sku}`;
 
