@@ -43,7 +43,7 @@ async function signIn(email, pass) {
 	const method = "POST";
 	const url = `${apiUrl}/user/sign-in`;
 	const body = {
-		email: email,
+		email: email.toLowerCase(),
 		password: pass
 	};
 	return await request(method, url, body)
