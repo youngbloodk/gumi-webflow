@@ -73,7 +73,7 @@ $(document).ready(function() {
 		.on('submit', '#product-form', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			const sku = $('#productcode').val();
+			const sku = "{{wf {&quot;path&quot;:&quot;sku&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}";
 			const freq = $('#subFrequency').val();
 			const is_sub = $('#true').is(':checked');
 			const quantity = parseInt($('#quantity').val());

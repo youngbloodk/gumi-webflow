@@ -491,7 +491,7 @@ function addCheckoutItem(item, quantity = 1) {
 					<div class="text">Delivered: ${freq_info}</div>
 					${removeButton}
 				</div>
-				<div class="text right" data-item="price">$${(Number((item.price).replace(/[^0-9.-]+/g, '')) * quantity).toFixed(2)}</div>
+				<div class="text right" data-item="price">$${(parseInt((item.price).replace(/[^0-9.-]+/g, '')) * quantity).toFixed(2)}</div>
 			</div>
 			<div class="divider"></div>
 		</div>
