@@ -1,0 +1,34 @@
+const gumi_auth = JSON.parse($.cookie('gumi_auth') || $.cookie('gumiAuth'));
+const gumi_api = 'http:localhost:8000/v1';
+const gumi = {
+	box: {
+		...JSON.parse(localStorage.getItem('guBox')),
+		update: function(method, items, quantity) {
+
+		}
+	},
+	goods: {
+		... await request('get', `${gumi_api}/webflow/goods`).then(res => {return res.success.items;}),
+	},
+
+	user: {
+		...gumi_auth ? await getUser(gumi_auth.email, gumi_auth.token) : null,
+	}
+};
+
+async function request(method, url, body) {
+	return await fetch(url, {
+		method: method,
+		headers: {
+			"Content-Type": "application/json",
+			"Access-Control-Allow-Origin": "*",
+			"Accept": "application/json",
+		},
+		mode: 'cors',
+		body: JSON.stringify(body)
+	})
+		.then(res => res.json())
+		.then(async res => {
+			return await res;
+		});
+}
