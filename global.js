@@ -10,6 +10,71 @@ if(signedIn) {
 	currentUser = getUser(gumiAuth.email, gumiAuth.token);
 }
 
+//global on ready
+$(document).ready(async function() {
+
+	renderBoxCount();
+
+	if(signedIn) {
+		$('[data-id="signIn"]').hide();
+		$('[data-id="myAccount"]').show();
+		$('[data-id="signOut"]').show();
+	} else {
+		$('[data-id="signIn"]').show();
+		$('[data-id="myAccount"]').hide();
+		$('[data-id="signOut"]').hide();
+	}
+
+	//cookie consent pop-up
+	if(!$.cookie('_cookieConsent')) {
+		$('#cookie_consent').css('display', 'grid').fadeIn();
+	}
+
+	$(document)
+
+		.on('click', '[data-id="signOut"]', function() {
+			signOut();
+		})
+
+		.on('click', '[data-chat="open"]', function() {
+			$zopim.livechat.window.show();
+		})
+
+		//button loaders global
+		.on('click', '.button', function() {
+			$(this).closest('.button-wrap').find('.button-loader').show();
+			setTimeout(function() {
+				$('.button-loader').hide();
+			}, 30000);
+		})
+
+		.on('click', '[data-button="reload"]', function() {
+			location.reload();
+		})
+
+		//prevent body scroll when mobile menu is open
+		.on('click', 'mobile-menu-icon', function() {
+			if($('.nav-menu').is(':visible')) {
+				$('body').css('overflow', 'hidden');
+			} else {
+				$('body').css('overflow', 'auto');
+			}
+		})
+
+		.on('click', '#accept_cookies', function() {
+			$.cookie('_cookieConsent', 'true', {expires: 14});
+			$('#cookie_consent').fadeOut();
+		})
+		;
+	;
+});
+
+//global on load
+$(window).on('load', function() {
+	//zendesk widget styling
+	$('[title="Button to launch messaging window"]').css('border-radius', '100%');
+});
+
 // global functions
 function renderBoxCount() {
 	const boxData = JSON.parse(localStorage.getItem('buildBox'));
@@ -647,68 +712,3 @@ function trackCheckout(email, event, invoice_id) {
 		"tax": tax
 	});
 }
-
-//global on ready
-$(document).ready(async function() {
-
-	renderBoxCount();
-
-	if(signedIn) {
-		$('[data-id="signIn"]').hide();
-		$('[data-id="myAccount"]').show();
-		$('[data-id="signOut"]').show();
-	} else {
-		$('[data-id="signIn"]').show();
-		$('[data-id="myAccount"]').hide();
-		$('[data-id="signOut"]').hide();
-	}
-
-	//cookie consent pop-up
-	if(!$.cookie('_cookieConsent')) {
-		$('#cookie_consent').css('display', 'grid').fadeIn();
-	}
-
-	$(document)
-
-		.on('click', '[data-id="signOut"]', function() {
-			signOut();
-		})
-
-		.on('click', '[data-chat="open"]', function() {
-			$zopim.livechat.window.show();
-		})
-
-		//button loaders global
-		.on('click', '.button', function() {
-			$(this).closest('.button-wrap').find('.button-loader').show();
-			setTimeout(function() {
-				$('.button-loader').hide();
-			}, 30000);
-		})
-
-		.on('click', '[data-button="reload"]', function() {
-			location.reload();
-		})
-
-		//prevent body scroll when mobile menu is open
-		.on('click', 'mobile-menu-icon', function() {
-			if($('.nav-menu').is(':visible')) {
-				$('body').css('overflow', 'hidden');
-			} else {
-				$('body').css('overflow', 'auto');
-			}
-		})
-
-		.on('click', '#accept_cookies', function() {
-			$.cookie('_cookieConsent', 'true', {expires: 14});
-			$('#cookie_consent').fadeOut();
-		})
-		;
-	;
-});
-
-//global on load
-$(window).on('load', function() {
-	//zendesk widget styling
-	$('[title="Button to launch messaging window"]').css('border-radius', '100%');
-});
