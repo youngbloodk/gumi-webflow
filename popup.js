@@ -6,6 +6,7 @@ $(document).ready(function() {
     $('[popup="close"]').click(function() {
         $('#popup-overlay').fadeOut();
         $.cookie('gumi_popup', moment().valueOf());
+        if($(this).attr("href")) location.href = "/box?state=build";
     });
 
     $('#email_signup').submit(function(e) {
