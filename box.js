@@ -191,19 +191,17 @@ $(document).ready(function() {
 		localStorage.setItem('buildBox', JSON.stringify(storage));
 		$(`[data-sku="${sku}"]`).remove();
 		updateBuildBoxQuantity(sku, 0);
-
-
 	}
 
 	function updateBuildBoxQuantity(sku, quantity) {
 		const $list_item = $(`.build-your-box-item .product-data input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
 		$list_item.find('.ticker input').val(quantity);
 
-		if(quantity < 1) {
-			$list_item.find('.ticker input, .minus').hide();
-		} else if(quantity >= 1) {
-			$list_item.find('.ticker input, .minus').show();
-		}
+		// if(quantity < 1) {
+		// 	$list_item.find('.ticker input, .minus').hide();
+		// } else if(quantity >= 1) {
+		// 	$list_item.find('.ticker input, .minus').show();
+		// }
 	}
 
 	function getItemData($el) {
@@ -213,7 +211,7 @@ $(document).ready(function() {
 
 	// Initalize variables
 	function init() {
-		$('.minus, .ticker input').hide();
+		// $('.minus, .ticker input').hide();
 		if(performance.navigation.type == 2) {
 			location.reload();
 		}
