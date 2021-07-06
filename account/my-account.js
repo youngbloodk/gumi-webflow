@@ -1,5 +1,5 @@
-$(document).ready(function () {
-	if (!signedIn) {
+$(document).ready(function() {
+	if(!signedIn) {
 		location.href = '/signin';
 	} else {
 		currentUser.then(user => {
@@ -9,7 +9,7 @@ $(document).ready(function () {
 
 	//account tab persist
 	let currentAccountTab = sessionStorage.getItem('accountTab');
-	if (currentAccountTab && performance.navigation.type > 0) {
+	if(currentAccountTab && performance.navigation.type > 0) {
 		setTimeout(() => {
 			$(`[data-tab="${currentAccountTab}"]`).trigger('click');
 		}, 1);
@@ -17,48 +17,48 @@ $(document).ready(function () {
 
 	$(document)
 		//active tab indication
-		.on('click', '[data-tab]', function () {
+		.on('click', '[data-tab]', function() {
 			sessionStorage.setItem('accountTab', `${$(this).attr('data-tab')}`);
 			$('.tab-indicator').removeClass('active');
 			$(this).find('.tab-indicator').addClass('active');
 			$('[data-tabpane]').hide();
 			$(`[data-tabpane="${$(this).attr('data-tab')}"]`).show();
-			window.scrollTo({ top: 0, behavior: 'smooth' });
+			window.scrollTo({top: 0, behavior: 'smooth'});
 		})
 		//dropdown menu handling
-		.on('click', '.menu-dropdown', function () {
+		.on('click', '.menu-dropdown', function() {
 			$(this).closest('.menu-dropdown').find('.menu-dropdown-list').show();
 		})
-		.on('click', function (e) {
-			if (!$(e.target).hasClass('menu-dropdown')) {
+		.on('click', function(e) {
+			if(!$(e.target).hasClass('menu-dropdown')) {
 				$('.menu-dropdown-list').hide();
 			}
 		})
 		//modal handling
-		.on('click', '[data-modalopen]', function () {
+		.on('click', '[data-modalopen]', function() {
 			const modalInfo = $(this).attr('data-modalopen');
 			$('#modalTitle').text(modalInfo.replaceAll('-', ' '));
 			$(`[data-modalform]`).hide();
 			$(`[data-modalform="${modalInfo}"]`).attr('data-stripeitem', $(this).closest('[data-stripeitem]').attr('data-stripeitem')).show();
 			$('.modal').fadeIn(250);
 		})
-		.on('click', '[data-modal="close"]', function () {
+		.on('click', '[data-modal="close"]', function() {
 			$('.modal, [data-modalForm]').fadeOut(250);
 			$(`[data-modalform]`).attr('data-stripeitem', '');
 			$('#modalTitle').text('');
 		})
 		//update or cancel update of email & pass
-		.on('click', '#updateProfileButton', function () {
+		.on('click', '#updateProfileButton', function() {
 			$(this).hide();
 			$('#existingProfileInfo').hide();
 			$('#updateProfile, #cancelUpdateProfile').show();
 		})
-		.on('click', '#cancelUpdateProfile', function () {
+		.on('click', '#cancelUpdateProfile', function() {
 			$(this).hide();
 			$('#updateProfile').hide();
 			$('#updateProfileButton, #existingProfileInfo').show();
 		})
-		.on('click', '#updateProfileConfirm', function () {
+		.on('click', '#updateProfileConfirm', function() {
 			const user = {
 				token: gumiAuth.token,
 				email: gumiAuth.email,
@@ -73,10 +73,10 @@ $(document).ready(function () {
 				}
 			};
 			updateUser(user).then(res => {
-				if (res.error) {
+				if(res.error) {
 					console.log(res.error);
 				} else {
-					if ($('#updateEmail').val() !== $('[data-customer="email"]').text()) {
+					if($('#updateEmail').val() !== $('[data-customer="email"]').text()) {
 						signOut();
 					} else {
 						location.reload();
@@ -86,7 +86,7 @@ $(document).ready(function () {
 		})
 
 		//remove payment method
-		.on('click', '#removePaymentMethodConfirm', function (e) {
+		.on('click', '#removePaymentMethodConfirm', function(e) {
 			e.preventDefault();
 
 			const $form = $(this).closest('[data-stripeitem]');
@@ -96,10 +96,10 @@ $(document).ready(function () {
 			$form.find('.error-message').hide();
 			signIn(gumiAuth.email, $pass)
 				.then(res => {
-					if (res.success) {
+					if(res.success) {
 						removePaymentMethod($id)
 							.then(res => {
-								if (res.success) {
+								if(res.success) {
 									$form.find('form').hide();
 									$form.find('.success-message').show();
 								} else {
@@ -140,8 +140,8 @@ $(document).ready(function () {
 		//render payment methods
 		await getPaymentMethods(gumiAuth.token)
 			.then(methods => {
-				if (methods.payment_method_count > 0) {
-					for (const method of methods.payment_methods) {
+				if(methods.payment_method_count > 0) {
+					for(const method of methods.payment_methods) {
 						const cardIcons = {
 							visa: "",
 							amex: "",
@@ -180,7 +180,7 @@ $(document).ready(function () {
 					`);
 					};
 				} else {
-					$('.empty-payment-methods').show();
+					$('.empty-payment-methods').css('display', 'grid').show();
 				}
 			});
 		;
