@@ -113,6 +113,7 @@ $(document).ready(function() {
 			if(!$('#sub_frequency').val()) {
 				alert('Please choose a subscription frequency.');
 			}
+			fbq('track', 'InitiateCheckout');
 		});
 	;
 
