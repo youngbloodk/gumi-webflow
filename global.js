@@ -700,10 +700,6 @@ function trackCheckout(email, event, invoice_id) {
 			"CheckoutURL": "http://www.guminutrition.com/pay",
 			"Items": itemsKlaviyo
 		}]);
-		fbq('track', 'InitiateCheckout', {
-			currency: "USD",
-			value: value
-		});
 	} else if(event == 'purchase') {
 		fbq('track', 'Purchase', {
 			currency: "USD",
