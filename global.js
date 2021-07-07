@@ -37,7 +37,7 @@ $(document).ready(async function() {
 		})
 
 		.on('click', '[data-chat="open"]', function() {
-			$zopim.livechat.window.show();
+			zE('messenger', 'open');
 		})
 
 		//button loaders global
@@ -324,10 +324,10 @@ async function resumeSubscription(id) {
 async function cancelSubscription(id, reason) {
 	const method = "POST";
 	const url = `${apiUrl}/stripe/subscriptions/cancel`;
-	const customer = await currentUser;
+	const stripe_customer_id = await currentUser.stripe_customer_id;
 	const body = {
 		id: id,
-		customer: customer.stripe_customer_id,
+		customer: stripe_customer_id,
 		reason: reason
 	};
 	return await request(method, url, body)
