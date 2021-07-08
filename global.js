@@ -667,10 +667,10 @@ function trackCheckout(email, event, invoice_id) {
 	let itemsKlaviyo = [];
 	let itemsGoogle = [];
 	let itemNames = [];
-	let value = parseInt($('#checkoutTotal').text().replace('$', ''));
-	let shipping = parseInt($('#checkoutShipping').text().replace('$', ''));
+	let value = parseFloat($('#checkoutTotal').text().replace('$', ''));
+	let shipping = parseFloat($('#checkoutShipping').text().replace('$', ''));
 	let coupon = $('#discountCode').val().toLowerCase();
-	let tax = parseInt($('#checkoutTax').text().replace('$', ''));
+	let tax = parseFloat($('#checkoutTax').text().replace('$', ''));
 
 	for(const item of storage) {
 		let data = getItemDataFromSku(item.sku);
