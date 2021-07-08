@@ -9,22 +9,22 @@ function renderPauseSubRenewalDate(target) {
 async function renderSubscriptions() {
 	await getSubscriptions(gumiAuth.token)
 		.then(async subscriptions => {
-			for(const subscription of subscriptions.subscriptions) {
-				let total = 0.00;
-				let taxRate;
-				let tax = 0;
-				let taxInfo = '';
-				let subscriptionTitle = subscription.items.total_count > 1 ? `${subscription.items.total_count} items` : `${subscription.items.total_count} item`;
-				let subItems = await renderSubItems(subscription.items.data);
-
-				for(const subItem of subscription.items.data) {
-					total += ((subItem.price.unit_amount * .01) * subItem.quantity);
-				};
-
-				if(subscription.default_tax_rates[0]) {
-					taxRate = subscription.default_tax_rates[0].percentage / 100;
-					tax = total * taxRate;
-					taxInfo = `<div class="w-layout-grid grid _1col row-gap-0">
+			if(subscriptions.count > 0) {
+				$('#no_subscriptions').hide();
+				for(const subscription of subscriptions.subscriptions) {
+					let total = 0.00;
+					let taxRate;
+					let tax = 0;
+					let taxInfo = '';
+					let subscriptionTitle = subscription.items.total_count > 1 ? `${subscription.items.total_count} items` : `${subscription.items.total_count} item`;
+					let subItems = await renderSubItems(subscription.items.data);
+					for(const subItem of subscription.items.data) {
+						total += ((subItem.price.unit_amount * .01) * subItem.quantity);
+					};
+					if(subscription.default_tax_rates[0]) {
+						taxRate = subscription.default_tax_rates[0].percentage / 100;
+						tax = total * taxRate;
+						taxInfo = `<div class="w-layout-grid grid _1col row-gap-0">
 									<div class="w-layout-grid grid _2col _1fr-auto">
 										<div class="text">Tax:</div>
 										<div class="text right">$${tax}</div>
@@ -36,24 +36,21 @@ async function renderSubscriptions() {
 								</div>
 								<div class="divider no-margin"></div>
 								`;
-				}
-
-				let status = 'active';
-				let pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Update-subscription"><span class="font-awesome _12"> &nbsp</span> Update subscription</a>
+					}
+					let status = 'active';
+					let pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Update-subscription"><span class="font-awesome _12"> &nbsp</span> Update subscription</a>
 											<div class="divider no-margin"></div>
 											<a href="#" class="dropdown-menu-item" data-modalopen="Pause-subscription"><span class="font-awesome _12"> &nbsp</span> Pause subscription</a>
 											<div class="divider no-margin"></div>`;
-				let subscriptionRenewalDetails = `Your subscription will renew on <span class="text bold" data-id="renewal-date">${moment.unix(subscription.current_period_end).format('MMM D, YYYY')}</span>`;
-
-				if(subscription.pause_collection) {
-					status = 'paused';
-					renewalDate = subscription.pause_collection.resumes_at;
-					pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Resume-subscription"><span class="font-awesome _12"> &nbsp</span> Resume subscription</a>
+					let subscriptionRenewalDetails = `Your subscription will renew on <span class="text bold" data-id="renewal-date">${moment.unix(subscription.current_period_end).format('MMM D, YYYY')}</span>`;
+					if(subscription.pause_collection) {
+						status = 'paused';
+						renewalDate = subscription.pause_collection.resumes_at;
+						pauseUpdateRenewButtons = `<a href="#" class="dropdown-menu-item" data-modalopen="Resume-subscription"><span class="font-awesome _12"> &nbsp</span> Resume subscription</a>
 											<div class="divider no-margin"></div>`;
-					subscriptionRenewalDetails = `Your subscription is paused until <span class="text bold" data-id="renewal-date">${moment.unix(subscription.pause_collection.resumes_at).format('MMM D, YYYY')}</span>, after which it will renew on it's original schedule`;
-				}
-
-				$('#subscriptionsList').append(`
+						subscriptionRenewalDetails = `Your subscription is paused until <span class="text bold" data-id="renewal-date">${moment.unix(subscription.pause_collection.resumes_at).format('MMM D, YYYY')}</span>, after which it will renew on it's original schedule`;
+					}
+					$('#subscriptionsList').append(`
 						<div class="cell vertical card" data-stripeitem="${subscription.id}" data-periodend="${moment.unix(subscription.current_period_end).format('MMM D, YYYY')}" data-subitems="${encodeURI(JSON.stringify(subscription.items.data))}">
 							<div class="cell-header">
 								<div class="w-layout-grid grid _2col auto a-center">
@@ -84,13 +81,13 @@ async function renderSubscriptions() {
 							</div>
 						</div>
 					`);
-			};
+				};
+			}
 		});
 	;
 }
 async function renderSubItems(subItems, type) {
 	let subItemsList = [];
-
 	for(const subItem of subItems) {
 		let quantity = `<div class="text" style="margin-left:5px;">${subItem.quantity}</div>`;
 		if(type == 'update') {
