@@ -77,7 +77,7 @@ $(document).ready(function() {
 				if(res.error) {
 					alert(res.error);
 					$('.button-loader').hide();
-				} else {
+				} else if(res.success) {
 					let invoice_id = res.success.invoice_id;
 					$pay.html('Paid!');
 					trackCheckout(body.email, 'purchase', invoice_id);
@@ -87,6 +87,9 @@ $(document).ready(function() {
 					localStorage.removeItem('gumiCheckout');
 					sessionStorage.removeItem('discountcode');
 					location.href = `/receipt?id=${invoice_id}&paid=true`;
+				} else {
+					alert('There was an error processing your payment. Please use a different card');
+					$('.button-loader').hide();
 				}
 			});
 		;

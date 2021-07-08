@@ -1,23 +1,496 @@
-const gumi_auth = JSON.parse($.cookie('gumi_auth') || $.cookie('gumiAuth'));
-const gumi_api = 'http:localhost:8000/v1';
+const gumi_auth = JSON.parse($.cookie('gumiAuth') || null); //change cookie value to gumi_auth before going live
+const gumi_api_url = 'https://api.guminutrition.app/v1';
 const gumi = {
 	box: {
-		...JSON.parse(localStorage.getItem('guBox')),
-		update: function(method, items, quantity) {
+		...JSON.parse(localStorage.getItem('gumi_box')),
+		update: function({method, items, is_sub = true, freq, }) {
+			localStorage.setItem('gumi_box', JSON.stringify({
+				count: count,
+				freq: freq,
+				is_sub: is_sub,
+				items: items,
+			}));
+		},
+		addCheckoutItem: function(item, quantity = 1) {
+			let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+			let freq_info = '';
+			let removeButton = '';
+			if(is_sub) {
+				let freq_name = $('.select option:selected').text();
+				freq_info = `${freq_name}`;
+			} else {
+				freq_info = `Just this once`;
+			} if(location.href.indexOf('box') > 0) {
+				removeButton = `<div style="color: red; cursor: pointer;" class="text remove-button">Remove</div>`;
+			}
+			$('#boxItemsList').append(`
+		<div data-sku="${item.sku}">
+			<div class="w-layout-grid grid _3col auto-auto-1fr column-gap-10">
+				<img src="${item.image}" loading="lazy" width="60" sizes="(max-width: 479px) 17vw, 60px" alt="">
+				<div class="w-layout-grid grid _1col row-gap-0">
+					<div class="text semibold">${item.name}</div>
+					<div class="text">Quantity: <span data-id="quantity">${quantity}</span></div>
+					<div class="text">Delivered: ${freq_info}</div>
+					${removeButton}
+				</div>
+				<div class="text right" data-item="price">$${(parseInt((item.price).replace(/[^0-9.-]+/g, '')) * quantity).toFixed(2)}</div>
+			</div>
+			<div class="divider"></div>
+		</div>
+	`);
+		},
+		renderMetaFromStorage: function() {
+			let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
+			let sub_val = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+			if(sub_val != storage.is_sub) {
+				evaluateSub();
+			}
+			if(!$('#sub_frequency').val()) {
+				$('#subFrequency').val('1m').trigger('change');
+			}
+			$('#subFrequency').val(storage.freq).trigger('change');
+		},
+		evaluateSub: function() {
+			if(gumi.box.is_sub) {
+				$('#true').click().attr('checked', true);
+				$('#true').closest('div').find('.text').addClass('light');
+				$('#false').closest('div').find('.text').removeClass('light');
+				$('#deliveryFrequencyWrap').show();
+			} else {
+				$('#false').click().attr('checked', true);
+				$('#false').closest('div').find('.text').addClass('light');
+				$('#true').closest('div').find('.text').removeClass('light');
+				$('#deliveryFrequencyWrap').hide();
+			}
+		},
+		updateCheckoutRender: function() {
+			const $emptyMessage = $('.empty-box');
+			const $continueBlock = $('#continueToCheckout');
 
-		}
+			// Update subtotal
+			let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+			let storage = JSON.parse(localStorage.getItem('buildBox'));
+			let subtotal = 0.00;
+			let shipping = 0.00;
+			let totalQuant = renderBoxCount();
+
+			for(const item of storage) {
+				const item_data = getItemDataFromSku(item.sku);
+				subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
+			}
+			if(totalQuant == 1) {
+				shipping = 5.00;
+			} else if(totalQuant >= 2 && totalQuant <= 6) {
+				shipping = 8.50;
+			} else if(totalQuant > 6) {
+				shipping = 12.00;
+			}
+			if(is_sub) {
+				$('#shippingTitleText').text('Free Shipping 🎉');
+				$('#shippingAmount').text(`$0.00`);
+			} else {
+				$('#shippingTitleText').text('Shipping');
+				$('#shippingAmount').text(`$${shipping.toFixed(2)}`);
+			}
+			$('#oneTimeSubtotal').text(`$${subtotal.toFixed(2)} + $${shipping.toFixed(2)} shipping`);
+			$('#subSubtotal').text(`$${subtotal.toFixed(2)} + Free shipping 🎉`);
+			$('#subtotalAcutal, #checkoutSubtotal').text(`$${subtotal.toFixed(2)}`);
+			if(storage.length > 0) {
+				$emptyMessage.hide();
+				$continueBlock.show();
+			} else {
+				$emptyMessage.show();
+				$continueBlock.hide();
+			}
+		},
+		getItemDataFromSku: function(sku) {
+			const $list_item = $(`.build-your-box-item .product-data
+		input[name="sku"][value="${sku}"]`).closest('.build-your-box-item');
+			return getItemDataFromBuildBoxItem($list_item);
+		},
+		getItemDataFromBuildBoxItem: function($el) {
+			const $product_data = $el.find('.product-data input');
+			let data = {
+				freq: parseInt($('#sub_frequency').val()) > 0 ? $('.product-select').val() : null
+			};
+			$product_data.each(function() {
+				const name = $(this).attr('name');
+				const value = $(this).attr('value');
+				data[name] = value;
+			});
+			return data;
+		},
+		/**
+			 * 
+			 * @param {string} email 
+			 * @param {string} event - the type of event, must be 'begin_checkout' or 'purchase'
+			 * @param {string} invoice_id
+			 */
+		trackCheckout: function(email, event, invoice_id) {
+			const storage = JSON.parse(localStorage.getItem('buildBox'));
+			let itemsKlaviyo = [];
+			let itemsGoogle = [];
+			let itemNames = [];
+			let value = parseInt($('#checkoutTotal').text().replace('$', ''));
+			let shipping = parseInt($('#checkoutShipping').text().replace('$', ''));
+			let coupon = $('#discountCode').val().toLowerCase();
+			let tax = parseInt($('#checkoutTax').text().replace('$', ''));
+
+			for(const item of storage) {
+				let data = getItemDataFromSku(item.sku);
+				itemsKlaviyo.push({
+					"ProductID": data.sku,
+					"SKU": data.sku,
+					"ProductName": data.name,
+					"Quantity": item.quantity,
+					"ItemPrice": parseFloat(data.price),
+					"RowTotal": parseFloat(data.price) * item.quantity,
+					"ProductURL": `https://guminutrition.com/goods/${data.url}`,
+					"ImageURL": data.image,
+				});
+				itemsGoogle.push({
+					"id": data.sku,
+					"name": data.name,
+					"quantity": item.quantity,
+					"price": parseFloat(data.price)
+				});
+				itemNames.push(data.name);
+			}
+			if(event == 'begin_checkout') {
+				_learnq.push(["track", "Started Checkout", {
+					"$event_id": email + "_" + moment().unix(),
+					"$value": value,
+					"ItemNames": itemNames,
+					"CheckoutURL": "http://www.guminutrition.com/pay",
+					"Items": itemsKlaviyo
+				}]);
+			}
+			gtag('event', event, {
+				"transaction_id": invoice_id,
+				"currency": "USD",
+				"coupon": coupon,
+				"value": value,
+				"items": itemsGoogle,
+				"shipping": shipping,
+				"tax": tax
+			});
+		},
 	},
 	goods: {
-		... await request('get', `${gumi_api}/webflow/goods`).then(res => {return res.success.items;}),
+		... await gumiRequest('POST', '/webflow/goods').then(res => {
+			return res.success.items;
+		}),
 	},
-
+	stripe: {
+		getPaymentMethods: async function(id, action) {
+			let method = 'GET';
+			let url = `/stripe/payment-methods/${id}`;
+			let body;
+			if(!id) {
+				method = 'POST';
+				url = '/stripe/payment-methods';
+				body = {token: gumi_auth.token};
+			}
+			if(action == 'detach') {
+				method = 'POST';
+				url = '/stripe/payment-methods/detach';
+				body = {id: id};
+			}
+			return await gumiRequest(method, url, body).then(res => {
+				return res.success;
+			});
+		},
+		getInvoices: async function(id) {
+			let url = '/stripe/invoices';
+			const body = {
+				token: gumi_auth.token
+			};
+			if(id) {
+				body.id = id;
+				url = '/stripe/invoice';
+			};
+			return await gumiRequest('POST', url, body)
+				.then(res => {
+					return res.success;
+				});
+		},
+		pay: async function({email, first_name, last_name, street_address, city, state, zip, items, coupon, meta, payment_method}) {
+			return await gumiRequest('POST', '/stripe/pay', {
+				email: email,
+				first_name: first_name,
+				last_name: last_name,
+				street_address: street_address,
+				city: city,
+				state: state,
+				zip: zip,
+				items: items,
+				coupon: coupon,
+				meta: meta,
+				payment_method: payment_method
+			}).then(res => {
+				return res;
+			});
+		},
+		getSubscriptions: async function() {
+			return await gumiRequest('POST', '/stripe/subscriptions', {
+				token: gumi_auth.token
+			}).then(res => {
+				return res.success;
+			});
+		},
+		getSubitemOptions: async function(sub_id) {
+			return await gumiRequest('POST', '/stripe/subscriptions/item/options', {
+				sub_id: sub_id,
+			}).then(res => {
+				return res;
+			});
+		},
+		updateSubItemQuantity: async function(item_id, quantity) {
+			return await gumiRequest('POST', '/stripe/subscriptions/item/quantity', {
+				item_id: item_id,
+				quantity: quantity
+			}).then(res => {
+				return res;
+			});
+		},
+		deleteSubItemdeleteSubItem: async function(item_id) {
+			return await gumiRequest('DELETE', `/stripe/subscriptions/item/${item_id}`).then(res => {
+				return res;
+			});
+		},
+		updateSubFreq: async function(sub_id, freq) {
+			return await gumiRequest('POST', '/stripe/subscriptions/change-freq', {
+				sub_id: sub_id,
+				freq: freq
+			}).then(res => {
+				return res;
+			});
+		},
+		pauseSubscription: async function(id, date) {
+			return await gumiRequest('POST', '/stripe/subscriptions/pause', {
+				id: id,
+				custom_date: date
+			}).then(res => {
+				return res;
+			});
+		},
+		resumeSubscription: async function(id) {
+			return await gumiRequest('POST', '/stripe/subscriptions/resume', {
+				id: id,
+			}).then(res => {
+				return res;
+			});
+		},
+		cancelSubscription: async function({id, reason, email}) {
+			return await gumiRequest('POST', '/stripe/subscriptions/cancel', {
+				id: id,
+				email: email,
+				reason: reason
+			}).then(res => {
+				return res;
+			});
+		},
+		getProduct: async function(id) {
+			return await gumiRequest('POST', '/stripe/product', {
+				id: id
+			}).then(res => {
+				return res.success;
+			});
+		},
+		couponExists: async function(coupon) {
+			return await gumiRequest('POST', '/stripe/coupon-exists', {
+				value: coupon.toLowerCase()
+			}).then(res => {
+				return res;
+			});
+		},
+	},
+	reviews: {
+		getReviews: async function(sku = '') {
+			return await gumiRequest('GET', `/reviews/${sku}`).then(res => {
+				return res;
+			});
+		},
+		postReview: async function({email, first_name, last_name, review_title, review, rating, product_sku, review_date}) {
+			return await gumiRequest('POST', '/reviews', {
+				email: email,
+				first_name: first_name,
+				last_name: last_name,
+				review_title: review_title,
+				review: review,
+				rating: rating,
+				product_sku: product_sku,
+				review_date: review_date
+			}).then(res => {
+				return res;
+			});
+		},
+		formatReviewData: function(reviewData) {
+			const reviews = reviewData.success;
+			//calc & render review count
+			const count = reviews.length;
+			$('[data-reviews="count"]').text(count);
+			//calc rating totals
+			let ratings = {};
+			let ratingTotal = 0.00;
+			for(const review of reviews) {
+				if(!ratings[review.rating[0]]) {
+					ratings[review.rating[0]] = 0;
+				}
+				ratings[review.rating[0]]++;
+				ratingTotal += parseFloat(review.rating);
+			}
+			const rating = Math.round((ratingTotal / reviews.length) * 4) / 4;
+			let finalRating;
+			if(rating.toString().indexOf('.') > 0) {
+				finalRating = rating.toFixed(2);
+			} else {
+				finalRating = rating.toFixed(1);
+			}
+			return {
+				count: count,
+				finalRating: finalRating,
+				rating: rating,
+				ratings: ratings,
+				ratingTotal: ratingTotal,
+				reviews: reviews
+			};
+		},
+		renderReviewStars: function(reviewData, target) {
+			$(target).find($('[data-reviews="rating"]')).text(reviewData.finalRating);
+			$(target).find($('.stars-fill')).css('width', `${reviewData.rating / 5 * 100}%`);
+		},
+		renderReviews: function(reviewData) {
+			const reviewMeta = formatReviewData(reviewData);
+			//render rating meters
+			const meters = $('[data-reviewmeter]');
+			for(const meter of meters) {
+				const ratingNumber = reviewMeta.ratings[$(meter).attr('data-reviewmeter')];
+				let percent = 0;
+				if(ratingNumber) {
+					percent = ratingNumber / reviewMeta.count;
+				}
+				$(meter).find('.rating-meter-fill').css('width', `${percent * 100}%`);
+			}
+			//render reviews
+			for(const review of reviewMeta.reviews) {
+				const rating = parseInt(review.rating);
+				const percent = rating / 5;
+				const date = moment(review.review_date).format('MMM D, YYYY');
+				let title = review.review_title;
+				if(!title) {
+					title = `${rating} stars`;
+				}
+				let name = `${review.first_name} ${review.last_name[0].toUpperCase()}. - `;
+				if(!review.first_name) {
+					name = '';
+				}
+				$('#reviewsList').append(`
+					<div class="w-layout-grid grid _1col row-gap-10">
+						<div class="w-layout-grid grid _2col _1fr-auto">
+							<div class="cell">
+								<div class="cell relative">
+									<div class="font-awesome stars-fill yellow" style="width: ${percent}%;"></div>
+									<div class="font-awesome-reg stars yellow"></div>
+								</div>
+							</div>
+							<div id="w-node-_252682f1-4915-c3a6-34d0-354212e5a59c-0f76a0b3" class="text right">${date}</div>
+						</div>
+						<div class="h5 semibold">${title}</div>
+						<div class="text">"${review.review}"</div>
+						<div class="text secondary bold">${name}Verified Buyer <span class="font-awesome blue"></span></div>
+					</div>
+				`);
+			}
+		},
+	},
 	user: {
-		...gumi_auth ? await getUser(gumi_auth.email, gumi_auth.token) : null,
-	}
+		...gumi_auth ? await gumiRequest('POST', '/user/get-user', gumi_auth).then(res => {
+			return res.success;
+		}) : null,
+		signIn: async function(email, pass) {
+			return await gumiRequest('POST', '/user/sign-in', {
+				email: email.toLowerCase(),
+				password: pass
+			}).then(async res => {
+				if(res.success) {
+					//set cookie with email and token
+					$.cookie.json = true;
+					$.cookie('gumi_auth', {
+						email: email,
+						token: res.token
+					});
+					gtag('event', 'login', {
+						'method': 'Gumi Auth'
+					});
+				}
+				return res;
+			});
+		},
+		signOut: function() {
+			$.removeCookie('gumiAuth');
+			location.reload();
+		},
+		//reason MUST be either 'forgot_password' or 'activate_account'
+		resetPass: async function(email, reason) {
+			return await gumiRequest('POST', '/user/reset-password', {
+				email: email,
+				reason: reason
+			}).then(async res => {
+				return res;
+			});
+		},
+		uuiDPassChange: async function(uuid, pass) {
+			return await gumiRequest('POST', '/user/uuid-password-change', {
+				uuid: uuid,
+				password: pass
+			}).then(async res => {
+				return res;
+			});
+		},
+		verifyToken: async function() {
+			return await gumiRequest('POST', '/user/verify-token', {
+				token: gumi_auth.token
+			}).then(async res => {
+				return res;
+			});
+		},
+		emailExists: async function(email) {
+			return await gumiRequest('POST', '/user/email-exists', {
+				email: email
+			}).then(async res => {
+				return res;
+			});
+		},
+		updateUser: async function({email, first_name, last_name, street_address, city, state, zip}) {
+			return await gumiRequest('PUT', '/user/', {
+				...gumi_auth,
+				update: {
+					email: email,
+					first_name: first_name,
+					last_name: last_name,
+					street_address: street_address,
+					city: city,
+					state: state,
+					zip: zip,
+				}
+			}).then(res => {
+				return res.success;
+			});
+		},
+		changePass: async function(currentPass, newPass) {
+			return await gumiRequest('POST', '/user/change-password', {
+				token: gumi_auth.token,
+				current_pass: currentPass,
+				new_pass: newPass
+			}).then(res => {
+				return res;
+			});
+		}
+	},
 };
-
-async function request(method, url, body) {
-	return await fetch(url, {
+async function gumiRequest(method, url, body) {
+	return await fetch(gumi_api_url + url, {
 		method: method,
 		headers: {
 			"Content-Type": "application/json",
@@ -26,9 +499,67 @@ async function request(method, url, body) {
 		},
 		mode: 'cors',
 		body: JSON.stringify(body)
-	})
-		.then(res => res.json())
-		.then(async res => {
-			return await res;
-		});
+	}).then(res => res.json()).then(async res => {return await res;});
 }
+function evenRound(num, decimalPlaces) {
+	const d = decimalPlaces || 0;
+	const m = Math.pow(10, d);
+	const n = +(d ? num * m : num).toFixed(8);
+	const i = Math.floor(n), f = n - i;
+	const e = 1e-8;
+	const r = (f > 0.5 - e && f < 0.5 + e) ? ((i % 2 == 0) ? i : i + 1) : Math.round(n); return d ? r / m : r;
+}
+function getURLParam(key) {
+	return new URLSearchParams(window.location.search).get(key);
+}
+//global on ready
+$(document).ready(async function() {
+	//render box count
+	$('#boxCount').text(gumi.box.count);
+	if(gumi_auth) {
+		$('[data-id="signIn"]').hide();
+		$('[data-id="myAccount"]').show();
+		$('[data-id="signOut"]').show();
+	} else {
+		$('[data-id="signIn"]').show();
+		$('[data-id="myAccount"]').hide();
+		$('[data-id="signOut"]').hide();
+	}
+	//cookie consent pop-up
+	if(!$.cookie('_cookieConsent')) {
+		$('#cookie_consent').css('display', 'grid').fadeIn();
+	}
+	$(document)
+		.on('click', '[data-id="signOut"]', function() {
+			signOut();
+		})
+		//button loaders global
+		.on('click', '.button', function() {
+			$(this).closest('.button-wrap').find('.button-loader').show();
+			setTimeout(function() {
+				$('.button-loader').hide();
+			}, 30000);
+		})
+		.on('click', '[data-button="reload"]', function() {
+			location.reload();
+		})
+		//prevent body scroll when mobile menu is open
+		.on('click', 'mobile-menu-icon', function() {
+			if($('.nav-menu').is(':visible')) {
+				$('body').css('overflow', 'hidden');
+			} else {
+				$('body').css('overflow', 'auto');
+			}
+		})
+		.on('click', '#accept_cookies', function() {
+			$.cookie('_cookieConsent', 'true', {expires: 14});
+			$('#cookie_consent').fadeOut();
+		})
+		;
+	;
+});
+//global on load
+$(window).on('load', function() {
+	//zendesk widget styling
+	$('[title="Button to launch messaging window"]').css('border-radius', '100%');
+});
