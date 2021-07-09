@@ -119,7 +119,7 @@ async function signIn(email, pass) {
 				const minutes = 1440;
 				date.setTime(date.getTime() + (minutes * 60 * 1000));
 				$.cookie.json = true;
-				const cookieData = {email: email, token: res.token};
+				const cookieData = {email: email.toLowerCase(), token: res.token};
 				$.cookie('gumiAuth', cookieData, {expires: date});
 				gtag('event', 'login', {
 					'method': 'Gumi Auth'
