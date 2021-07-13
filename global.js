@@ -65,6 +65,13 @@ $(document).ready(async function() {
 			$.cookie('_cookieConsent', 'true', {expires: 14});
 			$('#cookie_consent').fadeOut();
 		})
+		.on('keyup keypress', 'form', function(e) {
+			var keyCode = e.keyCode || e.which;
+			if(keyCode === 13) {
+				e.preventDefault();
+				return false;
+			}
+		})
 		;
 	;
 });
@@ -388,6 +395,19 @@ async function getPaymentMethod(id) {
 	return await request(method, url)
 		.then(res => {
 			return res.success;
+		});
+}
+
+async function addPaymentMethod({payment_method, customer}) {
+	const method = "POST";
+	const url = `${apiUrl}/stripe/payment-methods/attach`;
+	const body = {
+		payment_method: payment_method,
+		customer: customer
+	};
+	return await request(method, url, body)
+		.then(res => {
+			return res;
 		});
 }
 
