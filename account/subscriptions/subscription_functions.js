@@ -51,7 +51,7 @@ async function renderSubscriptions() {
 						subscriptionRenewalDetails = `Your subscription is paused until <span class="text bold" data-id="renewal-date">${moment.unix(subscription.pause_collection.resumes_at).format('MMM D, YYYY')}</span>, after which it will renew on it's original schedule`;
 					}
 					$('#subscriptionsList').append(`
-						<div class="cell vertical card" data-stripeitem="${subscription.id}" data-periodend="${moment.unix(subscription.current_period_end).format('MMM D, YYYY')}" data-subitems="${encodeURI(JSON.stringify(subscription.items.data))}">
+						<div class="cell vertical card" data-stripeitem="${subscription.id}" data-periodend="${moment.unix(subscription.current_period_end).format('MMM D, YYYY')}" data-subitems="${encodeURI(JSON.stringify(subscription.items.data))}" data-frequency="${subscription.items.data[0].plan.interval_count}">
 							<div class="cell-header">
 								<div class="w-layout-grid grid _2col auto a-center">
 									<div class="h5">${subscriptionTitle}</div>
@@ -116,7 +116,7 @@ async function renderSubItems(subItems, type) {
 									<div class="text">Quantity:</div>
 									${quantity}
 								</div>
-								<div class="text">Delivered: Every ${subItem.price.recurring.interval_count} ${subItem.price.recurring.interval}</div>
+								<div class="text">Delivered: Every ${subItem.price.recurring.interval_count} ${subItem.price.recurring.interval}${subItem.price.recurring.interval_count > 1 ? 's' : ''}</div>
 							</div>
 							<div class="text right">$${((subItem.price.unit_amount * .01) * subItem.quantity).toFixed(2)}</div>
 						</div>
