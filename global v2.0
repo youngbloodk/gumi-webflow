@@ -558,6 +558,7 @@ $(document).ready(async function() {
 		;
 	;
 });
+
 //global on load
 $(window).on('load', function() {
 	//zendesk widget styling
