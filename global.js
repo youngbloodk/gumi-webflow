@@ -4,18 +4,16 @@ let gumiAuth;
 let currentUser;
 const apiUrl = 'https://gumi-api-dcln6.ondigitalocean.app/v1';
 
-
-if(signedIn) {
+if (signedIn) {
 	gumiAuth = JSON.parse($.cookie('gumiAuth'));
 	currentUser = getUser(gumiAuth.email, gumiAuth.token);
 }
 
 //global on ready
-$(document).ready(async function() {
-
+$(document).ready(async function () {
 	renderBoxCount();
 
-	if(signedIn) {
+	if (signedIn) {
 		$('[data-id="signIn"]').hide();
 		$('[data-id="myAccount"]').show();
 		$('[data-id="signOut"]').show();
@@ -26,58 +24,55 @@ $(document).ready(async function() {
 	}
 
 	//cookie consent pop-up
-	if(!$.cookie('_cookieConsent')) {
+	if (!$.cookie('_cookieConsent')) {
 		$('#cookie_consent').css('display', 'grid').fadeIn();
 	}
 
 	$(document)
-
-		.on('click', '[data-id="signOut"]', function() {
+		.on('click', '[data-id="signOut"]', function () {
 			signOut();
 		})
 
-		.on('click', '[data-chat="open"]', function() {
+		.on('click', '[data-chat="open"]', function () {
 			zE('messenger', 'open');
 		})
 
 		//button loaders global
-		.on('click', '.button', function() {
+		.on('click', '.button', function () {
 			$(this).closest('.button-wrap').find('.button-loader').show();
-			setTimeout(function() {
+			setTimeout(function () {
 				$('.button-loader').hide();
 			}, 30000);
 		})
 
-		.on('click', '[data-button="reload"]', function() {
+		.on('click', '[data-button="reload"]', function () {
 			location.reload();
 		})
 
 		//prevent body scroll when mobile menu is open
-		.on('click', 'mobile-menu-icon', function() {
-			if($('.nav-menu').is(':visible')) {
+		.on('click', 'mobile-menu-icon', function () {
+			if ($('.nav-menu').is(':visible')) {
 				$('body').css('overflow', 'hidden');
 			} else {
 				$('body').css('overflow', 'auto');
 			}
 		})
 
-		.on('click', '#accept_cookies', function() {
-			$.cookie('_cookieConsent', 'true', {expires: 14});
+		.on('click', '#accept_cookies', function () {
+			$.cookie('_cookieConsent', 'true', { expires: 14 });
 			$('#cookie_consent').fadeOut();
 		})
-		.on('keyup keypress', 'form', function(e) {
+		.on('keyup keypress', 'form', function (e) {
 			var keyCode = e.keyCode || e.which;
-			if(keyCode === 13) {
+			if (keyCode === 13) {
 				e.preventDefault();
 				return false;
 			}
-		})
-		;
-	;
+		});
 });
 
 //global on load
-$(window).on('load', function() {
+$(window).on('load', function () {
 	//zendesk widget styling
 	$('[title="Button to launch messaging window"]').css('border-radius', '100%');
 });
@@ -85,9 +80,9 @@ $(window).on('load', function() {
 // global functions
 function renderBoxCount() {
 	const boxData = JSON.parse(localStorage.getItem('buildBox'));
-	if(boxData) {
+	if (boxData) {
 		let boxTotals = [];
-		boxData.forEach(element => boxTotals.push(element.quantity));
+		boxData.forEach((element) => boxTotals.push(element.quantity));
 		let boxCount = boxTotals.reduce((a, b) => a + b, 0);
 		$('#boxCount').text(boxCount);
 		return boxCount;
@@ -98,42 +93,42 @@ async function request(method, url, body) {
 	return await fetch(url, {
 		method: method,
 		headers: {
-			"Content-Type": "application/json",
-			"Access-Control-Allow-Origin": "*",
-			"Accept": "application/json",
+			'Content-Type': 'application/json',
+			'Access-Control-Allow-Origin': '*',
+			Accept: 'application/json',
 		},
 		mode: 'cors',
-		body: JSON.stringify(body)
+		body: JSON.stringify(body),
 	})
-		.then(response => response.json())
-		.then(async res => {
+		.then((response) => response.json())
+		.then(async (res) => {
 			return await res;
 		});
 }
 
 async function signIn(email, pass) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/user/sign-in`;
+	email = email.toLowerCase().replace(/\s/g, '');
 	const body = {
-		email: email.toLowerCase(),
-		password: pass
+		email: email,
+		password: pass,
 	};
-	return await request(method, url, body)
-		.then(async res => {
-			if(res.success) {
-				//set cookie with email and token
-				const date = new Date();
-				const minutes = 1440;
-				date.setTime(date.getTime() + (minutes * 60 * 1000));
-				$.cookie.json = true;
-				const cookieData = {email: email.toLowerCase(), token: res.token};
-				$.cookie('gumiAuth', cookieData, {expires: date});
-				gtag('event', 'login', {
-					'method': 'Gumi Auth'
-				});
-			}
-			return res;
-		});
+	return await request(method, url, body).then(async (res) => {
+		if (res.success) {
+			//set cookie with email and token
+			const date = new Date();
+			const minutes = 1440;
+			date.setTime(date.getTime() + minutes * 60 * 1000);
+			$.cookie.json = true;
+			const cookieData = { email: email, token: res.token };
+			$.cookie('gumiAuth', cookieData, { expires: date });
+			gtag('event', 'login', {
+				method: 'Gumi Auth',
+			});
+		}
+		return res;
+	});
 }
 
 function signOut() {
@@ -143,320 +138,290 @@ function signOut() {
 
 //reason MUST be either 'forgot_password' or 'activate_account'
 async function resetPass(email, reason) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/user/reset-password`;
 	const body = {
 		email: email,
-		reason: reason
+		reason: reason,
 	};
-	return await request(method, url, body)
-		.then(async res => {
-			return res;
-		});
-	;
+	return await request(method, url, body).then(async (res) => {
+		return res;
+	});
 }
 
 async function uuidPassChange(uuid, pass) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/user/uuid-password-change`;
 	const body = {
 		uuid: uuid,
-		password: pass
+		password: pass,
 	};
-	return await request(method, url, body)
-		.then(async res => {
-			return res;
-		});
-	;
+	return await request(method, url, body).then(async (res) => {
+		return res;
+	});
 }
 
 async function verifyToken(token) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/user/verify-token`;
 	const body = {
-		token: token
+		token: token,
 	};
-	return await request(method, url, body)
-		.then(async res => {
-			return res;
-		});
-	;
+	return await request(method, url, body).then(async (res) => {
+		return res;
+	});
 }
 
 async function emailExists(email) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/user/email-exists`;
 	const body = {
-		email: email
+		email: email,
 	};
-	return await request(method, url, body)
-		.then(async res => {
-			return res;
-		});
+	return await request(method, url, body).then(async (res) => {
+		return res;
+	});
 }
 
 async function getUser(email, token) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/user/get-user`;
 	const body = {
 		email: email,
-		token: token
+		token: token,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res.success;
-		});
+	return await request(method, url, body).then((res) => {
+		return res.success;
+	});
 }
 
 //token required in body
 async function updateUser(data) {
-	const method = "PUT";
+	const method = 'PUT';
 	const url = `${apiUrl}/user/`;
-	return await request(method, url, data)
-		.then(res => {
-			return res.success;
-		});
+	return await request(method, url, data).then((res) => {
+		return res.success;
+	});
 }
 
 async function changePass(token, currentPass, newPass) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/user/change-password`;
 	const body = {
 		token: token,
 		current_pass: currentPass,
-		new_pass: newPass
+		new_pass: newPass,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
-
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function apiPay(body) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/pay`;
 
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function getSubscriptions(token) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/subscriptions`;
 	const body = {
-		token: token
+		token: token,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res.success;
-		});
+	return await request(method, url, body).then((res) => {
+		return res.success;
+	});
 }
 
 async function getSubitemOptions(sub_id) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/subscriptions/item/options`;
 	const body = {
 		sub_id: sub_id,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function updateSubItemQuantity(item_id, quantity) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/subscriptions/item/quantity`;
 	const body = {
 		item_id: item_id,
-		quantity: quantity
+		quantity: quantity,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function deleteSubItem(item_id) {
-	const method = "DELETE";
+	const method = 'DELETE';
 	const url = `${apiUrl}/stripe/subscriptions/item/${item_id}`;
 
-	return await request(method, url)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url).then((res) => {
+		return res;
+	});
 }
 
 async function updateSubFreq(sub_id, freq) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/subscriptions/change-freq`;
 	const body = {
 		sub_id: sub_id,
-		freq: freq
+		freq: freq,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function pauseSubscription(id, date) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/subscriptions/pause`;
 	const body = {
 		id: id,
-		custom_date: date
+		custom_date: date,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function resumeSubscription(id) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/subscriptions/resume`;
 	const body = {
 		id: id,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function cancelSubscription(id, reason) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/subscriptions/cancel`;
 	const stripe_customer_id = await currentUser.stripe_customer_id;
 	const body = {
 		id: id,
 		customer: stripe_customer_id,
-		reason: reason
+		reason: reason,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function getProduct(id) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/product`;
 	const body = {
-		id: id
+		id: id,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res.success;
-		});
+	return await request(method, url, body).then((res) => {
+		return res.success;
+	});
 }
 
 async function getReviews(sku = '') {
-	const method = "GET";
+	const method = 'GET';
 	const url = `${apiUrl}/reviews/${sku}`;
 
-	return await request(method, url)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url).then((res) => {
+		return res;
+	});
 }
 
 async function postReview(reviewData) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/reviews`;
 	const body = reviewData;
 
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function getPaymentMethods(token) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/payment-methods`;
 	const body = {
-		token: token
+		token: token,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res.success;
-		});
+	return await request(method, url, body).then((res) => {
+		return res.success;
+	});
 }
 
 async function getPaymentMethod(id) {
-	const method = "GET";
+	const method = 'GET';
 	const url = `${apiUrl}/stripe/payment-methods/${id}`;
 
-	return await request(method, url)
-		.then(res => {
-			return res.success;
-		});
+	return await request(method, url).then((res) => {
+		return res.success;
+	});
 }
 
-async function addPaymentMethod({payment_method, customer}) {
-	const method = "POST";
+async function addPaymentMethod({ payment_method, customer }) {
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/payment-methods/attach`;
 	const body = {
 		payment_method: payment_method,
-		customer: customer
+		customer: customer,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function removePaymentMethod(id) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/payment-methods/detach`;
 	const body = {
-		id: id
+		id: id,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function getInvoices(token) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/invoices`;
 	const body = {
-		token: token
+		token: token,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function getInvoice(id) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/invoice`;
 	const body = {
-		id: id
+		id: id,
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 
 async function couponExists(coupon) {
-	const method = "POST";
+	const method = 'POST';
 	const url = `${apiUrl}/stripe/coupon-exists`;
 	const body = {
-		value: coupon.toLowerCase()
+		value: coupon.toLowerCase(),
 	};
-	return await request(method, url, body)
-		.then(res => {
-			return res;
-		});
+	return await request(method, url, body).then((res) => {
+		return res;
+	});
 }
 function formatReviewData(reviewData) {
 	const reviews = reviewData.success;
@@ -467,9 +432,9 @@ function formatReviewData(reviewData) {
 
 	//calc rating totals
 	let ratings = {};
-	let ratingTotal = 0.00;
-	for(const review of reviews) {
-		if(!ratings[review.rating[0]]) {
+	let ratingTotal = 0.0;
+	for (const review of reviews) {
+		if (!ratings[review.rating[0]]) {
 			ratings[review.rating[0]] = 0;
 		}
 		ratings[review.rating[0]]++;
@@ -477,7 +442,7 @@ function formatReviewData(reviewData) {
 	}
 	const rating = Math.round((ratingTotal / reviews.length) * 4) / 4;
 	let finalRating;
-	if(rating.toString().indexOf('.') > 0) {
+	if (rating.toString().indexOf('.') > 0) {
 		finalRating = rating.toFixed(2);
 	} else {
 		finalRating = rating.toFixed(1);
@@ -488,38 +453,42 @@ function formatReviewData(reviewData) {
 		rating: rating,
 		ratings: ratings,
 		ratingTotal: ratingTotal,
-		reviews: reviews
+		reviews: reviews,
 	};
 }
 function renderReviewStars(reviewData, target) {
 	$(target).find($('[data-reviews="rating"]')).text(reviewData.finalRating);
-	$(target).find($('.stars-fill')).css('width', `${reviewData.rating / 5 * 100}%`);
+	$(target)
+		.find($('.stars-fill'))
+		.css('width', `${(reviewData.rating / 5) * 100}%`);
 }
 function renderReviews(reviewData) {
 	const reviewMeta = formatReviewData(reviewData);
 
 	//render rating meters
 	const meters = $('[data-reviewmeter]');
-	for(const meter of meters) {
+	for (const meter of meters) {
 		const ratingNumber = reviewMeta.ratings[$(meter).attr('data-reviewmeter')];
 		let percent = 0;
-		if(ratingNumber) {
+		if (ratingNumber) {
 			percent = ratingNumber / reviewMeta.count;
 		}
-		$(meter).find('.rating-meter-fill').css('width', `${percent * 100}%`);
+		$(meter)
+			.find('.rating-meter-fill')
+			.css('width', `${percent * 100}%`);
 	}
 
 	//render reviews
-	for(const review of reviewMeta.reviews) {
+	for (const review of reviewMeta.reviews) {
 		const rating = parseInt(review.rating);
 		const percent = rating / 5;
 		const date = moment(review.review_date).format('MMM D, YYYY');
 		let title = review.review_title;
-		if(!title) {
+		if (!title) {
 			title = `${rating} stars`;
 		}
 		let name = `${review.first_name} ${review.last_name[0].toUpperCase()}. - `;
-		if(!review.first_name) {
+		if (!review.first_name) {
 			name = '';
 		}
 		$('#reviewsList').append(`
@@ -545,9 +514,12 @@ function evenRound(num, decimalPlaces) {
 	const d = decimalPlaces || 0;
 	const m = Math.pow(10, d);
 	const n = +(d ? num * m : num).toFixed(8);
-	const i = Math.floor(n), f = n - i;
+	const i = Math.floor(n),
+		f = n - i;
 	const e = 1e-8;
-	const r = (f > 0.5 - e && f < 0.5 + e) ? ((i % 2 == 0) ? i : i + 1) : Math.round(n); return d ? r / m : r;
+	const r =
+		f > 0.5 - e && f < 0.5 + e ? (i % 2 == 0 ? i : i + 1) : Math.round(n);
+	return d ? r / m : r;
 }
 
 function getURLParam(key) {
@@ -555,28 +527,34 @@ function getURLParam(key) {
 }
 
 function addCheckoutItem(item, quantity = 1) {
-	let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+	let is_sub =
+		$('input[type="radio"][name="subscription"]:checked').val() == 'true';
 	let freq_info = '';
 	let removeButton = '';
-	if(is_sub) {
+	if (is_sub) {
 		let freq_name = $('.select option:selected').text();
 		freq_info = `${freq_name}`;
 	} else {
 		freq_info = `Just this once`;
-	} if(location.href.indexOf('box') > 0) {
+	}
+	if (location.href.indexOf('box') > 0) {
 		removeButton = `<div style="color: red; cursor: pointer;" class="text remove-button">Remove</div>`;
 	}
 	$('#boxItemsList').append(`
 		<div data-sku="${item.sku}">
 			<div class="w-layout-grid grid _3col auto-auto-1fr column-gap-10">
-				<img src="${item.image}" loading="lazy" width="60" sizes="(max-width: 479px) 17vw, 60px" alt="">
+				<img src="${
+					item.image
+				}" loading="lazy" width="60" sizes="(max-width: 479px) 17vw, 60px" alt="">
 				<div class="w-layout-grid grid _1col row-gap-0">
 					<div class="text semibold">${item.name}</div>
 					<div class="text">Quantity: <span data-id="quantity">${quantity}</span></div>
 					<div class="text">Delivered: ${freq_info}</div>
 					${removeButton}
 				</div>
-				<div class="text right" data-item="price">$${(parseInt((item.price).replace(/[^0-9.-]+/g, '')) * quantity).toFixed(2)}</div>
+				<div class="text right" data-item="price">$${(
+					parseInt(item.price.replace(/[^0-9.-]+/g, '')) * quantity
+				).toFixed(2)}</div>
 			</div>
 			<div class="divider"></div>
 		</div>
@@ -585,21 +563,22 @@ function addCheckoutItem(item, quantity = 1) {
 
 function renderMetaFromStorage() {
 	let storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
-	let sub_val = $('input[type="radio"][name="subscription"]:checked').val() == "true";
-	if(sub_val != storage.is_sub) {
+	let sub_val =
+		$('input[type="radio"][name="subscription"]:checked').val() == 'true';
+	if (sub_val != storage.is_sub) {
 		evaluateSub(storage);
 	}
-	if(!$('#sub_frequency').val()) {
+	if (!$('#sub_frequency').val()) {
 		$('#subFrequency').val('1m').trigger('change');
 	}
 	$('#subFrequency').val(storage.freq).trigger('change');
 }
 
 function evaluateSub(storage = null) {
-	if(storage === null) {
+	if (storage === null) {
 		storage = JSON.parse(localStorage.getItem('buildBoxMeta'));
 	}
-	if(storage.is_sub) {
+	if (storage.is_sub) {
 		$('#true').click().attr('checked', true);
 		$('#true').closest('div').find('.text').addClass('light');
 		$('#false').closest('div').find('.text').removeClass('light');
@@ -617,25 +596,26 @@ function updateCheckoutRender() {
 	const $continueBlock = $('#continueToCheckout');
 
 	// Update subtotal
-	let is_sub = $('input[type="radio"][name="subscription"]:checked').val() == "true";
+	let is_sub =
+		$('input[type="radio"][name="subscription"]:checked').val() == 'true';
 	let storage = JSON.parse(localStorage.getItem('buildBox'));
-	let subtotal = 0.00;
-	let shipping = 0.00;
+	let subtotal = 0.0;
+	let shipping = 0.0;
 	let totalQuant = renderBoxCount();
 
-	for(const item of storage) {
+	for (const item of storage) {
 		const item_data = getItemDataFromSku(item.sku);
 		subtotal += parseFloat(item_data.price) * parseFloat(item.quantity);
 	}
-	if(totalQuant == 1) {
-		shipping = 5.00;
-	} else if(totalQuant >= 2 && totalQuant <= 6) {
-		shipping = 8.50;
-	} else if(totalQuant > 6) {
-		shipping = 12.00;
+	if (totalQuant == 1) {
+		shipping = 5.0;
+	} else if (totalQuant >= 2 && totalQuant <= 6) {
+		shipping = 8.5;
+	} else if (totalQuant > 6) {
+		shipping = 12.0;
 	}
 
-	if(is_sub) {
+	if (is_sub) {
 		$('#shippingTitleText').text('Free Shipping 🎉');
 		$('#shippingAmount').text(`$0.00`);
 	} else {
@@ -643,12 +623,13 @@ function updateCheckoutRender() {
 		$('#shippingAmount').text(`$${shipping.toFixed(2)}`);
 	}
 
-	$('#oneTimeSubtotal').text(`$${subtotal.toFixed(2)} + $${shipping.toFixed(2)} shipping`);
+	$('#oneTimeSubtotal').text(
+		`$${subtotal.toFixed(2)} + $${shipping.toFixed(2)} shipping`
+	);
 	$('#subSubtotal').text(`$${subtotal.toFixed(2)} + Free shipping 🎉`);
 	$('#subtotalAcutal, #checkoutSubtotal').text(`$${subtotal.toFixed(2)}`);
 
-
-	if(storage.length > 0) {
+	if (storage.length > 0) {
 		$emptyMessage.hide();
 		$continueBlock.show();
 	} else {
@@ -666,9 +647,12 @@ function getItemDataFromSku(sku) {
 function getItemDataFromBuildBoxItem($el) {
 	const $product_data = $el.find('.product-data input');
 	let data = {
-		freq: parseInt($('#sub_frequency').val()) > 0 ? $('.product-select').val() : null
+		freq:
+			parseInt($('#sub_frequency').val()) > 0
+				? $('.product-select').val()
+				: null,
 	};
-	$product_data.each(function() {
+	$product_data.each(function () {
 		const name = $(this).attr('name');
 		const value = $(this).attr('value');
 		data[name] = value;
@@ -677,11 +661,11 @@ function getItemDataFromBuildBoxItem($el) {
 }
 
 /**
-	 * 
-	 * @param {string} email 
-	 * @param {string} event - the type of event, must be 'begin_checkout' or 'purchase'
-	 * @param {string} invoice_id
-	 */
+ *
+ * @param {string} email
+ * @param {string} event - the type of event, must be 'begin_checkout' or 'purchase'
+ * @param {string} invoice_id
+ */
 function trackCheckout(email, event, invoice_id) {
 	const storage = JSON.parse(localStorage.getItem('buildBox'));
 	let itemsKlaviyo = [];
@@ -692,50 +676,52 @@ function trackCheckout(email, event, invoice_id) {
 	let coupon = $('#discountCode').val().toLowerCase();
 	let tax = parseFloat($('#checkoutTax').text().replace('$', ''));
 
-	for(const item of storage) {
+	for (const item of storage) {
 		let data = getItemDataFromSku(item.sku);
 		itemsKlaviyo.push({
-			"ProductID": data.sku,
-			"SKU": data.sku,
-			"ProductName": data.name,
-			"Quantity": item.quantity,
-			"ItemPrice": parseFloat(data.price),
-			"RowTotal": parseFloat(data.price) * item.quantity,
-			"ProductURL": `https://guminutrition.com/goods/${data.url}`,
-			"ImageURL": data.image,
+			ProductID: data.sku,
+			SKU: data.sku,
+			ProductName: data.name,
+			Quantity: item.quantity,
+			ItemPrice: parseFloat(data.price),
+			RowTotal: parseFloat(data.price) * item.quantity,
+			ProductURL: `https://guminutrition.com/goods/${data.url}`,
+			ImageURL: data.image,
 		});
 		itemsGoogle.push({
-			"id": data.sku,
-			"name": data.name,
-			"quantity": item.quantity,
-			"price": parseFloat(data.price)
+			id: data.sku,
+			name: data.name,
+			quantity: item.quantity,
+			price: parseFloat(data.price),
 		});
 		itemNames.push(data.name);
 	}
-	if(event == 'begin_checkout') {
-		_learnq.push(["track", "Started Checkout", {
-			"$event_id": email + "_" + moment().unix(),
-			"$value": value,
-			"ItemNames": itemNames,
-			"CheckoutURL": "http://www.guminutrition.com/pay",
-			"Items": itemsKlaviyo
-		}]);
-	} else if(event == 'purchase') {
+	if (event == 'begin_checkout') {
+		_learnq.push([
+			'track',
+			'Started Checkout',
+			{
+				$event_id: email + '_' + moment().unix(),
+				$value: value,
+				ItemNames: itemNames,
+				CheckoutURL: 'http://www.guminutrition.com/pay',
+				Items: itemsKlaviyo,
+			},
+		]);
+	} else if (event == 'purchase') {
 		fbq('track', 'Purchase', {
-			currency: "USD",
-			value: value
+			currency: 'USD',
+			value: value,
 		});
 	}
 
 	gtag('event', event, {
-		"transaction_id": invoice_id,
-		"currency": "USD",
-		"coupon": coupon,
-		"value": value,
-		"items": itemsGoogle,
-		"shipping": shipping,
-		"tax": tax
+		transaction_id: invoice_id,
+		currency: 'USD',
+		coupon: coupon,
+		value: value,
+		items: itemsGoogle,
+		shipping: shipping,
+		tax: tax,
 	});
-
-
 }
