@@ -176,7 +176,7 @@ async function emailExists(email) {
 	const method = 'POST';
 	const url = `${apiUrl}/user/email-exists`;
 	const body = {
-		email: email,
+		email: email.toLowerCase().replace(/\s/g, ''),
 	};
 	return await request(method, url, body).then(async (res) => {
 		return res;
